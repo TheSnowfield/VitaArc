@@ -1,0 +1,17 @@
+# Ignore data
+data
+
+# Ignore CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeLists.txt
+
+# Ignore makefile
+Makefile
+
+# Ignore binary
+build/
+
+# Ignore VSCode settings
+.vscode/

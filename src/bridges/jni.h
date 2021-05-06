@@ -1,9 +1,9 @@
-#ifndef _PATCH_JNI_H_
-#define _PATCH_JNI_H_
+#ifndef _BRIDGE_JNI_H_
+#define _BRIDGE_JNI_H_
 
 #include <solibrary/solib.h>
 
-void bridgePatchJNI(LPHSO lpSoLibrary);
-void bridgeCallJNIMain(LPHSO lpSoLibrary);
+void bridgePatchJNI(HSOLIB lpSoLibrary);
+void bridgeCallJNIMain(HSOLIB lpSoLibrary);
 
-#endif /* _PATCH_JNI_H_ */
+#endif /* _BRIDGE_JNI_H_ */

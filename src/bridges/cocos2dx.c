@@ -1,6 +1,6 @@
 #include "cocos2dx.h"
 
-void bridgePatchCocos2Dx(HSO* lpSoLibrary)
+void bridgePatchCocos2Dx(HSOLIB lpSoLibrary)
 {
   
 }

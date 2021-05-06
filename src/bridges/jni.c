@@ -1,11 +1,11 @@
 #include "jni.h"
 
-void bridgePatchJNI(LPHSO lpSoLibrary)
+void bridgePatchJNI(HSOLIB lpSoLibrary)
 {
   
 }
 
-void bridgeCallJNIMain(LPHSO lpSoLibrary)
+void bridgeCallJNIMain(HSOLIB lpSoLibrary)
 {
 
 }

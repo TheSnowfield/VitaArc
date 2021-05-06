@@ -17,7 +17,7 @@
 int main()
 {
   // Load library
-  LPHSO lpCocos2dx = solibLoadLibrary("ux0:vitaarc/library/armeabi-v7a/libcocos2dcpp.so");
+  HSOLIB lpCocos2dx = solibLoadLibrary("ux0:vitaarc/library/armeabi-v7a/libcocos2dcpp.so");
   if (!lpCocos2dx)
   {
     sceKernelExitProcess(-1);

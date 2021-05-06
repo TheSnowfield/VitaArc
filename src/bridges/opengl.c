@@ -1,6 +1,6 @@
 #include "opengl.h"
 
-void bridgePatchGL(HSO* lpSoLibrary)
+void bridgePatchGL(HSOLIB lpSoLibrary)
 {
   
 }

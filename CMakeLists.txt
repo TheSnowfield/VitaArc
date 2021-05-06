@@ -56,6 +56,8 @@ add_executable(${PROJECT_NAME}
   src/bridges/opengl.c
   src/bridges/jni.c
   src/solibrary/solib.c
+  src/utils/fs.c
+  src/utils/string.c
 )
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.

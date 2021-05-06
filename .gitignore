@@ -1,6 +1,3 @@
-# Ignore data
-data
-
 # Ignore CMake files
 CMakeFiles/
 CMakeCache.txt

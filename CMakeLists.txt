@@ -37,7 +37,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 
 # Add any additional include paths here
-include_directories()
+include_directories(
+  "src"
+)
 
 # Add any additional library paths here
 # ${CMAKE_CURRENT_BINARY_DIR} lets you use any library currently being built
@@ -49,10 +51,11 @@ link_directories(
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
   src/main.c
-  src/symbols/cocos2dx.c
-  src/symbols/libc.c
-  src/symbols/opengl.c
-  src/symbols/jni.c
+  src/bridges/cocos2dx.c
+  src/bridges/libc.c
+  src/bridges/opengl.c
+  src/bridges/jni.c
+  src/solibrary/solib.c
 )
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.

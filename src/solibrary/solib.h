@@ -6,6 +6,8 @@
 typedef struct SOINTERNAL
 {
   uint32_t nRefCount;
+  uint32_t nSlotIndex;
+  char *szLibraryName;
   char *szLibraryPath;
   void *lpLibraryBase;
   SceUID sceImageMemBlock;
@@ -72,7 +74,7 @@ HSOLIB solibFindLibrary(const char *szLibraryName);
  *
  * @return not 0 success
  */
-HSOLIB solidCloneHandle(HSOLIB hSoLibrary);
+HSOLIB solibCloneHandle(HSOLIB hSoLibrary);
 
 /**
  * Clone a handle (Internal use)
@@ -81,6 +83,13 @@ HSOLIB solidCloneHandle(HSOLIB hSoLibrary);
  *
  * @return not 0 success
  */
-HSOLIB solidCloneHandleInternal(LPSOINTERNAL lpInternal);
+HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal);
+
+/**
+ * Find an empty library slot (Internal use)
+ *
+ * @return >0 success
+ */
+int solibFindEmptySlot();
 
 #endif /* _SOLIB_H_ */

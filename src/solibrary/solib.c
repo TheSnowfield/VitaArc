@@ -141,17 +141,17 @@ HSOLIB solibCloneHandle(HSOLIB hSoLibrary)
 HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal)
 {
   // Clone a pointer
-    HSOLIB hSoLibraryNew = (HSOLIB)malloc(sizeof(HSOLIB));
-(*hSoLibraryNew) = lpInternal;
+  HSOLIB hSoLibraryNew = (HSOLIB)malloc(sizeof(HSOLIB));
+  (*hSoLibraryNew) = lpInternal;
 
-// Add reference count
-++(lpInternal->nRefCount);
+  // Add reference count
+  ++(lpInternal->nRefCount);
 
-return hSoLibraryNew;
+  return hSoLibraryNew;
+}
 
-return // Add reference count
-
-  {
+int solibFindEmptySlot()
+{
   if (libraryLoaded >= TOTAL_LIBRARY)
     return -1;
 

@@ -7,9 +7,15 @@
 #include <common/defines.h>
 #include "logcat.h"
 
-SceUID logFile;
-bool logStarted = false;
-const char logLvString[] = {'V', 'I', 'W', 'E', 'F'};
+#define VARG_WRAP(x)     \
+  va_list opt;           \
+  va_start(opt, format); \
+  x;                     \
+  va_end(opt);
+
+static SceUID logFile;
+static bool logStarted = false;
+static const char logLvString[] = {'V', 'I', 'W', 'E', 'F'};
 
 void logBegin(const char *logFilePath)
 {
@@ -41,43 +47,39 @@ void logEnd()
   sceIoClose(logFile);
 }
 
-void logBase(LOGLEVEL level, const char *tag, const char *format, ...)
+void logBase(LOGLEVEL level, const char *tag, const char *format, va_list args)
 {
   char logBuffer[1024] = {0x00};
   char *logPosition = logBuffer;
-  va_list opt;
 
-  va_start(opt, format);
-  {
-    logPosition += snprintf(logPosition, sizeof(logBuffer), "[%c] [%s] \t", logLvString[level], tag);
-    logPosition += vsnprintf(logPosition, sizeof(logBuffer), format, opt);
-    logPosition += snprintf(logPosition, sizeof(logBuffer), "\n");
-    sceIoWrite(logFile, logBuffer, logPosition - logBuffer);
-  }
-  va_end(opt);
+  logPosition += snprintf(logPosition, sizeof(logBuffer), "[%c] [%s] \t", logLvString[level], tag);
+  logPosition += vsnprintf(logPosition, sizeof(logBuffer), format, args);
+  logPosition += snprintf(logPosition, sizeof(logBuffer), "\n");
+
+  sceIoWrite(logFile, logBuffer, logPosition - logBuffer);
 }
 
 void inline logV(const char *tag, const char *format, ...)
 {
-  logBase(VERBOSE, tag, format);
+  VARG_WRAP(logBase(VERBOSE, tag, format, opt));
 }
 
 void inline logI(const char *tag, const char *format, ...)
 {
-  logBase(INFORMATION, tag, format);
+  VARG_WRAP(logBase(INFORMATION, tag, format, opt));
 }
 
 void inline logW(const char *tag, const char *format, ...)
 {
-  logBase(WARNING, tag, format);
+  VARG_WRAP(logBase(WARNING, tag, format, opt));
 }
 
 void inline logE(const char *tag, const char *format, ...)
 {
-  logBase(ERROR, tag, format);
+  VARG_WRAP(logBase(ERROR, tag, format, opt));
 }
 
 void inline logF(const char *tag, const char *format, ...)
 {
-  logBase(FATAL, tag, format);
+  VARG_WRAP(logBase(FATAL, tag, format, opt));
 }

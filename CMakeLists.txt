@@ -51,6 +51,7 @@ link_directories(
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
   src/logcat/logcat.c
+  src/utils/patcher.c
   src/utils/string.c
   src/utils/fs.c
   src/solibrary/solib.c

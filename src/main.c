@@ -12,6 +12,10 @@
 #include "bridges/libc.h"
 #include "bridges/opengl.h"
 #include "bridges/cocos2dx.h"
+#include "bridges/androidndk.h"
+#include "bridges/androidlog.h"
+#include "bridges/eabi.h"
+
 #include "solibrary/solib.h"
 #include "logcat/logcat.h"
 #include "common/define.h"
@@ -51,7 +55,7 @@ int main()
     // HSOLIB hLibCrashlytics = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS);
     // HSOLIB hLibCrashlyticsCommon = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_COMMON);
     // HSOLIB hLibCrashlyticsHandler = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_HANDLER);
-    // HSOLIB hLibCrashlyticsTrampoline = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_TRAMPOLINE);
+    // HSOLIB hLibCrashlyticsTrampoline =77 solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_TRAMPOLINE);
     // HSOLIB hLibFMOD = solibLoadLibrary(LIBRARY_LIBFMOD);
     // HSOLIB hLibFMODProvider = solibLoadLibrary(LIBRARY_LIBFMOD_PROVIDER);
 
@@ -64,6 +68,9 @@ int main()
 
     // Setup bridges
     bridgePatchJNI(hLibCocos2dx);
+    bridgePatchEABI(hLibCocos2dx);
+    bridgePatchAndroidNDK(hLibCocos2dx);
+    bridgePatchAndroidLog(hLibCocos2dx);
     bridgePatchGL(hLibCocos2dx);
     bridgePatchCocos2DX(hLibCocos2dx);
 

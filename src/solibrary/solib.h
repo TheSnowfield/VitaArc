@@ -90,6 +90,6 @@ HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal);
  *
  * @return >0 success
  */
-int solibFindEmptySlot();
+int32_t solibFindEmptySlot();
 
 #endif /* _SOLIB_H_ */

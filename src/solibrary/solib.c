@@ -5,29 +5,52 @@
 #include <psp2/io/fcntl.h>
 #include <psp2/kernel/sysmem.h>
 
-#include "solib.h"
 #include <common/elf.h>
+#include <common/defines.h>
+#include <logcat/logcat.h>
+#include "solib.h"
 
 #define _H(x) ((LPSOINTERNAL)(*x));
 #define TOTAL_LIBRARY 32
+
+#define FAILED(x, ...)           \
+  {                              \
+    logF(TAG, x, ##__VA_ARGS__); \
+    return NULL;                 \
+  }
+
+#define FAILED_INTERNAL(x, ...)  \
+  {                              \
+    logF(TAG, x, ##__VA_ARGS__); \
+    goto ReleaseInternal;        \
+  }
+
+#define FAILED_MEMBLOCK(x, ...)  \
+  {                              \
+    logF(TAG, x, ##__VA_ARGS__); \
+    goto ReleaseMemblock;        \
+  }
 
 uint32_t libraryLoaded = 0;
 LPSOINTERNAL libraryInstances[TOTAL_LIBRARY] = {NULL};
 
 HSOLIB solibLoadLibrary(const char *szLibrary)
 {
+  logV(TAG, "Loading library '%s'", szLibrary);
+
   // Check file exists
   if (!utilFileExists(szLibrary))
-    return NULL;
+    FAILED("No such file or directory.");
 
   // Check file size
   uint32_t nfileSize = utilGetFileSize(szLibrary);
   if (nfileSize <= 0)
-    return NULL;
+    FAILED("File is empty.");
 
   // Find library instance
   HSOLIB hSoLibrary = NULL;
-  hSoLibrary = solibFindLibrary(utilGetFileName(szLibrary));
+  const char *szLibraryName = utilGetFileName(szLibrary);
+  hSoLibrary = solibFindLibrary(szLibraryName);
 
   // If this library has been loaded
   // just duplicate the handle and return
@@ -40,11 +63,14 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     // Allocate a memory block to
     // storage library image
     lpInternal->sceImageMemBlock =
-        sceKernelAllocMemBlock("elf_image", SCE_KERNEL_MEMBLOCK_TYPE_USER_RW, nfileSize, NULL);
+        sceKernelAllocMemBlock("elf_image",
+                               SCE_KERNEL_MEMBLOCK_TYPE_USER_RW,
+                               (nfileSize + 0xFFF) & ~0xFFF,
+                               NULL);
 
     // Check success
     if (lpInternal->sceImageMemBlock <= 0)
-      goto ReleaseInternal;
+      FAILED_INTERNAL("Allocate memory block failed.");
 
     // Save the head of this memory block
     sceKernelGetMemBlockBase(lpInternal->sceImageMemBlock, &lpInternal->lpLibraryBase);
@@ -57,17 +83,22 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     // Allocate a slot to store instance
     int32_t nSlotIndex = solibFindEmptySlot();
     if (nSlotIndex < 0)
-      goto ReleaseMemblock;
+      FAILED_MEMBLOCK("Library loaded too much!");
 
     // Setup pointers
     lpInternal->nSlotIndex = nSlotIndex;
     lpInternal->szLibraryPath = malloc(strlen(szLibrary) + 1);
     strcpy(lpInternal->szLibraryPath, szLibrary);
-    lpInternal->szLibraryName = malloc(strlen(utilGetFileName(szLibrary)) + 1);
+    lpInternal->szLibraryName = malloc(strlen(szLibraryName) + 1);
     strcpy(lpInternal->szLibraryName, szLibrary);
 
+    ++libraryLoaded;
     ++lpInternal->nRefCount;
     libraryInstances[nSlotIndex] = lpInternal;
+
+    logI(TAG, "Library '%s' loaded.", szLibraryName);
+    logI(TAG, "  Current slot: %d", nSlotIndex);
+    logI(TAG, "  Available slots: %d", TOTAL_LIBRARY - libraryLoaded);
 
     // Clone an userend handle
     return solibCloneHandleInternal(lpInternal);
@@ -150,7 +181,7 @@ HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal)
   return hSoLibraryNew;
 }
 
-int solibFindEmptySlot()
+int32_t solibFindEmptySlot()
 {
   if (libraryLoaded >= TOTAL_LIBRARY)
     return -1;

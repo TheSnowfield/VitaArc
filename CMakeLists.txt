@@ -32,13 +32,14 @@ set(VITA_VERSION  "01.00")
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 # Optional. You can specify more param.sfo flags this way.
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 
 # Add any additional include paths here
 include_directories(
   "src"
+  "src/bridges"
 )
 
 # Add any additional library paths here
@@ -47,21 +48,20 @@ link_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+## Build libraries
+add_subdirectory(src/utils)
+add_subdirectory(src/logcat)
+add_subdirectory(src/solibrary)
+add_subdirectory(src/bridges/android)
+add_subdirectory(src/bridges/cocos2dx)
+add_subdirectory(src/bridges/eabi)
+add_subdirectory(src/bridges/jni)
+add_subdirectory(src/bridges/libc)
+add_subdirectory(src/bridges/opengl)
+
 ## Build and link
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
-  src/logcat/logcat.c
-  src/utils/patcher.c
-  src/utils/string.c
-  src/utils/fs.c
-  src/solibrary/solib.c
-  src/bridges/cocos2dx.c
-  src/bridges/libc.c
-  src/bridges/opengl.c
-  src/bridges/jni.c
-  src/bridges/eabi.c
-  src/bridges/androidndk.c
-  src/bridges/androidlog.c
   src/main.c
 )
 
@@ -73,7 +73,17 @@ target_link_libraries(${PROJECT_NAME}
   vitaGL
   vitashark
   mathneon
-  
+
+  Utils
+  Logcat
+  SoLibrary
+  CBridge
+  EabiBridge
+  JniBridge
+  AndroidBridge
+  OpenGLBridge
+  Cocos2dxBridge
+
   SceAppMgr_stub
   SceAppUtil_stub
   SceAudio_stub
@@ -102,3 +112,4 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
   FILE livearea/startup.png sce_sys/livearea/contents/startup.png
   FILE livearea/template.xml sce_sys/livearea/contents/template.xml
 )
+

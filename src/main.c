@@ -8,13 +8,13 @@
 #include <psp2/power.h>
 #include <vitaGL.h>
 
-#include "bridges/jni.h"
-#include "bridges/libc.h"
-#include "bridges/opengl.h"
-#include "bridges/cocos2dx.h"
-#include "bridges/androidndk.h"
-#include "bridges/androidlog.h"
-#include "bridges/eabi.h"
+#include "bridges/jni/jni.h"
+#include "bridges/libc/libc.h"
+#include "bridges/opengl/opengl.h"
+#include "bridges/cocos2dx/cocos2dx.h"
+#include "bridges/android/ndk.h"
+#include "bridges/android/log.h"
+#include "bridges/eabi/eabi.h"
 
 #include "solibrary/solib.h"
 #include "logcat/logcat.h"
@@ -71,6 +71,7 @@ int main()
     bridgePatchEABI(hLibCocos2dx);
     bridgePatchAndroidNDK(hLibCocos2dx);
     bridgePatchAndroidLog(hLibCocos2dx);
+    bridgePatchLibC(hLibCocos2dx);
     bridgePatchGL(hLibCocos2dx);
     bridgePatchCocos2DX(hLibCocos2dx);
 

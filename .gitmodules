@@ -1,3 +1,0 @@
-[submodule "src/pthread"]
-	path = src/pthread
-	url = https://github.com/vitasdk/pthread-embedded.git

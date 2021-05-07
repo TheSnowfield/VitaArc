@@ -47,22 +47,28 @@ int main()
   logBegin(PATH_TO_LOGFILE);
   {
     // Load library
-    HSOLIB hCocos2dx = solibLoadLibrary(LIBRARY_LIBCOCOS2DCPP);
+    HSOLIB hLibCocos2dx = solibLoadLibrary(LIBRARY_LIBCOCOS2DCPP);
+    // HSOLIB hLibCrashlytics = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS);
+    // HSOLIB hLibCrashlyticsCommon = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_COMMON);
+    // HSOLIB hLibCrashlyticsHandler = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_HANDLER);
+    // HSOLIB hLibCrashlyticsTrampoline = solibLoadLibrary(LIBRARY_LIBCRASHLYTICS_TRAMPOLINE);
+    // HSOLIB hLibFMOD = solibLoadLibrary(LIBRARY_LIBFMOD);
+    // HSOLIB hLibFMODProvider = solibLoadLibrary(LIBRARY_LIBFMOD_PROVIDER);
 
     // Check success
-    if (!hCocos2dx)
+    if (!hLibCocos2dx)
     {
       logF(TAG, "Load cocos2dx library failed! Exit.");
       goto ExitProgram;
     }
 
     // Setup bridges
-    bridgePatchJNI(hCocos2dx);
-    bridgePatchGL(hCocos2dx);
-    bridgePatchCocos2DX(hCocos2dx);
+    bridgePatchJNI(hLibCocos2dx);
+    bridgePatchGL(hLibCocos2dx);
+    bridgePatchCocos2DX(hLibCocos2dx);
 
     // Call JNI Main
-    bridgeCallJNIMain(hCocos2dx);
+    bridgeCallJNIMain(hLibCocos2dx);
   }
 
 ExitProgram:

@@ -6,7 +6,7 @@
 #include <psp2/kernel/sysmem.h>
 
 #include <common/elf.h>
-#include <common/defines.h>
+#include <common/define.h>
 #include <logcat/logcat.h>
 #include "solib.h"
 

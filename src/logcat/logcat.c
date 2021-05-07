@@ -4,7 +4,7 @@
 #include <psp2/io/fcntl.h>
 
 #include <common/types.h>
-#include <common/defines.h>
+#include <common/define.h>
 #include "logcat.h"
 
 #define VARG_WRAP(x)     \

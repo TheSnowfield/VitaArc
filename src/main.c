@@ -14,7 +14,7 @@
 #include "bridges/cocos2dx.h"
 #include "solibrary/solib.h"
 #include "logcat/logcat.h"
-#include "common/defines.h"
+#include "common/define.h"
 
 void setupVitaGL()
 {

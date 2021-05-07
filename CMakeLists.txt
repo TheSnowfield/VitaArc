@@ -59,6 +59,9 @@ add_executable(${PROJECT_NAME}
   src/bridges/libc.c
   src/bridges/opengl.c
   src/bridges/jni.c
+  src/bridges/eabi.c
+  src/bridges/androidndk.c
+  src/bridges/androidlog.c
   src/main.c
 )
 

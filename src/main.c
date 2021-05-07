@@ -52,7 +52,7 @@ int main()
     // Check success
     if (!hCocos2dx)
     {
-      logF(__FILE__, "Load cocos2dx library failed! Exit.");
+      logF(TAG, "Load cocos2dx library failed! Exit.");
       goto ExitProgram;
     }
 

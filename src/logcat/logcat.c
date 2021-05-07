@@ -1,10 +1,10 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <psp2/io/fcntl.h>
 
 #include <common/types.h>
 #include <common/defines.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
 #include "logcat.h"
 
 SceUID logFile;
@@ -20,7 +20,7 @@ void logBegin(const char *logFilePath)
   }
 
   // Open log file
-  logFile = sceIoOpen(logFilePath, SCE_O_WRONLY, 0777);
+  logFile = sceIoOpen(logFilePath, SCE_O_CREAT | SCE_O_WRONLY, 0777);
   if (logFile <= 0)
     return;
 
@@ -35,7 +35,7 @@ void logEnd()
 
   // Stop log
   logStarted = false;
-  logI(__FILE__, "Log stop.");
+  logI(TAG, "Log stop.");
 
   // Close file
   sceIoClose(logFile);
@@ -49,8 +49,9 @@ void logBase(LOGLEVEL level, const char *tag, const char *format, ...)
 
   va_start(opt, format);
   {
-    logPosition += vsnprintf(logBuffer, sizeof(logBuffer), format, opt);
-    logPosition += snprintf(logBuffer, sizeof(logBuffer), "\n");
+    logPosition += snprintf(logPosition, sizeof(logBuffer), "[%c] [%s] \t", logLvString[level], tag);
+    logPosition += vsnprintf(logPosition, sizeof(logBuffer), format, opt);
+    logPosition += snprintf(logPosition, sizeof(logBuffer), "\n");
     sceIoWrite(logFile, logBuffer, logPosition - logBuffer);
   }
   va_end(opt);

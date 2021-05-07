@@ -1,6 +1,8 @@
 #ifndef _LOGCAT_LOGCAT_H_
 #define _LOGCAT_LOGCAT_H_
 
+#include <stdarg.h>
+
 typedef enum LOGLEVEL
 {
   VERBOSE = 0,
@@ -10,9 +12,17 @@ typedef enum LOGLEVEL
   FATAL
 } LOGLEVEL;
 
-void logBegin(const char *logFilePath);
+#define VARG_WRAP(x)     \
+  va_list opt;           \
+  va_start(opt, format); \
+  x;                     \
+  va_end(opt);
 
 void logEnd();
+
+void logBegin(const char *logFilePath);
+
+void logBase(LOGLEVEL level, const char *tag, const char *format, va_list args);
 
 void logV(const char *tag, const char *format, ...);
 

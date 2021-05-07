@@ -1,17 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
 #include <psp2/io/fcntl.h>
 
 #include <common/types.h>
 #include <common/define.h>
 #include "logcat.h"
-
-#define VARG_WRAP(x)     \
-  va_list opt;           \
-  va_start(opt, format); \
-  x;                     \
-  va_end(opt);
 
 static SceUID logFile;
 static bool logStarted = false;

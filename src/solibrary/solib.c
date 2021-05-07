@@ -90,10 +90,9 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     lpInternal->szLibraryPath = malloc(strlen(szLibrary) + 1);
     strcpy(lpInternal->szLibraryPath, szLibrary);
     lpInternal->szLibraryName = malloc(strlen(szLibraryName) + 1);
-    strcpy(lpInternal->szLibraryName, szLibrary);
+    strcpy(lpInternal->szLibraryName, szLibraryName);
 
     ++libraryLoaded;
-    ++lpInternal->nRefCount;
     libraryInstances[nSlotIndex] = lpInternal;
 
     logI(TAG, "Library '%s' loaded.", szLibraryName);
@@ -130,6 +129,7 @@ HSOLIB solibFindLibrary(const char *szLibraryName)
     if (libraryInstances[i] &&
         !strcmp(libraryInstances[i]->szLibraryName, szLibraryName))
     {
+      logV(TAG, "Library found. Index: %d", i);
       return solibCloneHandleInternal(libraryInstances[i]);
     }
   }
@@ -140,6 +140,7 @@ HSOLIB solibFindLibrary(const char *szLibraryName)
 void solibFreeLibrary(HSOLIB hSoLibrary)
 {
   LPSOINTERNAL lpInternal = _H(hSoLibrary);
+  logV(TAG, "Free library %s", lpInternal->szLibraryName);
 
   // Sub reference count
   if (--(lpInternal->nRefCount) == 0)

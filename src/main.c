@@ -13,27 +13,11 @@
 #include "bridges/opengl.h"
 #include "bridges/cocos2dx.h"
 #include "solibrary/solib.h"
+#include "logcat/logcat.h"
+#include "common/defines.h"
 
-int main()
+void setupVitaGL()
 {
-  // Load library
-  HSOLIB lpCocos2dx = solibLoadLibrary("ux0:vitaarc/library/armeabi-v7a/libcocos2dcpp.so");
-  if (!lpCocos2dx)
-  {
-    sceKernelExitProcess(-1);
-  }
-
-  // Set system clock frequency
-  scePowerSetArmClockFrequency(444);
-  scePowerSetBusClockFrequency(222);
-  scePowerSetGpuClockFrequency(222);
-  scePowerSetGpuXbarClockFrequency(166);
-
-  // Setup bridges
-  bridgePatchJNI(lpCocos2dx);
-  bridgePatchGL(lpCocos2dx);
-  bridgePatchCocos2Dx(lpCocos2dx);
-
   // Initial vitagl
   vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE, SHARK_ENABLE);
   vglSetVDMBufferSize(128 * 1024);         // default 128 * 1024
@@ -43,9 +27,46 @@ int main()
   vglSetVertexPoolSize(48 * 1024 * 1024);
   vglInitExtended(0, 960, 544, 24 * 1024 * 1024, SCE_GXM_MULTISAMPLE_NONE);
   vglUseVram(GL_TRUE);
+}
 
-  // Call JNI Main
-  bridgeCallJNIMain(lpCocos2dx);
+void setupPerformanceProfile()
+{
+  scePowerSetArmClockFrequency(444);
+  scePowerSetBusClockFrequency(222);
+  scePowerSetGpuClockFrequency(222);
+  scePowerSetGpuXbarClockFrequency(166);
+}
+
+int main()
+{
+  // Setup environment
+  setupPerformanceProfile();
+  setupVitaGL();
+
+  // Begin log
+  logBegin(PATH_TO_LOGFILE);
+  {
+    // Load library
+    HSOLIB hCocos2dx = solibLoadLibrary(LIBRARY_LIBCOCOS2DCPP);
+
+    // Check success
+    if (!hCocos2dx)
+    {
+      logF(__FILE__, "Load cocos2dx library failed! Exit.");
+      goto ExitProgram;
+    }
+
+    // Setup bridges
+    bridgePatchJNI(hCocos2dx);
+    bridgePatchGL(hCocos2dx);
+    bridgePatchCocos2DX(hCocos2dx);
+
+    // Call JNI Main
+    bridgeCallJNIMain(hCocos2dx);
+  }
+
+ExitProgram:
+  logEnd();
 
   return 0;
 }

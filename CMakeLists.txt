@@ -50,14 +50,15 @@ link_directories(
 ## Build and link
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
-  src/main.c
+  src/logcat/logcat.c
+  src/utils/string.c
+  src/utils/fs.c
+  src/solibrary/solib.c
   src/bridges/cocos2dx.c
   src/bridges/libc.c
   src/bridges/opengl.c
   src/bridges/jni.c
-  src/solibrary/solib.c
-  src/utils/fs.c
-  src/utils/string.c
+  src/main.c
 )
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.

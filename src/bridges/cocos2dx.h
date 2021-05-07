@@ -3,6 +3,6 @@
 
 #include <solibrary/solib.h>
 
-void bridgePatchCocos2Dx(HSOLIB lpSoLibrary);
+void bridgePatchCocos2DX(HSOLIB hSoLibrary);
 
 #endif /* _BRIDGE_COCOS2DX_H_ */

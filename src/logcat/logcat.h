@@ -22,7 +22,10 @@ void logEnd();
 
 void logBegin(const char *logFilePath);
 
-void logBase(LOGLEVEL level, const char *tag, const char *format, va_list args);
+void logBase(LOGLEVEL level, const char *tag,
+             const char *format, va_list args);
+
+void logPrintf(const char *format, ...);
 
 void logV(const char *tag, const char *format, ...);
 

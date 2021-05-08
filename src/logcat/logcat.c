@@ -52,6 +52,20 @@ void logBase(LOGLEVEL level, const char *tag, const char *format, va_list args)
   sceIoWrite(logFile, logBuffer, logPosition - logBuffer);
 }
 
+void inline logPrintf(const char *format, ...)
+{
+  char logBuffer[1024] = {0x00};
+  char *logPosition = logBuffer;
+
+  va_list opt;
+  va_start(opt, format);
+  {
+    logPosition += vsnprintf(logPosition, sizeof(logBuffer), format, opt);
+    sceIoWrite(logFile, logBuffer, logPosition - logBuffer);
+  }
+  va_end(opt);
+}
+
 void inline logV(const char *tag, const char *format, ...)
 {
   VARG_WRAP(logBase(VERBOSE, tag, format, opt));

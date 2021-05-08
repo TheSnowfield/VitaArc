@@ -7,6 +7,8 @@ void patchSymbols(HSOLIB hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bri
   {
     logV(TAG, "Patcher processing on 0x%08X %s",
          (uint32_t)bridgeFunc[i].pfnBridgeProc, bridgeFunc[i].szSymbolName);
-    solibInstallRelocation(hSoLibrary, bridgeFunc[i].szSymbolName, bridgeFunc[i].pfnBridgeProc);
+
+    // solibGetSymbolStub();
+    // solibGetSymbolStub(hSoLibrary, bridgeFunc[i].szSymbolName, bridgeFunc[i].pfnBridgeProc);
   }
 }

@@ -25,6 +25,11 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
+# Add any additional include paths here
+include_directories(
+  "../"
+)
+
 # Add any additional library paths here
 # ${CMAKE_CURRENT_BINARY_DIR} lets you use any library currently being built
 link_directories(
@@ -37,4 +42,5 @@ add_library(${PROJECT_NAME}
   fs.c
   patcher.c
   string.c
+  debug.c
 )

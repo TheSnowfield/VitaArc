@@ -10,7 +10,8 @@ This project is not affiliated with Lowiro or Arcaea.
 This project now **under development**.  
 You may not get the game running correctly.
 
-## Installation
+## Get started
+### Install
  - Download the `VitaArc.vpk` from the release page.  
  (random laughing) ~~cause now there's no release exists. XD~~
  - Connect your PSVita to PC via VitaShell and copy `VitaArc.vpk` into it.
@@ -42,7 +43,7 @@ If you do this follows the tutorial, The directory tree should be like
      - libcrashlytics-trampoline.so
      - ...
  - persistent
-### Play
+### Play & PM
  - Click VitaArc bubble.
  - Wait for the game load.
  - Try your best to `PM` all of the songs.

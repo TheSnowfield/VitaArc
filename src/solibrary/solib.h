@@ -7,9 +7,9 @@ typedef struct SOINTERNAL
 {
   uint32_t nRefCount;
   uint32_t nSlotIndex;
-  char *szLibraryName;
-  char *szLibraryPath;
-  void *lpLibraryBase;
+  char szLibraryName[64];
+  char szLibraryPath[128];
+  void *lpLibraryImageBase;
   SceUID sceImageMemBlock;
 
 } SOINTERNAL, *LPSOINTERNAL;
@@ -56,7 +56,7 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
  *
  * @return not 0 success
  */
-void *solibInstallRelocation(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc);
+void *solibGetSymbolStub(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc);
 
 /**
  * Find loaded library by name
@@ -91,5 +91,23 @@ HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal);
  * @return >0 success
  */
 int32_t solibFindEmptySlot();
+
+/**
+ * Relocate virtual address (Internal use)
+ *
+ * @param lpInternal Library base pointer
+ *
+ * @return not 0 success
+ */
+void solibRelocateVirtualAddress(LPSOINTERNAL lpInternal);
+
+/**
+ * Print ELF fotmat information (Internal use)
+ *
+ * @param lpInternal Library base pointer
+ *
+ * @return not 0 success
+ */
+void solibDebugPrintElfTable(LPSOINTERNAL lpInternal);
 
 #endif /* _SOLIB_H_ */

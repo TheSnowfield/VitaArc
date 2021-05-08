@@ -8,6 +8,7 @@
 #include <common/elf.h>
 #include <common/define.h>
 #include <logcat/logcat.h>
+#include <utils/debug.h>
 #include "solib.h"
 
 #define _H(x) ((LPSOINTERNAL)(*x));
@@ -73,11 +74,12 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
       FAILED_INTERNAL("Allocate memory block failed.");
 
     // Save the head of this memory block
-    sceKernelGetMemBlockBase(lpInternal->sceImageMemBlock, &lpInternal->lpLibraryBase);
+    sceKernelGetMemBlockBase(lpInternal->sceImageMemBlock,
+                             &lpInternal->lpLibraryImageBase);
 
     // Open file and read
-    SceUID libFile = sceIoOpen(szLibrary, SCE_O_RDONLY, 0777);
-    sceIoRead(libFile, lpInternal->lpLibraryBase, nfileSize);
+    SceUID libFile = sceIoOpen(szLibrary, SCE_O_RDONLY, 0);
+    sceIoRead(libFile, lpInternal->lpLibraryImageBase, nfileSize);
     sceIoClose(libFile);
 
     // Allocate a slot to store instance
@@ -87,17 +89,23 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
 
     // Setup pointers
     lpInternal->nSlotIndex = nSlotIndex;
-    lpInternal->szLibraryPath = malloc(strlen(szLibrary) + 1);
     strcpy(lpInternal->szLibraryPath, szLibrary);
-    lpInternal->szLibraryName = malloc(strlen(szLibraryName) + 1);
     strcpy(lpInternal->szLibraryName, szLibraryName);
 
     ++libraryLoaded;
     libraryInstances[nSlotIndex] = lpInternal;
 
+    // Print slots information
     logI(TAG, "Library '%s' loaded.", szLibraryName);
     logI(TAG, "  Current slot: %d", nSlotIndex);
     logI(TAG, "  Available slots: %d", TOTAL_LIBRARY - libraryLoaded);
+
+    // Process relocation
+    solibRelocateVirtualAddress(lpInternal);
+    logI(TAG, "All virtual addresses have been relocated.");
+
+    // Print debug information
+    solibDebugPrintElfTable(lpInternal);
 
     // Clone an userend handle
     return solibCloneHandleInternal(lpInternal);
@@ -112,12 +120,70 @@ ReleaseInternal:
   return NULL;
 }
 
+void solibRelocateVirtualAddress(LPSOINTERNAL lpInternal)
+{
+}
+
+void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
+{
+  logV(TAG, "Image Base: 0x%08X", lpInternal->lpLibraryImageBase);
+  debugPrintMemoryBlock(lpInternal->lpLibraryImageBase, 16);
+
+  Elf32_Ehdr *lpElfHeader =
+      (Elf32_Ehdr *)lpInternal->lpLibraryImageBase;
+  {
+    logV(TAG, "ELF Magic: %s", lpElfHeader->e_ident);
+    logV(TAG, "ELF Header Size: %d", lpElfHeader->e_ehsize);
+    logV(TAG, "ELF Virtual Address Entry: 0x%08X", lpElfHeader->e_entry);
+    logV(TAG, "ELF Flags: 0x%08X", lpElfHeader->e_flags);
+    logV(TAG, "ELF Architecture: 0x%08X", lpElfHeader->e_machine);
+    logV(TAG, "ELF Program Entry Size: 0x%08X", lpElfHeader->e_phentsize);
+    logV(TAG, "ELF Program Entry Count: 0x%08X", lpElfHeader->e_phnum);
+    logV(TAG, "ELF Program Entry Offset: 0x%08X", lpElfHeader->e_phoff);
+    logV(TAG, "ELF Section Entry Size: 0x%08X", lpElfHeader->e_shentsize);
+    logV(TAG, "ELF Section Entry Count: 0x%08X", lpElfHeader->e_shnum);
+    logV(TAG, "ELF Section Entry Offset: 0x%08X", lpElfHeader->e_shoff);
+    logV(TAG, "ELF Section String Index: 0x%08X", lpElfHeader->e_shstrndx);
+    logV(TAG, "ELF Object File Type: 0x%08X", lpElfHeader->e_type);
+  }
+
+  Elf32_Phdr *lpElfProgramHeader =
+      (Elf32_Phdr *)((uintptr_t)lpElfHeader->e_phoff + (uintptr_t)lpElfHeader);
+  {
+    logV(TAG, "ELF Program Header Base: 0x%08X", lpElfProgramHeader);
+    logV(TAG, "    Alignment: 0x%08X", lpElfProgramHeader->p_align);
+    logV(TAG, "    Size (File): 0x%08X", lpElfProgramHeader->p_filesz);
+    logV(TAG, "    Flags: 0x%08X", lpElfProgramHeader->p_flags);
+    logV(TAG, "    Size (Memory): 0x%08X", lpElfProgramHeader->p_memsz);
+    logV(TAG, "    File Offset: 0x%08X", lpElfProgramHeader->p_offset);
+    logV(TAG, "    Physical Address: 0x%08X", lpElfProgramHeader->p_paddr);
+    logV(TAG, "    Type: 0x%08X", lpElfProgramHeader->p_type);
+    logV(TAG, "    Virtual Address: 0x%08X", lpElfProgramHeader->p_vaddr);
+  }
+
+  Elf32_Shdr *lpElfSectionHeader =
+      (Elf32_Shdr *)((uintptr_t)lpElfHeader->e_shoff + (uintptr_t)lpElfHeader);
+  {
+    logV(TAG, "ELF Section Header Base: 0x%08X", lpElfSectionHeader);
+    logV(TAG, "    Virtual Address Exec: 0x%08X", lpElfSectionHeader->sh_addr);
+    logV(TAG, "    Alignment: 0x%08X", lpElfSectionHeader->sh_addralign);
+    logV(TAG, "    Entry Size: %d", lpElfSectionHeader->sh_entsize);
+    logV(TAG, "    Flags: 0x%08X", lpElfSectionHeader->sh_flags);
+    logV(TAG, "    Section Info: 0x%08X", lpElfSectionHeader->sh_info);
+    logV(TAG, "    Another Section Link: 0x%08X", lpElfSectionHeader->sh_link);
+    logV(TAG, "    Name: %s", lpElfSectionHeader->sh_name);
+    logV(TAG, "    File Offset : 0x%08X", lpElfSectionHeader->sh_offset);
+    logV(TAG, "    Size In Bytes: %d", lpElfSectionHeader->sh_size);
+    logV(TAG, "    Type: 0x%08X", lpElfSectionHeader->sh_type);
+  }
+}
+
 void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
 {
   return NULL;
 }
 
-void *solibInstallRelocation(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc)
+void *solibGetSymbolStub(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc)
 {
   return NULL;
 }
@@ -151,8 +217,8 @@ void solibFreeLibrary(HSOLIB hSoLibrary)
   --libraryLoaded;
 
   sceKernelFreeMemBlock(lpInternal->sceImageMemBlock);
-  free(lpInternal->szLibraryPath);
-  free(lpInternal->szLibraryName);
+  // free(lpInternal->szLibraryPath);
+  // free(lpInternal->szLibraryName);
   free(hSoLibrary);
 }
 

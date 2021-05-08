@@ -12,7 +12,7 @@
 #include "solib.h"
 
 #define _H(x) ((LPSOINTERNAL)(*x));
-#define TOTAL_LIBRARY 32
+#define MAX_LIBRARY 32
 
 #define FAILED(x, ...)           \
   {                              \
@@ -32,8 +32,8 @@
     goto ReleaseMemblock;        \
   }
 
-uint32_t libraryLoaded = 0;
-LPSOINTERNAL libraryInstances[TOTAL_LIBRARY] = {NULL};
+static uint32_t libraryLoaded = 0;
+static LPSOINTERNAL libraryInstances[MAX_LIBRARY] = {NULL};
 
 HSOLIB solibLoadLibrary(const char *szLibrary)
 {
@@ -98,7 +98,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     // Print slots information
     logI(TAG, "Library '%s' loaded.", szLibraryName);
     logI(TAG, "  Current slot: %d", nSlotIndex);
-    logI(TAG, "  Available slots: %d", TOTAL_LIBRARY - libraryLoaded);
+    logI(TAG, "  Available slots: %d", MAX_LIBRARY - libraryLoaded);
 
     // Process relocation
     solibRelocateVirtualAddress(lpInternal);
@@ -129,52 +129,58 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
   logV(TAG, "Image Base: 0x%08X", lpInternal->lpLibraryImageBase);
   debugPrintMemoryBlock(lpInternal->lpLibraryImageBase, 16);
 
-  Elf32_Ehdr *lpElfHeader =
-      (Elf32_Ehdr *)lpInternal->lpLibraryImageBase;
+  uintptr_t lpImageBase = (uintptr_t)lpInternal->lpLibraryImageBase;
+  Elf32_Ehdr *lpElfHeader = (Elf32_Ehdr *)lpImageBase;
   {
     logV(TAG, "ELF Magic: %s", lpElfHeader->e_ident);
     logV(TAG, "ELF Header Size: %d", lpElfHeader->e_ehsize);
     logV(TAG, "ELF Virtual Address Entry: 0x%08X", lpElfHeader->e_entry);
     logV(TAG, "ELF Flags: 0x%08X", lpElfHeader->e_flags);
     logV(TAG, "ELF Architecture: 0x%08X", lpElfHeader->e_machine);
-    logV(TAG, "ELF Program Entry Size: 0x%08X", lpElfHeader->e_phentsize);
-    logV(TAG, "ELF Program Entry Count: 0x%08X", lpElfHeader->e_phnum);
+    logV(TAG, "ELF Program Entry Size: %d", lpElfHeader->e_phentsize);
+    logV(TAG, "ELF Program Entry Count: %d", lpElfHeader->e_phnum);
     logV(TAG, "ELF Program Entry Offset: 0x%08X", lpElfHeader->e_phoff);
-    logV(TAG, "ELF Section Entry Size: 0x%08X", lpElfHeader->e_shentsize);
-    logV(TAG, "ELF Section Entry Count: 0x%08X", lpElfHeader->e_shnum);
+    logV(TAG, "ELF Section Entry Size: %d", lpElfHeader->e_shentsize);
+    logV(TAG, "ELF Section Entry Count: %d", lpElfHeader->e_shnum);
     logV(TAG, "ELF Section Entry Offset: 0x%08X", lpElfHeader->e_shoff);
-    logV(TAG, "ELF Section String Index: 0x%08X", lpElfHeader->e_shstrndx);
+    logV(TAG, "ELF Section String Index: %d", lpElfHeader->e_shstrndx);
     logV(TAG, "ELF Object File Type: 0x%08X", lpElfHeader->e_type);
   }
 
   Elf32_Phdr *lpElfProgramHeader =
-      (Elf32_Phdr *)((uintptr_t)lpElfHeader->e_phoff + (uintptr_t)lpElfHeader);
+      (Elf32_Phdr *)(lpImageBase + lpElfHeader->e_phoff);
   {
     logV(TAG, "ELF Program Header Base: 0x%08X", lpElfProgramHeader);
-    logV(TAG, "    Alignment: 0x%08X", lpElfProgramHeader->p_align);
-    logV(TAG, "    Size (File): 0x%08X", lpElfProgramHeader->p_filesz);
+    logV(TAG, "    Alignment: %d", lpElfProgramHeader->p_align);
+    logV(TAG, "    Size (File): %d", lpElfProgramHeader->p_filesz);
     logV(TAG, "    Flags: 0x%08X", lpElfProgramHeader->p_flags);
-    logV(TAG, "    Size (Memory): 0x%08X", lpElfProgramHeader->p_memsz);
+    logV(TAG, "    Size (Memory): %d", lpElfProgramHeader->p_memsz);
     logV(TAG, "    File Offset: 0x%08X", lpElfProgramHeader->p_offset);
     logV(TAG, "    Physical Address: 0x%08X", lpElfProgramHeader->p_paddr);
     logV(TAG, "    Type: 0x%08X", lpElfProgramHeader->p_type);
     logV(TAG, "    Virtual Address: 0x%08X", lpElfProgramHeader->p_vaddr);
   }
 
-  Elf32_Shdr *lpElfSectionHeader =
-      (Elf32_Shdr *)((uintptr_t)lpElfHeader->e_shoff + (uintptr_t)lpElfHeader);
+  Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
+  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+
+  // Print all section informations
+  for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
-    logV(TAG, "ELF Section Header Base: 0x%08X", lpElfSectionHeader);
-    logV(TAG, "    Virtual Address Exec: 0x%08X", lpElfSectionHeader->sh_addr);
-    logV(TAG, "    Alignment: 0x%08X", lpElfSectionHeader->sh_addralign);
-    logV(TAG, "    Entry Size: %d", lpElfSectionHeader->sh_entsize);
-    logV(TAG, "    Flags: 0x%08X", lpElfSectionHeader->sh_flags);
-    logV(TAG, "    Section Info: 0x%08X", lpElfSectionHeader->sh_info);
-    logV(TAG, "    Another Section Link: 0x%08X", lpElfSectionHeader->sh_link);
-    logV(TAG, "    Name: %s", lpElfSectionHeader->sh_name);
-    logV(TAG, "    File Offset : 0x%08X", lpElfSectionHeader->sh_offset);
-    logV(TAG, "    Size In Bytes: %d", lpElfSectionHeader->sh_size);
-    logV(TAG, "    Type: 0x%08X", lpElfSectionHeader->sh_type);
+    logV(TAG, "Section %s [0x%08X => 0x%08X]",
+         lpSectionStrTab + lpElfSectionBase[i].sh_name,
+         lpElfSectionBase[i].sh_addr,
+         lpImageBase + lpElfSectionBase[i].sh_addr);
+
+    logV(TAG, "    Virtual Address Exec: 0x%08X", lpElfSectionBase[i].sh_addr);
+    logV(TAG, "    Alignment: %d", lpElfSectionBase[i].sh_addralign);
+    logV(TAG, "    Entry Size: %d", lpElfSectionBase[i].sh_entsize);
+    logV(TAG, "    Flags: 0x%08X", lpElfSectionBase[i].sh_flags);
+    logV(TAG, "    Section Info: 0x%08X", lpElfSectionBase[i].sh_info);
+    logV(TAG, "    Another Section Link: 0x%08X", lpElfSectionBase[i].sh_link);
+    logV(TAG, "    File Offset : 0x%08X", lpElfSectionBase[i].sh_offset);
+    logV(TAG, "    Size In Bytes: %d", lpElfSectionBase[i].sh_size);
+    logV(TAG, "    Type: 0x%08X", lpElfSectionBase[i].sh_type);
   }
 }
 
@@ -190,7 +196,7 @@ void *solibGetSymbolStub(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnD
 
 HSOLIB solibFindLibrary(const char *szLibraryName)
 {
-  for (int i = 0; i < TOTAL_LIBRARY; ++i)
+  for (int i = 0; i < MAX_LIBRARY; ++i)
   {
     if (libraryInstances[i] &&
         !strcmp(libraryInstances[i]->szLibraryName, szLibraryName))
@@ -250,10 +256,10 @@ HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal)
 
 int32_t solibFindEmptySlot()
 {
-  if (libraryLoaded >= TOTAL_LIBRARY)
+  if (libraryLoaded >= MAX_LIBRARY)
     return -1;
 
-  for (int i = 0; i < TOTAL_LIBRARY; ++i)
+  for (int i = 0; i < MAX_LIBRARY; ++i)
     if (libraryInstances[i] == NULL)
     {
       return i;

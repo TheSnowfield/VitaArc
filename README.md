@@ -3,7 +3,7 @@
 Run Arcaea on your HENkaku PSVita.  
 This is a cross-system ABI bridge to simulate the android environment of Arcaea in the SCE system.
 
-`Arcaea` is a mobile game who developed by Lowiro.
+`Arcaea` is a mobile game who developed by Lowiro.  
 This project is not affiliated with Lowiro or Arcaea.
 
 ## Hint
@@ -19,7 +19,7 @@ You may not get the game running correctly.
 
 ### Make directory tree
  - Download the game from the official website.
- - Teardown the apk (~~ToS Warning~~) to any where on your PC.
+ - Extract the apk (~~ToS Warning~~) to any where on your PC.
  - Make a directory named `vitaarc` under `ux0:` root partition on your PSVita.
  - Copy `lib/arbeabi-v7a` to `ux0:vitaarc/library/`.
  - Copy `assets` to `ux0:vitaarc/`.

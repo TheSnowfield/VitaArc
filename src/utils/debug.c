@@ -1,17 +1,22 @@
 #include <logcat/logcat.h>
 #include "debug.h"
 
-void debugPrintMemoryBlock(void *lpMemoryBlock, uint32_t nBlockCount)
+void debugPrintMemoryBlock(void *lpMemoryBlock,
+                           uint32_t nBlockCount, uint8_t alignSize)
 {
   uint8_t *lpMemory = (uint8_t *)lpMemoryBlock;
+  alignSize = alignSize == 0 ? 16 : alignSize;
 
-  for (int i = 0; i < nBlockCount; ++i)
+  for (int i = 0, j = 0; i < nBlockCount * alignSize; ++i)
   {
-    for (int j = 0; j < 16; ++j)
+    logPrintf("%02X ", *lpMemory);
+
+    if (++j >= 16)
     {
-      logPrintf("%02X ", *lpMemory);
-      ++lpMemory;
+      j = 0;
+      logPrintf("\n");
     }
-    logPrintf("\n");
+
+    ++lpMemory;
   }
 }

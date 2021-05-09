@@ -4,12 +4,17 @@
 #include <utils/string.h>
 #include <psp2/io/fcntl.h>
 #include <psp2/kernel/sysmem.h>
+#include <psp2/kernel/modulemgr.h>
 
 #include <common/elf.h>
 #include <common/define.h>
+#include <kubridge/kubridge.h>
 #include <logcat/logcat.h>
+#include <utils/kubridge.h>
 #include <utils/debug.h>
+
 #include "solib.h"
+#include "internal.h"
 
 #define _H(x) ((LPSOINTERNAL)(*x));
 #define MAX_LIBRARY 32
@@ -32,11 +37,18 @@
     goto ReleaseMemblock;        \
   }
 
+#define MEMALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
+
 static uint32_t libraryLoaded = 0;
 static LPSOINTERNAL libraryInstances[MAX_LIBRARY] = {NULL};
+static bool kuBridgeLoaded = false;
 
 HSOLIB solibLoadLibrary(const char *szLibrary)
 {
+  // Load kuBridge
+  if (!kuBridgeLoaded)
+    solibLoadKuBridge();
+
   logV(TAG, "Loading library '%s'", szLibrary);
 
   // Check file exists
@@ -100,12 +112,12 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     logI(TAG, "  Current slot: %d", nSlotIndex);
     logI(TAG, "  Available slots: %d", MAX_LIBRARY - libraryLoaded);
 
-    // Process relocation
-    solibRelocateVirtualAddress(lpInternal);
-    logI(TAG, "All virtual addresses have been relocated.");
-
     // Print debug information
     solibDebugPrintElfTable(lpInternal);
+
+    // Process relocation
+    solibLoadSections(lpInternal);
+    logI(TAG, "Load and relocated all sections.");
 
     // Clone an userend handle
     return solibCloneHandleInternal(lpInternal);
@@ -120,14 +132,100 @@ ReleaseInternal:
   return NULL;
 }
 
-void solibRelocateVirtualAddress(LPSOINTERNAL lpInternal)
+void solibLoadSections(LPSOINTERNAL lpInternal)
 {
+  // Image base address
+  uintptr_t lpImageBase = (uintptr_t)lpInternal->lpLibraryImageBase;
+
+  // ELF format header
+  Elf32_Ehdr *lpElfHeader = (Elf32_Ehdr *)lpImageBase;
+
+  // ELF program base
+  Elf32_Phdr *lpElfProgramBase = (Elf32_Phdr *)(lpImageBase + lpElfHeader->e_phoff);
+
+  // ELF section base
+  Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
+
+  // Section string table
+  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+
+  uintptr_t lpLinearAddressBase = 0x98000000;
+  uintptr_t lpLinearAddress = lpLinearAddressBase;
+
+  // Load program segments
+  for (int i = 0; i < lpElfHeader->e_phnum; ++i)
+  {
+    // If this section is loadable
+    if (lpElfProgramBase[i].p_type == PT_LOAD)
+    {
+      // Calculate aligned block size
+      uint32_t nBlockSize =
+          MEMALIGN(lpElfProgramBase[i].p_memsz, lpElfProgramBase[i].p_align);
+
+      SceUID nBlockID = NULL;
+      SceKernelAllocMemBlockKernelOpt sAllocOption = {0};
+      {
+        sAllocOption.size = sizeof(SceKernelAllocMemBlockKernelOpt);
+        sAllocOption.field_C = lpLinearAddress;
+        sAllocOption.attr = 0x01;
+      }
+
+      logV(TAG, "Address 0x%08X, Size %d", lpLinearAddress, nBlockSize);
+
+      // If this segment exectuable
+      if (lpElfProgramBase[i].p_type & PF_X)
+      {
+        nBlockID = kuKernelAllocMemBlock("elf_rx_block",
+                                         SCE_KERNEL_MEMBLOCK_TYPE_USER_RX,
+                                         nBlockSize, &sAllocOption);
+      }
+      else
+      {
+        nBlockID = kuKernelAllocMemBlock("elf_rw_block",
+                                         SCE_KERNEL_MEMBLOCK_TYPE_USER_RW,
+                                         nBlockSize, &sAllocOption);
+      }
+
+      logV(TAG, "nBlockID %d", nBlockID);
+
+      if (nBlockID <= 0)
+        return false;
+
+      logV(TAG, "Allocated %d bytes at [0x%08X] for segment.",
+           nBlockSize, lpElfProgramBase[i].p_vaddr);
+
+      // Update section data
+      void *lpBlockData = NULL;
+      sceKernelGetMemBlockBase(nBlockID, &lpBlockData);
+      lpElfProgramBase[i].p_vaddr += lpLinearAddressBase;
+
+      // Copy data
+      kuKernelCpuUnrestrictedMemset(lpBlockData, 0x00, nBlockSize);
+      kuKernelCpuUnrestrictedMemcpy(lpElfProgramBase[i].p_vaddr,
+                                    lpImageBase + lpElfProgramBase[i].p_offset,
+                                    lpElfProgramBase[i].p_filesz);
+
+      // Next segment
+      lpLinearAddress += nBlockSize;
+
+      logV(TAG, "Load segment: [0x%08X]. Length %d.",
+           lpElfProgramBase[i].p_vaddr, lpElfProgramBase[i].p_filesz);
+
+      debugPrintMemoryBlock(lpElfProgramBase[i].p_vaddr, 16, 16);
+    }
+  }
+
+  // Process section relocation
+  // for (int i = 0; i < lpElfHeader->e_shnum; ++i)
+  // {
+
+  // }
 }
 
 void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
 {
   logV(TAG, "Image Base: 0x%08X", lpInternal->lpLibraryImageBase);
-  debugPrintMemoryBlock(lpInternal->lpLibraryImageBase, 16);
+  debugPrintMemoryBlock(lpInternal->lpLibraryImageBase, 16, 16);
 
   uintptr_t lpImageBase = (uintptr_t)lpInternal->lpLibraryImageBase;
   Elf32_Ehdr *lpElfHeader = (Elf32_Ehdr *)lpImageBase;
@@ -147,18 +245,22 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
     logV(TAG, "ELF Object File Type: 0x%08X", lpElfHeader->e_type);
   }
 
-  Elf32_Phdr *lpElfProgramHeader =
-      (Elf32_Phdr *)(lpImageBase + lpElfHeader->e_phoff);
+  Elf32_Phdr *lpElfProgramBase = lpImageBase + lpElfHeader->e_phoff;
+
+  for (int i = 0; i < lpElfHeader->e_phnum; ++i)
   {
-    logV(TAG, "ELF Program Header Base: 0x%08X", lpElfProgramHeader);
-    logV(TAG, "    Alignment: %d", lpElfProgramHeader->p_align);
-    logV(TAG, "    Size (File): %d", lpElfProgramHeader->p_filesz);
-    logV(TAG, "    Flags: 0x%08X", lpElfProgramHeader->p_flags);
-    logV(TAG, "    Size (Memory): %d", lpElfProgramHeader->p_memsz);
-    logV(TAG, "    File Offset: 0x%08X", lpElfProgramHeader->p_offset);
-    logV(TAG, "    Physical Address: 0x%08X", lpElfProgramHeader->p_paddr);
-    logV(TAG, "    Type: 0x%08X", lpElfProgramHeader->p_type);
-    logV(TAG, "    Virtual Address: 0x%08X", lpElfProgramHeader->p_vaddr);
+    logV(TAG, "Segment [0x%08X => 0x%08X]",
+         lpElfProgramBase[i].p_vaddr,
+         lpImageBase + lpElfProgramBase[i].p_vaddr);
+
+    logV(TAG, "    Type: 0x%08X", lpElfProgramBase[i].p_type);
+    logV(TAG, "    Alignment: %d", lpElfProgramBase[i].p_align);
+    logV(TAG, "    Size (File): %d", lpElfProgramBase[i].p_filesz);
+    logV(TAG, "    Size (Memory): %d", lpElfProgramBase[i].p_memsz);
+    logV(TAG, "    Flags: 0x%08X", lpElfProgramBase[i].p_flags);
+    logV(TAG, "    Data Offset: 0x%08X", lpElfProgramBase[i].p_offset);
+    logV(TAG, "    Virtual Address: 0x%08X", lpElfProgramBase[i].p_vaddr);
+    logV(TAG, "    Physical Address: 0x%08X", lpElfProgramBase[i].p_paddr);
   }
 
   Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
@@ -266,4 +368,24 @@ int32_t solibFindEmptySlot()
     }
 
   return -2;
+}
+
+void solibLoadKuBridge()
+{
+  if (utilFileExists("os0:kd/kubridge.skprx"))
+  {
+    logV(TAG, "Found kubridge.skprx. Try loading.");
+
+    SceUID resultID =
+        sceKernelLoadStartModule("os0:kd/kubridge.skprx", 0, 0, 0, NULL, NULL);
+
+    if (resultID <= 0)
+    {
+      logV(TAG, "Load kubridge.skprx failed!", resultID);
+      return;
+    }
+
+    kuBridgeLoaded = true;
+    logV(TAG, "Load kubridge.skprx success!");
+  }
 }

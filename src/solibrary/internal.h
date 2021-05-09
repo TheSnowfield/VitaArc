@@ -50,11 +50,4 @@ void solibLoadSections(LPSOINTERNAL lpInternal);
  */
 void solibDebugPrintElfTable(LPSOINTERNAL lpInternal);
 
-/**
- * Loa kubridge.kuprx (Internal use)
- *
- * @return void
- */
-void solibLoadKuBridge(void);
-
 #endif /* _SOLIB_INTERNAL_H_ */

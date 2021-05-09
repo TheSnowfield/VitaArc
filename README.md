@@ -25,7 +25,7 @@ You may not get the game running correctly.
  - Copy `assets` to `ux0:vitaarc/`.
  - Make a directory named `persistent` under `ux0:vitaarc/`.
  
-If you do this follows the tutorial, The directory tree should be like
+If you follows the tutorial correctly, The directory tree should be like
  - assets
    + app-data
    + audio

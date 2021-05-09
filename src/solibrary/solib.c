@@ -41,14 +41,9 @@
 
 static uint32_t libraryLoaded = 0;
 static LPSOINTERNAL libraryInstances[MAX_LIBRARY] = {NULL};
-static bool kuBridgeLoaded = false;
 
 HSOLIB solibLoadLibrary(const char *szLibrary)
 {
-  // Load kuBridge
-  if (!kuBridgeLoaded)
-    solibLoadKuBridge();
-
   logV(TAG, "Loading library '%s'", szLibrary);
 
   // Check file exists
@@ -368,24 +363,4 @@ int32_t solibFindEmptySlot()
     }
 
   return -2;
-}
-
-void solibLoadKuBridge()
-{
-  if (utilFileExists("os0:kd/kubridge.skprx"))
-  {
-    logV(TAG, "Found kubridge.skprx. Try loading.");
-
-    SceUID resultID =
-        sceKernelLoadStartModule("os0:kd/kubridge.skprx", 0, 0, 0, NULL, NULL);
-
-    if (resultID <= 0)
-    {
-      logV(TAG, "Load kubridge.skprx failed!", resultID);
-      return;
-    }
-
-    kuBridgeLoaded = true;
-    logV(TAG, "Load kubridge.skprx success!");
-  }
 }

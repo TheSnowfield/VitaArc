@@ -84,6 +84,8 @@ target_link_libraries(${PROJECT_NAME}
   OpenGLBridge
   Cocos2dxBridge
 
+  taihen_stub
+  kubridge_stub
   SceAppMgr_stub
   SceAppUtil_stub
   SceAudio_stub

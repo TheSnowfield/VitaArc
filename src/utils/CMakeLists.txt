@@ -43,4 +43,5 @@ add_library(${PROJECT_NAME}
   patcher.c
   string.c
   debug.c
+  kubridge.c
 )

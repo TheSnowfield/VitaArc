@@ -12,10 +12,7 @@ void debugPrintMemoryBlock(void *lpMemoryBlock,
     logPrintf("%02X ", *lpMemory);
 
     if (++j >= 16)
-    {
-      j = 0;
-      logPrintf("\n");
-    }
+      logPrintf("\n"), j = 0;
 
     ++lpMemory;
   }

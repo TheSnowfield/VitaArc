@@ -211,9 +211,9 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
   // Find dynsym and dynstr
   Elf32_Sym *lpSectionSyms = NULL;
+  uint32_t nSymsCount = 0;
   char *lpSectionDynStrTab = NULL;
   char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
-  uint32_t nDynRelCount = 0;
 
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
@@ -221,7 +221,10 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
     // Find .dynsym section
     if (!lpSectionSyms && strcmp(lpszSectionName, ".dynsym") == 0)
+    {
+      nSymsCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
       lpSectionSyms = lpImageBase + lpElfSectionBase[i].sh_offset;
+    }
 
     // Find .dynstr section
     if (!lpSectionDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
@@ -279,6 +282,11 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       }
     }
   }
+
+  // Save cache
+  lpInternal->nElfSymCount = nSymsCount;
+  lpInternal->lpElfSymSection = lpSectionSyms;
+  lpInternal->lpElfDynStrSection = lpSectionDynStrTab;
 
   logI(TAG, "Relocated all symbols.");
 
@@ -351,6 +359,28 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
 
 void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
 {
+  if (!hSoLibrary)
+    return NULL;
+
+  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+
+  // Enumerate symbol table
+  for (int i = 0; i < lpInternal->nElfSymCount; ++i)
+  {
+    char *lpszSymbolName =
+        lpInternal->lpElfDynStrSection +
+        lpInternal->lpElfSymSection[i].st_name;
+
+    // Compare symbol name
+    if (strcmp(lpszSymbolName, szFunctionName) == 0)
+    {
+      logV(TAG, "ProcAddress found: %s [0x%08X]", szFunctionName,
+           0x98000000 + lpInternal->lpElfSymSection[i].st_value - 1);
+
+      return 0x98000000 + lpInternal->lpElfSymSection[i].st_value - 1;
+    }
+  }
+
   return NULL;
 }
 
@@ -388,8 +418,6 @@ void solibFreeLibrary(HSOLIB hSoLibrary)
   --libraryLoaded;
 
   sceKernelFreeMemBlock(lpInternal->sceImageMemBlock);
-  // free(lpInternal->szLibraryPath);
-  // free(lpInternal->szLibraryName);
   free(hSoLibrary);
 }
 

@@ -11,8 +11,9 @@ typedef struct SOINTERNAL
   char szLibraryPath[128];
   void *lpLibraryImageBase;
   SceUID sceImageMemBlock;
-  void* lpElfSectionBase;
-  void* lpElfProgramBase;
+  Elf32_Sym *lpElfSymSection;
+  uint32_t nElfSymCount;
+  void *lpElfDynStrSection;
 
 } SOINTERNAL, *LPSOINTERNAL;
 

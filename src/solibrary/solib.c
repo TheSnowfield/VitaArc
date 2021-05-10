@@ -40,7 +40,7 @@
 #define MEMALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
 
 static uint32_t libraryLoaded = 0;
-static LPSOINTERNAL libraryInstances[MAX_LIBRARY] = {NULL};
+static LPSOINTERNAL librarySlots[MAX_LIBRARY] = {NULL};
 
 HSOLIB solibLoadLibrary(const char *szLibrary)
 {
@@ -100,7 +100,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     strcpy(lpInternal->szLibraryName, szLibraryName);
 
     ++libraryLoaded;
-    libraryInstances[nSlotIndex] = lpInternal;
+    librarySlots[nSlotIndex] = lpInternal;
 
     // Print slots information
     logI(TAG, "Library '%s' loaded.", szLibraryName);
@@ -110,7 +110,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     // Print debug information
     solibDebugPrintElfTable(lpInternal);
 
-    // Process relocation
+    // Process section
     solibLoadSections(lpInternal);
     logI(TAG, "Load and relocated all sections.");
 
@@ -141,9 +141,6 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   // ELF section base
   Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
 
-  // Section string table
-  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
-
   uintptr_t lpLinearAddressBase = 0x98000000;
   uintptr_t lpLinearAddress = lpLinearAddressBase;
 
@@ -168,7 +165,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       logV(TAG, "Address 0x%08X, Size %d", lpLinearAddress, nBlockSize);
 
       // If this segment exectuable
-      if (lpElfProgramBase[i].p_type & PF_X)
+      if (lpElfProgramBase[i].p_flags & PF_X)
       {
         nBlockID = kuKernelAllocMemBlock("elf_rx_block",
                                          SCE_KERNEL_MEMBLOCK_TYPE_USER_RX,
@@ -210,11 +207,78 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     }
   }
 
-  // Process section relocation
-  // for (int i = 0; i < lpElfHeader->e_shnum; ++i)
-  // {
+  logV(TAG, "Segments load finished.");
 
-  // }
+  // Find dynsym and dynstr
+  Elf32_Sym *lpSectionSyms = NULL;
+  Elf32_Rel *lpSectionDynRel = NULL;
+  char *lpSectionDynStrTab = NULL;
+  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  uint32_t nDynRelCount = 0;
+
+  for (int i = 0; i < lpElfHeader->e_shnum; ++i)
+  {
+    char *lpszSectionName = lpSectionStrTab + lpElfSectionBase[i].sh_name;
+
+    // Find .dynsym section
+    if (!lpSectionSyms && strcmp(lpszSectionName, ".dynsym") == 0)
+      lpSectionSyms = lpImageBase + lpElfSectionBase[i].sh_offset;
+
+    // Find .dynstr section
+    if (!lpSectionDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
+      lpSectionDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+
+    // Find .rel.dyn section
+    if (!lpSectionDynRel && strcmp(lpszSectionName, ".rel.dyn") == 0)
+    {
+      lpSectionDynRel = lpImageBase + lpElfSectionBase[i].sh_offset;
+      nDynRelCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel);
+    }
+  }
+
+  logV(TAG, ".dynsym: [0x%08X], .dynstr: [0x%08X]", lpSectionSyms, lpSectionDynStrTab);
+  logV(TAG, ".rel.dyn: [0x%08X] %d", lpSectionDynRel, nDynRelCount);
+
+  // If one of section not found
+  if (!(lpSectionSyms && lpSectionDynStrTab && lpSectionDynRel))
+    return false;
+
+  // Process section relocation
+  for (int i = 0; i < nDynRelCount; ++i)
+  {
+    Elf32_Sym *lpRelocateInfo = &lpSectionSyms[ELF32_R_SYM(lpSectionDynRel[i].r_info)];
+    uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionDynRel[i].r_offset;
+    uint32_t nRelocateType = ELF32_R_TYPE(lpSectionDynRel[i].r_info);
+
+    logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
+         lpSectionDynStrTab + lpRelocateInfo->st_name,
+         *lpRelocateAddress, lpRelocateInfo->st_value,
+         nRelocateType, lpRelocateInfo->st_shndx);
+
+    switch (nRelocateType)
+    {
+    case R_ARM_ABS32:
+      (*lpRelocateAddress) += lpRelocateInfo->st_value;
+      break;
+
+    case R_ARM_RELATIVE:
+      (*lpRelocateAddress) += lpLinearAddressBase;
+      break;
+
+    case R_ARM_GLOB_DAT:
+    case R_ARM_JUMP_SLOT:
+      (*lpRelocateAddress) = lpLinearAddressBase + lpRelocateInfo->st_value;
+      break;
+
+    default:
+      logE(TAG, "Unknown relocate type reached. %d", nRelocateType);
+      return false;
+    }
+
+    logV(TAG, "Relocated to [0x%08X]\n", (*lpRelocateAddress));
+  }
+
+  logI(TAG, "Relocated all symbols.");
 }
 
 void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
@@ -295,11 +359,11 @@ HSOLIB solibFindLibrary(const char *szLibraryName)
 {
   for (int i = 0; i < MAX_LIBRARY; ++i)
   {
-    if (libraryInstances[i] &&
-        !strcmp(libraryInstances[i]->szLibraryName, szLibraryName))
+    if (librarySlots[i] &&
+        !strcmp(librarySlots[i]->szLibraryName, szLibraryName))
     {
       logV(TAG, "Library found. Index: %d", i);
-      return solibCloneHandleInternal(libraryInstances[i]);
+      return solibCloneHandleInternal(librarySlots[i]);
     }
   }
 
@@ -316,7 +380,7 @@ void solibFreeLibrary(HSOLIB hSoLibrary)
     solibFreeLibrary(*hSoLibrary);
 
   // Destroy pointers
-  libraryInstances[lpInternal->nSlotIndex] = NULL;
+  librarySlots[lpInternal->nSlotIndex] = NULL;
   --libraryLoaded;
 
   sceKernelFreeMemBlock(lpInternal->sceImageMemBlock);
@@ -357,7 +421,7 @@ int32_t solibFindEmptySlot()
     return -1;
 
   for (int i = 0; i < MAX_LIBRARY; ++i)
-    if (libraryInstances[i] == NULL)
+    if (librarySlots[i] == NULL)
     {
       return i;
     }

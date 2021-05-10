@@ -131,37 +131,40 @@ jint AttachCurrentThreadAsDaemon(JavaVM *javaVM, JNIEnv **jniEnv, void *a1)
 }
 
 static struct JNIInvokeInterface jniInvokeEnv =
-    {
-        .GetEnv = GetEnv,
-        .DestroyJavaVM = DestroyJavaVM,
-        .AttachCurrentThread = AttachCurrentThread,
-        .DetachCurrentThread = DetachCurrentThread,
-        .AttachCurrentThreadAsDaemon = AttachCurrentThreadAsDaemon};
+{
+  .reserved0 = &jniInvokeEnv,
+  .GetEnv = GetEnv,
+  .DestroyJavaVM = DestroyJavaVM,
+  .AttachCurrentThread = AttachCurrentThread,
+  .DetachCurrentThread = DetachCurrentThread,
+  .AttachCurrentThreadAsDaemon = AttachCurrentThreadAsDaemon
+};
 
 static struct JNINativeInterface jniNativeEnv =
-    {
-        .reserved0 = &jniNativeEnv,
-        .GetVersion = GetVersion,
-        .FindClass = FindClass,
-        .ExceptionClear = ExceptionClear,
-        .NewGlobalRef = NewGlobalRef,
-        .DeleteLocalRef = DeleteLocalRef,
-        .GetMethodID = GetMethodID,
-        .CallObjectMethodV = CallObjectMethodV,
-        .CallBooleanMethodV = CallBooleanMethodV,
-        .CallIntMethodV = CallIntMethodV,
-        .CallFloatMethodV = CallFloatMethodV,
-        .CallVoidMethodV = CallVoidMethodV,
-        .NewStringUTF = NewStringUTF,
-        .GetStringUTFChars = GetStringUTFChars,
-        .ReleaseStringUTFChars = ReleaseStringUTFChars,
-        .RegisterNatives = RegisterNatives};
+{
+  .reserved0 = &jniNativeEnv,
+  .GetVersion = GetVersion,
+  .FindClass = FindClass,
+  .ExceptionClear = ExceptionClear,
+  .NewGlobalRef = NewGlobalRef,
+  .DeleteLocalRef = DeleteLocalRef,
+  .GetMethodID = GetMethodID,
+  .CallObjectMethodV = CallObjectMethodV,
+  .CallBooleanMethodV = CallBooleanMethodV,
+  .CallIntMethodV = CallIntMethodV,
+  .CallFloatMethodV = CallFloatMethodV,
+  .CallVoidMethodV = CallVoidMethodV,
+  .NewStringUTF = NewStringUTF,
+  .GetStringUTFChars = GetStringUTFChars,
+  .ReleaseStringUTFChars = ReleaseStringUTFChars,
+  .RegisterNatives = RegisterNatives
+};
 
 void bridgeCallJNIMain(HSOLIB hSoLibrary)
 {
   JNI_OnLoad pfnJNIOnload = solibGetProcAddress(hSoLibrary, "JNI_OnLoad");
-  debugPrintMemoryBlock(pfnJNIOnload, 16, 16);
+  debugMemoryDump(0x98000000, 0xA60000);
 
-  pfnJNIOnload(&jniInvokeEnv, NULL);
+  // pfnJNIOnload(&jniInvokeEnv, NULL);
   // native(&jniNativeEnv, false, true);
 }

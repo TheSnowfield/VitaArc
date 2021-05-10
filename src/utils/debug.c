@@ -1,3 +1,4 @@
+#include <psp2/io/fcntl.h>
 #include <logcat/logcat.h>
 #include "debug.h"
 
@@ -16,4 +17,11 @@ void debugPrintMemoryBlock(void *lpMemoryBlock,
 
     ++lpMemory;
   }
+}
+void debugMemoryDump(void *lpMemoryBlock, uint32_t size)
+{
+  SceUID nFileId = sceIoOpen("ux0:vitaarc/memdump.bin",
+                             SCE_O_CREAT | SCE_O_WRONLY, 0777);
+  sceIoWrite(nFileId, lpMemoryBlock, size);
+  sceIoClose(nFileId);
 }

@@ -3,7 +3,6 @@
 
 #include <solibrary/solib.h>
 
-void bridgePatchJNI(HSOLIB lpSoLibrary);
-void bridgeCallJNIMain(HSOLIB lpSoLibrary);
+void bridgeCallJNIMain(HSOLIB hSoLibrary);
 
 #endif /* _BRIDGE_JNI_H_ */

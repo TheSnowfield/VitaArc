@@ -67,7 +67,6 @@ int main()
     }
 
     // Setup bridges
-    bridgePatchJNI(hLibCocos2dx);
     bridgePatchEABI(hLibCocos2dx);
     bridgePatchAndroidNDK(hLibCocos2dx);
     bridgePatchAndroidLog(hLibCocos2dx);

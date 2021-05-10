@@ -211,7 +211,6 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
   // Find dynsym and dynstr
   Elf32_Sym *lpSectionSyms = NULL;
-  Elf32_Rel *lpSectionDynRel = NULL;
   char *lpSectionDynStrTab = NULL;
   char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
   uint32_t nDynRelCount = 0;
@@ -227,58 +226,63 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     // Find .dynstr section
     if (!lpSectionDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
       lpSectionDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
-
-    // Find .rel.dyn section
-    if (!lpSectionDynRel && strcmp(lpszSectionName, ".rel.dyn") == 0)
-    {
-      lpSectionDynRel = lpImageBase + lpElfSectionBase[i].sh_offset;
-      nDynRelCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel);
-    }
   }
 
   logV(TAG, ".dynsym: [0x%08X], .dynstr: [0x%08X]", lpSectionSyms, lpSectionDynStrTab);
-  logV(TAG, ".rel.dyn: [0x%08X] %d", lpSectionDynRel, nDynRelCount);
 
   // If one of section not found
-  if (!(lpSectionSyms && lpSectionDynStrTab && lpSectionDynRel))
+  if (!(lpSectionSyms && lpSectionDynStrTab))
     return false;
 
-  // Process section relocation
-  for (int i = 0; i < nDynRelCount; ++i)
+  for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
-    Elf32_Sym *lpRelocateInfo = &lpSectionSyms[ELF32_R_SYM(lpSectionDynRel[i].r_info)];
-    uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionDynRel[i].r_offset;
-    uint32_t nRelocateType = ELF32_R_TYPE(lpSectionDynRel[i].r_info);
+    char *lpszSectionName =
+        lpSectionStrTab + lpElfSectionBase[i].sh_name;
 
-    logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
-         lpSectionDynStrTab + lpRelocateInfo->st_name,
-         *lpRelocateAddress, lpRelocateInfo->st_value,
-         nRelocateType, lpRelocateInfo->st_shndx);
-
-    switch (nRelocateType)
+    if ((strcmp(lpszSectionName, ".rel.dyn") == 0) ||
+        (strcmp(lpszSectionName, ".rel.plt") == 0))
     {
-    case R_ARM_ABS32:
-      (*lpRelocateAddress) += lpRelocateInfo->st_value;
-      break;
+      // Process section relocation
+      for (int j = 0; j < lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
+      {
+        Elf32_Rel *lpSectionBase = lpImageBase + lpElfSectionBase[i].sh_offset;
+        Elf32_Sym *lpRelocateInfo = &lpSectionSyms[ELF32_R_SYM(lpSectionBase[j].r_info)];
+        uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionBase[j].r_offset;
+        uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
 
-    case R_ARM_RELATIVE:
-      (*lpRelocateAddress) += lpLinearAddressBase;
-      break;
+        logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
+             lpSectionDynStrTab + lpRelocateInfo->st_name,
+             *lpRelocateAddress, lpRelocateInfo->st_value,
+             nRelocateType, lpRelocateInfo->st_shndx);
 
-    case R_ARM_GLOB_DAT:
-    case R_ARM_JUMP_SLOT:
-      (*lpRelocateAddress) = lpLinearAddressBase + lpRelocateInfo->st_value;
-      break;
+        switch (nRelocateType)
+        {
+        case R_ARM_ABS32:
+          (*lpRelocateAddress) += lpRelocateInfo->st_value;
+          break;
 
-    default:
-      logE(TAG, "Unknown relocate type reached. %d", nRelocateType);
-      return false;
+        case R_ARM_RELATIVE:
+          (*lpRelocateAddress) += lpLinearAddressBase;
+          break;
+
+        case R_ARM_GLOB_DAT:
+        case R_ARM_JUMP_SLOT:
+          (*lpRelocateAddress) = lpLinearAddressBase + lpRelocateInfo->st_value;
+          break;
+
+        default:
+          logE(TAG, "Unknown relocate type reached. %d", nRelocateType);
+          // return false;
+        }
+
+        logV(TAG, "Relocated to [0x%08X]\n", (*lpRelocateAddress));
+      }
     }
-
-    logV(TAG, "Relocated to [0x%08X]\n", (*lpRelocateAddress));
   }
 
   logI(TAG, "Relocated all symbols.");
+
+  return true;
 }
 
 void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)

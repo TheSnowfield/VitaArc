@@ -35,7 +35,7 @@ void solibFreeLibrary(HSOLIB hSoLibrary);
 void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
 
 /**
- * Set relocation address by symbol name
+ * Install relocation address by symbol name
  *
  * @param hSoLibrary Library instance handle
  *
@@ -45,7 +45,7 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
  *
  * @return not 0 success
  */
-void *solibGetSymbolStub(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc);
+void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc);
 
 /**
  * Find loaded library by name

@@ -19,6 +19,26 @@
 #define _H(x) ((LPSOINTERNAL)(*x));
 #define MAX_LIBRARY 32
 
+// Symbol Values
+// In addition to the normal rules for symbol values
+// the following rules shall also apply to symbols of type STT_FUNC:
+
+// If the symbol addresses an Arm instruction,
+// its value is the address of the instruction
+// (in a relocatable object, the offset of the instruction
+// from the start of the section containing it).
+
+// If the symbol addresses a Thumb instruction,
+// its value is the address of the instruction with bit zero set
+// (in a relocatable object, the section offset with bit zero set).
+
+// For the purposes of relocation the value used shall be the address
+// of the instruction (st_value & ~1).
+// https://developer.arm.com/documentation/ihi0044/latest/
+
+// #define OFFRST(x) (x & ~1)
+#define OFFRST(x) (x)
+
 #define FAILED(x, ...)           \
   {                              \
     logF(TAG, x, ##__VA_ARGS__); \
@@ -66,7 +86,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     return solibCloneHandle(hSoLibrary);
 
   // Prepare new block
-  LPSOINTERNAL lpInternal = malloc(sizeof(LPSOINTERNAL));
+  LPSOINTERNAL lpInternal = malloc(sizeof(SOINTERNAL));
   {
     // Allocate a memory block to
     // storage library image
@@ -108,7 +128,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     logI(TAG, "  Available slots: %d", MAX_LIBRARY - libraryLoaded);
 
     // Print debug information
-    solibDebugPrintElfTable(lpInternal);
+    // solibDebugPrintElfTable(lpInternal);
 
     // Process section
     solibLoadSections(lpInternal);
@@ -210,67 +230,72 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   logV(TAG, "Segments load finished.");
 
   // Find dynsym and dynstr
-  Elf32_Sym *lpSectionSyms = NULL;
-  uint32_t nSymsCount = 0;
-  char *lpSectionDynStrTab = NULL;
-  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  Elf32_Sym *lpDynSymbols = NULL;
+  uint32_t nDynSymbolCount = 0;
+  char *lpDynStrTab = NULL;
+  char *lpSecStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
 
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
-    char *lpszSectionName = lpSectionStrTab + lpElfSectionBase[i].sh_name;
+    char *lpszSectionName = lpSecStrTab + lpElfSectionBase[i].sh_name;
 
     // Find .dynsym section
-    if (!lpSectionSyms && strcmp(lpszSectionName, ".dynsym") == 0)
+    if (!lpDynSymbols && strcmp(lpszSectionName, ".dynsym") == 0)
     {
-      nSymsCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
-      lpSectionSyms = lpImageBase + lpElfSectionBase[i].sh_offset;
+      nDynSymbolCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
+      lpDynSymbols = lpImageBase + lpElfSectionBase[i].sh_offset;
     }
 
     // Find .dynstr section
-    if (!lpSectionDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
-      lpSectionDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+    if (!lpDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
+      lpDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
   }
 
-  logV(TAG, ".dynsym: [0x%08X], .dynstr: [0x%08X]", lpSectionSyms, lpSectionDynStrTab);
+  logV(TAG, ".dynsym: [0x%08X], .dynstr: [0x%08X]", lpDynSymbols, lpDynStrTab);
 
   // If one of section not found
-  if (!(lpSectionSyms && lpSectionDynStrTab))
+  if (!(lpDynSymbols && lpDynStrTab))
     return false;
 
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
     char *lpszSectionName =
-        lpSectionStrTab + lpElfSectionBase[i].sh_name;
+        lpSecStrTab + lpElfSectionBase[i].sh_name;
 
     if ((strcmp(lpszSectionName, ".rel.dyn") == 0) ||
         (strcmp(lpszSectionName, ".rel.plt") == 0))
     {
+      Elf32_Rel *lpSectionBase = lpImageBase + lpElfSectionBase[i].sh_addr;
+      logV(TAG, "lpSectionBase %d", lpSectionBase);
+
       // Process section relocation
       for (int j = 0; j < lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
       {
-        Elf32_Rel *lpSectionBase = lpImageBase + lpElfSectionBase[i].sh_offset;
-        Elf32_Sym *lpRelocateInfo = &lpSectionSyms[ELF32_R_SYM(lpSectionBase[j].r_info)];
+        Elf32_Sym *lpRelocateInfo = &lpDynSymbols[ELF32_R_SYM(lpSectionBase[j].r_info)];
         uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionBase[j].r_offset;
         uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
 
         logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
-             lpSectionDynStrTab + lpRelocateInfo->st_name,
-             *lpRelocateAddress, lpRelocateInfo->st_value,
+             lpDynStrTab + lpRelocateInfo->st_name,
+             *lpRelocateAddress, OFFRST(lpRelocateInfo->st_value),
              nRelocateType, lpRelocateInfo->st_shndx);
 
         switch (nRelocateType)
         {
         case R_ARM_ABS32:
-          (*lpRelocateAddress) += lpRelocateInfo->st_value;
+          (*lpRelocateAddress) +=
+              lpLinearAddressBase + OFFRST(lpRelocateInfo->st_value);
           break;
 
         case R_ARM_RELATIVE:
-          (*lpRelocateAddress) += lpLinearAddressBase;
+          (*lpRelocateAddress) =
+              OFFRST(*lpRelocateAddress) + lpLinearAddressBase;
           break;
 
         case R_ARM_GLOB_DAT:
         case R_ARM_JUMP_SLOT:
-          (*lpRelocateAddress) = lpLinearAddressBase + lpRelocateInfo->st_value;
+          if (lpRelocateInfo->st_shndx != SHN_UNDEF)
+            (*lpRelocateAddress) = lpLinearAddressBase + OFFRST(lpRelocateInfo->st_value);
           break;
 
         default:
@@ -284,9 +309,13 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   }
 
   // Save cache
-  lpInternal->nElfSymCount = nSymsCount;
-  lpInternal->lpElfSymSection = lpSectionSyms;
-  lpInternal->lpElfDynStrSection = lpSectionDynStrTab;
+  lpInternal->lpElfHeader = lpElfHeader;
+  lpInternal->lpElfSectionBase = lpElfSectionBase;
+  lpInternal->lpElfSegmentBase = lpElfProgramBase;
+  lpInternal->lpElfSecStrTab = lpSecStrTab;
+  lpInternal->lpElfDynStrTab = lpDynStrTab;
+  lpInternal->lpElfDynSymbols = lpDynSymbols;
+  lpInternal->nElfDynSymbolCount = nDynSymbolCount;
 
   logI(TAG, "Relocated all symbols.");
 
@@ -336,13 +365,17 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
 
   Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
   char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  Elf32_Sym *lpDynamicSymbolTab = NULL;
+  char *lpDynamicSymbolName = NULL;
+  uint32_t nDynamicSymbols = 0;
 
   // Print all section informations
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
+    char *lpszSectionName = lpSectionStrTab + lpElfSectionBase[i].sh_name;
+
     logV(TAG, "Section %s [0x%08X => 0x%08X]",
-         lpSectionStrTab + lpElfSectionBase[i].sh_name,
-         lpElfSectionBase[i].sh_addr,
+         lpszSectionName, lpElfSectionBase[i].sh_addr,
          lpImageBase + lpElfSectionBase[i].sh_addr);
 
     logV(TAG, "    Virtual Address Exec: 0x%08X", lpElfSectionBase[i].sh_addr);
@@ -354,6 +387,26 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
     logV(TAG, "    File Offset : 0x%08X", lpElfSectionBase[i].sh_offset);
     logV(TAG, "    Size In Bytes: %d", lpElfSectionBase[i].sh_size);
     logV(TAG, "    Type: 0x%08X", lpElfSectionBase[i].sh_type);
+
+    // Find .dynsym section
+    if (strcmp(lpszSectionName, ".dynsym") == 0)
+    {
+      nDynamicSymbols = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
+      lpDynamicSymbolTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+    }
+
+    // Find .dynstr section
+    if (strcmp(lpszSectionName, ".dynstr") == 0)
+      lpDynamicSymbolName = lpImageBase + lpElfSectionBase[i].sh_offset;
+  }
+
+  logV(TAG, "Import Symbols");
+
+  // Print all symbols of this library
+  for (int i = 0; i < nDynamicSymbols; ++i)
+  {
+    logV(TAG, "    [0x%08X] => [0x%08X] %s", ((uintptr_t)(lpDynamicSymbolTab + i)) + 4,
+         lpDynamicSymbolTab[i].st_value, lpDynamicSymbolName + lpDynamicSymbolTab[i].st_name);
   }
 }
 
@@ -365,27 +418,59 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
   LPSOINTERNAL lpInternal = _H(hSoLibrary);
 
   // Enumerate symbol table
-  for (int i = 0; i < lpInternal->nElfSymCount; ++i)
+  for (int i = 0; i < lpInternal->nElfDynSymbolCount; ++i)
   {
     char *lpszSymbolName =
-        lpInternal->lpElfDynStrSection +
-        lpInternal->lpElfSymSection[i].st_name;
+        lpInternal->lpElfDynStrTab +
+        lpInternal->lpElfDynSymbols[i].st_name;
 
     // Compare symbol name
     if (strcmp(lpszSymbolName, szFunctionName) == 0)
     {
-      logV(TAG, "ProcAddress found: %s [0x%08X]", szFunctionName,
-           0x98000000 + lpInternal->lpElfSymSection[i].st_value - 1);
+      logV(TAG, "ProcAddress found: %s [0x%08X] + [0x%08X]", szFunctionName,
+           0x98000000, OFFRST(lpInternal->lpElfDynSymbols[i].st_value));
 
-      return 0x98000000 + lpInternal->lpElfSymSection[i].st_value - 1;
+      return 0x98000000 + OFFRST(lpInternal->lpElfDynSymbols[i].st_value);
     }
   }
 
   return NULL;
 }
 
-void *solibGetSymbolStub(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc)
+void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc)
 {
+  if (!hSoLibrary)
+    return NULL;
+
+  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+
+  for (int i = 0; i < lpInternal->lpElfHeader->e_shnum; ++i)
+  {
+    char *lpszSectionName =
+        lpInternal->lpElfSecStrTab + lpInternal->lpElfSectionBase[i].sh_name;
+
+    if ((strcmp(lpszSectionName, ".rel.dyn") == 0) ||
+        (strcmp(lpszSectionName, ".rel.plt") == 0))
+    {
+      Elf32_Rel *lpSectionBase = lpInternal->lpLibraryImageBase +
+                                 lpInternal->lpElfSectionBase[i].sh_addr;
+
+      // Process section relocation
+      for (int j = 0; j < lpInternal->lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
+      {
+        Elf32_Sym *lpRelocateInfo = &lpInternal->lpElfDynSymbols[ELF32_R_SYM(lpSectionBase[j].r_info)];
+        uintptr_t *lpRelocateAddress = 0x98000000 + lpSectionBase[j].r_offset;
+        uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
+
+        if (strcmp(lpInternal->lpElfDynStrTab + lpRelocateInfo->st_name, szSymbolName) == 0)
+        {
+          (*lpRelocateAddress) = pfnDestProc;
+          logV(TAG, "Symbol [0x%08X] %s installed.", pfnDestProc, szSymbolName);
+        }
+      }
+    }
+  }
+
   return NULL;
 }
 

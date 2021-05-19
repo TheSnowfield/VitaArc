@@ -12,6 +12,7 @@ static struct JNIInvokeInterface jniInvokeEnv;
 static struct JNINativeInterface jniNativeEnv;
 
 typedef int (*JNI_OnInit)(void *JNIEnv, bool r1, bool graphics);
+typedef int (*_testmain)();
 static JNI_OnInit native;
 
 jint GetVersion(JNIEnv *jniEnv)
@@ -163,8 +164,7 @@ static struct JNINativeInterface jniNativeEnv =
 void bridgeCallJNIMain(HSOLIB hSoLibrary)
 {
   JNI_OnLoad pfnJNIOnload = solibGetProcAddress(hSoLibrary, "JNI_OnLoad");
-  debugMemoryDump(0x98000000, 0xA60000);
+  debugMemoryDump(0x98000000, 0x7C8000);
 
-  // pfnJNIOnload(&jniInvokeEnv, NULL);
-  // native(&jniNativeEnv, false, true);
+  pfnJNIOnload(&jniInvokeEnv, NULL);
 }

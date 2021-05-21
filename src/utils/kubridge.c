@@ -6,7 +6,7 @@
 int kuKernelCpuUnrestrictedMemset(void *dst, int val, size_t len)
 {
   void *lpZeroMemory = malloc(len);
-  memset(lpZeroMemory, 0x00, len);
+  memset(lpZeroMemory, val, len);
   kuKernelCpuUnrestrictedMemcpy(dst, lpZeroMemory, len);
   free(lpZeroMemory);
 }

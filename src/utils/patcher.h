@@ -11,6 +11,15 @@ typedef struct BRIDGEFUNC
 
 } BRIDGEFUNC, *LPBRIDGEFUNC;
 
+typedef struct PATCHADDRESS
+{
+  uintptr_t nPatchOffset;
+  uint64_t nPatchValue;
+  uint8_t nPatchLength;
+} PATCHADDRESS, *LPPATCHADDRESS;
+
 void patchSymbols(HSOLIB hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bridgeSize);
+
+void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patchSize);
 
 #endif /* _UTILS_PATCHER_H_ */

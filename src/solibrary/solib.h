@@ -48,6 +48,15 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
 void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc);
 
 /**
+ * Get library image base
+ *
+ * @param hSoLibrary Library instance handle
+ *
+ * @return library image base
+ */
+void *solibGetLibraryImageBase(HSOLIB hSoLibrary);
+
+/**
  * Find loaded library by name
  *
  * @param szLibraryName Library instance handle

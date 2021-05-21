@@ -164,7 +164,7 @@ static struct JNINativeInterface jniNativeEnv =
 void bridgeCallJNIMain(HSOLIB hSoLibrary)
 {
   JNI_OnLoad pfnJNIOnload = solibGetProcAddress(hSoLibrary, "JNI_OnLoad");
-  debugMemoryDump(0x98000000, 0x7C8000);
+  debugMemoryDump(0x98000000, 0x7F7510);
 
   pfnJNIOnload(&jniInvokeEnv, NULL);
 }

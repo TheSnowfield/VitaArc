@@ -76,6 +76,9 @@ int main()
 
     // Call JNI Main
     bridgeCallJNIMain(hLibCocos2dx);
+
+    // Init Cocos2dx
+    bridgeCocos2DXRendererNativeInit(hLibCocos2dx, 960, 544);
   }
 
 ExitProgram:

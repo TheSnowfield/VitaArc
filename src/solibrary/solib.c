@@ -128,7 +128,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     logI(TAG, "  Available slots: %d", MAX_LIBRARY - libraryLoaded);
 
     // Print debug information
-    // solibDebugPrintElfTable(lpInternal);
+    solibDebugPrintElfTable(lpInternal);
 
     // Process section
     solibLoadSections(lpInternal);
@@ -266,7 +266,6 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
         (strcmp(lpszSectionName, ".rel.plt") == 0))
     {
       Elf32_Rel *lpSectionBase = lpImageBase + lpElfSectionBase[i].sh_addr;
-      logV(TAG, "lpSectionBase %d", lpSectionBase);
 
       // Process section relocation
       for (int j = 0; j < lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
@@ -275,10 +274,10 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
         uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionBase[j].r_offset;
         uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
 
-        logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
-             lpDynStrTab + lpRelocateInfo->st_name,
-             *lpRelocateAddress, OFFRST(lpRelocateInfo->st_value),
-             nRelocateType, lpRelocateInfo->st_shndx);
+        // logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
+        //      lpDynStrTab + lpRelocateInfo->st_name,
+        //      *lpRelocateAddress, OFFRST(lpRelocateInfo->st_value),
+        //      nRelocateType, lpRelocateInfo->st_shndx);
 
         switch (nRelocateType)
         {
@@ -303,7 +302,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
           // return false;
         }
 
-        logV(TAG, "Relocated to [0x%08X]\n", (*lpRelocateAddress));
+        // logV(TAG, "Relocated to [0x%08X]\n", (*lpRelocateAddress));
       }
     }
   }
@@ -472,6 +471,15 @@ void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDes
   }
 
   return NULL;
+}
+
+void *solibGetLibraryImageBase(HSOLIB hSoLibrary)
+{
+    if (!hSoLibrary)
+    return NULL;
+
+  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+  return lpInternal->lpLibraryImageBase;
 }
 
 HSOLIB solibFindLibrary(const char *szLibraryName)

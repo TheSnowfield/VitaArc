@@ -8,8 +8,14 @@
 extern int *__errno _PARAMS((void));
 extern void *__cxa_atexit;
 extern void *__cxa_finalize;
-extern void *__stack_chk_fail;
-extern void *__stack_chk_guard;
+// extern void *__stack_chk_fail;
+// extern void *__stack_chk_guard;
+
+void __stack_chk_fail()
+{
+  logF(TAG, "__stack_chk_fail hited. Program exit.");
+  exit(-1);
+}
 
 void __check_failed()
 {

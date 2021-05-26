@@ -165,7 +165,7 @@ void bridgeCallJNIMain(HSOLIB hSoLibrary)
 {
   JNI_OnLoad pfnJNIOnload = solibGetProcAddress(hSoLibrary, "JNI_OnLoad");
   debugMemoryDump("ux0:vitaarc/memdump.bin", 0x98000000, 0xA60AA0);
-  debugMemoryDump("ux0:vitaarc/vitaarc.bin", 0x81000000, 0x000100);
+  // debugMemoryDump("ux0:vitaarc/vitaarc.bin", 0x81000000, 0x000100);
 
   pfnJNIOnload(&jniInvokeEnv, NULL);
 }

@@ -4,12 +4,12 @@
 #include <stddef.h>
 #include <sys/unistd.h>
 #include <logcat/logcat.h>
+#include <psp2/rtc.h>
 
 extern int *__errno _PARAMS((void));
 extern void *__cxa_atexit;
 extern void *__cxa_finalize;
-// extern void *__stack_chk_fail;
-// extern void *__stack_chk_guard;
+static const uint32_t __stack_chk_guard = 0xDEADBEEF;
 
 void __stack_chk_fail()
 {
@@ -20,6 +20,12 @@ void __stack_chk_fail()
 void __check_failed()
 {
   logF(TAG, "__check_failed hited. Program exit.");
+  exit(-1);
+}
+
+void __assert2()
+{
+  logF(TAG, "__assert2 hited. Program exit.");
   exit(-1);
 }
 
@@ -138,7 +144,15 @@ int fchown(int fildes, uid_t owner, gid_t group)
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
-  logW(TAG, "Unsupported symbol 'clock_gettime' called.");
+  logV(TAG, "Called clock_gettime(%d, 0x%08X)", clock_id, tp);
+
+  SceRtcTick sRtcTick;
+  sceRtcGetCurrentTick(&sRtcTick);
+  {
+    tp->tv_nsec = 0;
+    tp->tv_sec = sRtcTick.tick;
+    logV(TAG, "    Tick: %ld", sRtcTick.tick);
+  }
 }
 
 int dladdr(void *addr, void *info)

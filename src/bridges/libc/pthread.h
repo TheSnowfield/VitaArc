@@ -1,0 +1,5 @@
+#ifndef _BRIDGE_LIBC_PTHREAD_H_
+#define _BRIDGE_LIBC_PTHREAD_H_
+
+
+#endif /* _BRIDGE_LIBC_PTHREAD_H_ */

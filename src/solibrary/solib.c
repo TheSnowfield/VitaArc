@@ -163,6 +163,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
   uintptr_t lpLinearAddressBase = 0x98000000;
   uintptr_t lpLinearAddress = lpLinearAddressBase;
+  uintptr_t lpLastBlockEnd = 0;
 
   // Load program segments
   for (int i = 0; i < lpElfHeader->e_phnum; ++i)
@@ -170,9 +171,23 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     // If this section is loadable
     if (lpElfProgramBase[i].p_type == PT_LOAD)
     {
+
+      uint32_t nBlockGapSize = 0;
+
+      // Becareful the gap
+      if (lpLastBlockEnd)
+      {
+        uintptr_t lpCurrentBlockStart =
+            lpLinearAddressBase + lpElfProgramBase[i].p_vaddr;
+
+        nBlockGapSize = lpCurrentBlockStart - lpLastBlockEnd;
+
+        logV(TAG, "Block gap size %d", nBlockGapSize);
+      }
+
       // Calculate aligned block size
       uint32_t nBlockSize =
-          MEMALIGN(lpElfProgramBase[i].p_memsz, lpElfProgramBase[i].p_align);
+          MEMALIGN(lpElfProgramBase[i].p_memsz + nBlockGapSize, lpElfProgramBase[i].p_align);
 
       SceUID nBlockID = NULL;
       SceKernelAllocMemBlockKernelOpt sAllocOption = {0};
@@ -219,6 +234,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
       // Next segment
       lpLinearAddress += nBlockSize;
+      lpLastBlockEnd = lpElfProgramBase[i].p_vaddr + nBlockSize;
 
       logV(TAG, "Load segment: [0x%08X]. Length %d.",
            lpElfProgramBase[i].p_vaddr, lpElfProgramBase[i].p_filesz);
@@ -475,7 +491,7 @@ void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDes
 
 void *solibGetLibraryImageBase(HSOLIB hSoLibrary)
 {
-    if (!hSoLibrary)
+  if (!hSoLibrary)
     return NULL;
 
   LPSOINTERNAL lpInternal = _H(hSoLibrary);

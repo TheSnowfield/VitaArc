@@ -101,6 +101,7 @@ target_link_libraries(${PROJECT_NAME}
   SceTouch_stub
   SceVshBridge_stub
   SceNetCtl_stub
+  SceRtc_stub
 )
 
 ## Create Vita files

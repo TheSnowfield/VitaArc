@@ -47,4 +47,5 @@ add_library(${PROJECT_NAME}
   bionic/__vsnprintf_chk.cpp
   bionic/__vsprintf_chk.cpp
   libc.c
+  pthread.c
 )

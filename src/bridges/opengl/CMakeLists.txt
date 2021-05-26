@@ -35,4 +35,5 @@ link_directories(
 # Add all the files needed to compile here
 add_library(${PROJECT_NAME}
   opengl.c
+  openglimpl.c
 )

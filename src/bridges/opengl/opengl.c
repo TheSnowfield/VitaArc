@@ -103,6 +103,7 @@ static const BRIDGEFUNC BRIDGE_GL[] =
         {"glUseProgram", (uintptr_t)&glUseProgram},
         {"glVertexAttribPointer", (uintptr_t)&glVertexAttribPointer},
         {"glViewport", (uintptr_t)&glViewport},
+        {"eglGetProcAddress", (uintptr_t)&eglGetProcAddress}
 };
 
 void bridgePatchGL(HSOLIB lpSoLibrary)

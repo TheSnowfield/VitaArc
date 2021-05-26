@@ -34,7 +34,7 @@ static const BRIDGEFUNC BRIDGE_LIBC[] =
   {"__cxa_atexit", (uintptr_t)&__cxa_atexit},
   {"__cxa_finalize", (uintptr_t)&__cxa_finalize},
   {"__errno", (uintptr_t)&__errno},
-  // {"__gnu_Unwind_Find_exidx", (uintptr_t)&__gnu_Unwind_Find_exidx},
+  {"__gnu_Unwind_Find_exidx", (uintptr_t)&__gnu_Unwind_Find_exidx},
   {"__memcpy_chk", (uintptr_t)&__memcpy_chk},
   {"__memset_chk", (uintptr_t)&__memset_chk},
   {"__mmap2", (uintptr_t)&mmap2},

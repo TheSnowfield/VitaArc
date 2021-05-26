@@ -155,16 +155,16 @@ int _pthread_cond_destroy(pthread_cond_t *cond)
 int _pthread_cond_wait(pthread_cond_t *cond,
                        pthread_mutex_t *mutex)
 {
-  logV(TAG, "_pthread_cond_wait(%d, %d)", cond, mutex);
-  return pthread_cond_wait(cond, mutex);
+  logV(TAG, "_pthread_cond_wait(%d, %d)", cond, _MUTEX(mutex));
+  return pthread_cond_wait(cond, &_MUTEX(mutex));
 }
 
 int _pthread_cond_timedwait(pthread_cond_t *cond,
                             pthread_mutex_t *mutex,
                             const struct timespec *abstime)
 {
-  logV(TAG, "_pthread_cond_timedwait(%d, %d, %d)", cond, mutex, abstime);
-  return pthread_cond_timedwait(cond, mutex, abstime);
+  logV(TAG, "_pthread_cond_timedwait(%d, %d, %d)", cond, _MUTEX(mutex), abstime);
+  return pthread_cond_timedwait(cond, &_MUTEX(mutex), abstime);
 }
 
 int _pthread_cond_signal(pthread_cond_t *cond)

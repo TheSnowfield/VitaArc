@@ -153,6 +153,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
     tp->tv_sec = sRtcTick.tick;
     logV(TAG, "    Tick: %ld", sRtcTick.tick);
   }
+
+  return 0;
 }
 
 int dladdr(void *addr, void *info)
@@ -191,6 +193,12 @@ void __fortify_chk_fail(const char *msg, uint32_t event_tag)
 {
   logF("bionic", msg);
   exit(-1);
+}
+
+uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount)
+{
+  logW(TAG, "called '__gnu_Unwind_Find_exidx(0x%08X, 0x%08X)'.", pc, pcount);
+  return NULL;
 }
 
 #endif /* _BRIDGE_LIBC_IMPL_H_ */

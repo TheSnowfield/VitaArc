@@ -24,4 +24,10 @@ void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patc
 
 void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue);
 
+void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue);
+
+void patchThumb(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue);
+
+void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue);
+
 #endif /* _UTILS_PATCHER_H_ */

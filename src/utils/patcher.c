@@ -62,3 +62,33 @@ void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
   kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
                                 &nPatchValue, 4);
 }
+
+void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
+{
+  // Get image base
+  uintptr_t lpImageBase = 0x98000000;
+  {
+    if (!lpImageBase)
+    {
+      logE(TAG, "Patch image base is NULL");
+      return;
+    }
+  }
+
+  // Calculate address
+  uintptr_t lpPatchAddress = lpImageBase + nPatchOffset;
+
+  // Apply patch
+  kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
+                                &nPatchValue, 2);
+}
+
+void patchThumb(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
+{
+  return patchUint16(hSoLibrary, nPatchOffset, nPatchValue);
+}
+
+void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
+{
+  return patchUint32(hSoLibrary, nPatchOffset, nPatchValue);
+}

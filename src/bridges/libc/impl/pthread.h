@@ -1,5 +1,5 @@
-#ifndef _BRIDGE_LIBC_PTHREAD_H_
-#define _BRIDGE_LIBC_PTHREAD_H_
+#ifndef _BRIDGE_LIBC_PTHREADIMPL_H_
+#define _BRIDGE_LIBC_PTHREADIMPL_H_
 
 #include <pthread.h>
 
@@ -63,4 +63,4 @@ int _pthread_cond_broadcast(pthread_cond_t *cond);
 
 int _pthread_mutexattr_settype(pthread_mutexattr_t *attr, int kind);
 
-#endif /* _BRIDGE_LIBC_PTHREAD_H_ */
+#endif /* _BRIDGE_LIBC_PTHREADIMPL_H_ */

@@ -1,15 +1,6 @@
-#ifndef _BRIDGE_LIBC_IMPL_H_
-#define _BRIDGE_LIBC_IMPL_H_
-
-#include <stddef.h>
-#include <sys/unistd.h>
-#include <logcat/logcat.h>
-#include <psp2/rtc.h>
-
-extern int *__errno _PARAMS((void));
-extern void *__cxa_atexit;
-extern void *__cxa_finalize;
-static const uint32_t __stack_chk_guard = 0xDEADBEEF;
+#include "../../../logcat/logcat.h"
+#include "../../../common/define.h"
+#include "libc.h"
 
 void __stack_chk_fail()
 {
@@ -33,113 +24,134 @@ void *memmem(const void *haystack, size_t haystacklen,
              const void *needle, size_t needlelen)
 {
   logW(TAG, "Unsupported symbol 'memmem' called.");
+  return NULL;
 }
 
 int mkdir(const char *path, mode_t mode)
 {
   logW(TAG, "Unsupported symbol 'mkdir' called.");
+  return 0;
 }
 
 _off64_t lseek64(int fd, _off64_t offset, int whence)
 {
   logW(TAG, "Unsupported symbol 'lseek64' called.");
+  return 0;
 }
 
-int lstat(const char *restrict path, struct stat *restrict buf)
+int lstat(const char *path, struct stat *buf)
 {
   logW(TAG, "Unsupported symbol 'lstat' called.");
+  return 0;
 }
 
 int fsync(int fildes)
 {
   logW(TAG, "Unsupported symbol 'fsync' called.");
+  return 0;
 }
 
 int ftruncate64(int fildes, _off64_t length)
 {
   logW(TAG, "Unsupported symbol 'ftruncate64' called.");
+  return 0;
 }
 
 const char *gai_strerror(int ecode)
 {
   logW(TAG, "Unsupported symbol 'gai_strerror' called.");
+  return NULL;
 }
 
 char *getcwd(char *buf, size_t size)
 {
   logW(TAG, "Unsupported symbol 'getcwd' called.");
+  return NULL;
 }
 
 uid_t geteuid(void)
 {
   logW(TAG, "Unsupported symbol 'geteuid' called.");
+  return 0;
 }
 
 int ioctl(int fildes, int request, ...)
 {
   logW(TAG, "Unsupported symbol 'ioctl' called.");
+  return 0;
 }
 
 int rmdir(const char *path)
 {
   logW(TAG, "Unsupported symbol 'rmdir' called.");
+  return 0;
 }
 
 long sysconf(int name)
 {
   logW(TAG, "Unsupported symbol 'sysconf' called.");
+  return 0;
 }
 
 intmax_t strtoimax(const char *nptr, char **endptr, int base)
 {
   logW(TAG, "Unsupported symbol 'strtoimax' called.");
+  return 0;
 }
 
 uintmax_t strtoumax(const char *nptr, char **endptr, int base)
 {
   logW(TAG, "Unsupported symbol 'strtoumax' called.");
+  return 0;
 }
 
-ssize_t readlink(const char *restrict path,
-                 char *restrict buf, size_t bufsize)
+ssize_t readlink(const char *path, char *buf, size_t bufsize)
 {
   logW(TAG, "Unsupported symbol 'readlink' called.");
+  return 0;
 }
 
 long syscall(long number, ...)
 {
   logW(TAG, "Unsupported symbol 'syscall' called.");
+  return 0;
 }
 
 int utimes(const char *path, const struct timeval times[2])
 {
   logW(TAG, "Unsupported symbol 'utimes' called.");
+  return 0;
 }
 
 void *mremap(void *old_address, size_t old_size,
              size_t new_size, int flags, ... /* void *new_address */)
 {
   logW(TAG, "Unsupported symbol 'mremap' called.");
+  return NULL;
 }
 
 int munmap(void *addr, size_t length)
 {
   logW(TAG, "Unsupported symbol 'munmap' called.");
+  return 0;
 }
 
 int nanosleep(const struct timespec *req, struct timespec *rem)
 {
   logW(TAG, "Unsupported symbol 'nanosleep' called.");
+  return 0;
 }
 
 int fchmod(int fildes, mode_t mode)
 {
   logW(TAG, "Unsupported symbol 'fchmod' called.");
+  return 0;
 }
 
 int fchown(int fildes, uid_t owner, gid_t group)
 {
   logW(TAG, "Unsupported symbol 'fchown' called.");
+  return 0;
 }
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
@@ -160,26 +172,31 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 int dladdr(void *addr, void *info)
 {
   logW(TAG, "Unsupported symbol 'dladdr' called.");
+  return 0;
 }
 
 int dlclose(void *handle)
 {
   logW(TAG, "Unsupported symbol 'dlclose' called.");
+  return 0;
 }
 
 char *dlerror(void)
 {
   logW(TAG, "Unsupported symbol 'dlerror' called.");
+  return NULL;
 }
 
 void *dlopen(const char *filename, int flags)
 {
   logW(TAG, "Unsupported symbol 'dlopen' called.");
+  return NULL;
 }
 
-void *dlsym(void *restrict handle, const char *restrict symbol)
+void *dlsym(void *handle, const char *symbol)
 {
   logW(TAG, "Unsupported symbol 'dlsym' called.");
+  return NULL;
 }
 
 void *mmap2(unsigned long addr, unsigned long length,
@@ -187,6 +204,7 @@ void *mmap2(unsigned long addr, unsigned long length,
             unsigned long fd, unsigned long pgoffset)
 {
   logW(TAG, "Unsupported symbol 'mmap2' called.");
+  return NULL;
 }
 
 void __fortify_chk_fail(const char *msg, uint32_t event_tag)
@@ -198,7 +216,5 @@ void __fortify_chk_fail(const char *msg, uint32_t event_tag)
 uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount)
 {
   logW(TAG, "called '__gnu_Unwind_Find_exidx(0x%08X, 0x%08X)'.", pc, pcount);
-  return NULL;
+  return 0;
 }
-
-#endif /* _BRIDGE_LIBC_IMPL_H_ */

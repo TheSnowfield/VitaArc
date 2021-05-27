@@ -25,9 +25,9 @@
 #include <logcat/logcat.h>
 
 #include "libc.h"
-#include "libcimpl.h"
-#include "bionic/bionic.h"
-#include "pthread.h"
+#include "impl/libc.h"
+#include "impl/pthread.h"
+#include "impl/bionic/bionic.h"
 
 static const BRIDGEFUNC BRIDGE_LIBC[] =
 {

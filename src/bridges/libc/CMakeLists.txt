@@ -22,7 +22,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-int-conversion")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # Add any additional library paths here
@@ -39,13 +39,14 @@ include_directories(
 ## Build and link
 # Add all the files needed to compile here
 add_library(${PROJECT_NAME}
-  bionic/__memcpy_chk.cpp
-  bionic/__memmove_chk.cpp
-  bionic/__memset_chk.cpp
-  bionic/__strchr_chk.cpp
-  bionic/__strlen_chk.cpp
-  bionic/__vsnprintf_chk.cpp
-  bionic/__vsprintf_chk.cpp
+  impl/bionic/__memcpy_chk.cpp
+  impl/bionic/__memmove_chk.cpp
+  impl/bionic/__memset_chk.cpp
+  impl/bionic/__strchr_chk.cpp
+  impl/bionic/__strlen_chk.cpp
+  impl/bionic/__vsnprintf_chk.cpp
+  impl/bionic/__vsprintf_chk.cpp
+  impl/libc.c
+  impl/pthread.c
   libc.c
-  pthread.c
 )

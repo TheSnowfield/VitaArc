@@ -34,5 +34,8 @@ link_directories(
 ## Build and link
 # Add all the files needed to compile here
 add_library(${PROJECT_NAME}
+  impl/cocos.c
+  impl/jni.c
+  impl/jvm.c
   jni.c
 )

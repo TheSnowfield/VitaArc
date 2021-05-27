@@ -16,6 +16,11 @@ void bridgeCocos2DXRendererNativeInit(HSOLIB hSoLibrary,
 void bridgePatchCocos2DX(HSOLIB hSoLibrary)
 {
   // cocos2d::experimental::FrameBuffer::_frameBuffers
+  // read nullptr
   void *lpPatchAddress = malloc(4);
   patchUint32(hSoLibrary, 0xA5F750, lpPatchAddress);
+
+  // cocos2d::JniHelper::deleteLocalRefs [BLX LR]
+  // __next_prime underflow exception in unordered_map
+  patchARM(hSoLibrary, 0x393B68, 0xE12FFF3E);
 }

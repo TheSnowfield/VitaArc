@@ -154,5 +154,11 @@ jint RegisterNatives(JNIEnv *jniEnv, jclass a1, const JNINativeMethod *a2, jint 
 jstring NewString(JNIEnv *jniEnv, const jchar *a1, jsize a2)
 {
   logV(TAG, "Called NewString(0x%08X, \"%s\", %d)", jniEnv, a1, a2);
+
+  for (int i = 0; i < a2 * 2; ++i)
+  {
+    logPrintf("%02X", *((char *)a1 + i));
+  }
+
   return (jstring)a1;
 }

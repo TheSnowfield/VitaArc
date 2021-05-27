@@ -3,7 +3,7 @@
 #include <logcat/logcat.h>
 
 #include "opengl.h"
-#include "openglimpl.h"
+#include "impl/opengl.h"
 
 static const BRIDGEFUNC BRIDGE_GL[] =
 {

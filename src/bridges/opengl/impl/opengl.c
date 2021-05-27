@@ -1,7 +1,8 @@
-#include "../../common/define.h"
-#include "../../logcat/logcat.h"
-#include "openglimpl.h"
 #include <vitaGL.h>
+
+#include "../../../common/define.h"
+#include "../../../logcat/logcat.h"
+#include "opengl.h"
 
 void glBindRenderbuffer(GLenum target, GLuint renderbuffer)
 {

@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 #include <pthread.h>
 #include <ctype.h>
 #include <wchar.h>
@@ -85,7 +85,7 @@ static const BRIDGEFUNC BRIDGE_LIBC[] =
   {"floor", (uintptr_t)&floor},
   {"floorf", (uintptr_t)&floorf},
   {"fmodf", (uintptr_t)&fmodf},
-  {"fopen", (uintptr_t)&fopen},
+  {"fopen", (uintptr_t)&_fopen},
   {"fprintf", (uintptr_t)&fprintf},
   {"fputc", (uintptr_t)&fputc},
   {"fread", (uintptr_t)&fread},

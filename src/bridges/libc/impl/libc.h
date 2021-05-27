@@ -1,6 +1,7 @@
 #ifndef _BRIDGE_LIBC_LIBCIMPL_H_
 #define _BRIDGE_LIBC_LIBCIMPL_H_
 
+#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -83,5 +84,7 @@ void *mmap2(unsigned long addr, unsigned long length,
 void __fortify_chk_fail(const char *msg, uint32_t event_tag);
 
 uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount);
+
+FILE *_fopen(const char *_name, const char *_type);
 
 #endif /* _BRIDGE_LIBC_LIBCIMPL_H_ */

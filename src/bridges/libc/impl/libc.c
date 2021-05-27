@@ -218,3 +218,9 @@ uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount)
   logW(TAG, "called '__gnu_Unwind_Find_exidx(0x%08X, 0x%08X)'.", pc, pcount);
   return 0;
 }
+
+FILE *_fopen(const char *_name, const char *_type)
+{
+  logW(TAG, "Called _fopen(%s, %s)", _name, _type);
+  return fopen(_name, _type);
+}

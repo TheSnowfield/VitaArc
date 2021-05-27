@@ -3,7 +3,7 @@
 #include <logcat/logcat.h>
 
 #include "eabi.h"
-#include "eabiimpl.h"
+#include "impl/eabi.h"
 
 static const BRIDGEFUNC BRIDGE_EABI[] =
 {

@@ -20,19 +20,6 @@
 #include "logcat/logcat.h"
 #include "common/define.h"
 
-void setupVitaGL()
-{
-  // Initial vitagl
-  vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE, SHARK_ENABLE);
-  vglSetVDMBufferSize(128 * 1024);         // default 128 * 1024
-  vglSetVertexBufferSize(2 * 1024 * 1024); // default 2 * 1024 * 1024
-  vglSetFragmentBufferSize(512 * 1024);    // default 512 * 1024
-  vglSetUSSEBufferSize(16 * 1024);         // default 16 * 1024
-  vglSetVertexPoolSize(48 * 1024 * 1024);
-  vglInitExtended(0, 960, 544, 24 * 1024 * 1024, SCE_GXM_MULTISAMPLE_NONE);
-  vglUseVram(GL_TRUE);
-}
-
 void setupPerformanceProfile()
 {
   scePowerSetArmClockFrequency(444);
@@ -43,10 +30,6 @@ void setupPerformanceProfile()
 
 int main()
 {
-  // Setup environment
-  setupPerformanceProfile();
-  setupVitaGL();
-
   // Begin log
   logBegin(PATH_TO_LOGFILE);
   {
@@ -77,8 +60,23 @@ int main()
     // Call JNI Main
     bridgeCallJNIMain(hLibCocos2dx);
 
-    // Init Cocos2dx
-    bridgeCocos2DXRendererNativeInit(hLibCocos2dx, 960, 544);
+    // Initial vitagl
+    vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE, SHARK_ENABLE);
+    vglSetVDMBufferSize(128 * 1024);         // default 128 * 1024
+    vglSetVertexBufferSize(2 * 1024 * 1024); // default 2 * 1024 * 1024
+    vglSetFragmentBufferSize(512 * 1024);    // default 512 * 1024
+    vglSetUSSEBufferSize(16 * 1024);         // default 16 * 1024
+    vglSetVertexPoolSize(48 * 1024 * 1024);
+    vglInitExtended(0, 960, 544, 24 * 1024 * 1024, SCE_GXM_MULTISAMPLE_NONE);
+    vglUseVram(GL_TRUE);
+    {
+      // glClear(GL_COLOR_BUFFER_BIT);
+      // glClearColor(1, 1, 1, 0.5);
+      // vglSwapBuffers(GL_FALSE);
+
+      // Init Cocos2dx
+      bridgeCocos2DXRendererNativeInit(hLibCocos2dx, 960, 544);
+    }
   }
 
 ExitProgram:

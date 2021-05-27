@@ -22,4 +22,6 @@ void patchSymbols(HSOLIB hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bri
 
 void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patchSize);
 
+void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue);
+
 #endif /* _UTILS_PATCHER_H_ */

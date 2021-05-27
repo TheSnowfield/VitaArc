@@ -42,3 +42,23 @@ void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patc
       logW(TAG, "Patch length over 8 bytes.");
   }
 }
+
+void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
+{
+  // Get image base
+  uintptr_t lpImageBase = 0x98000000;
+  {
+    if (!lpImageBase)
+    {
+      logE(TAG, "Patch image base is NULL");
+      return;
+    }
+  }
+
+  // Calculate address
+  uintptr_t lpPatchAddress = lpImageBase + nPatchOffset;
+
+  // Apply patch
+  kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
+                                &nPatchValue, 4);
+}

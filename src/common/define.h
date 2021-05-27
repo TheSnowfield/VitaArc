@@ -15,6 +15,9 @@
 
 #define TAG ((__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__))
 
-#define BREAKPOINT asm volatile("str r0, [lr]")
+#define BREAKPOINT(x) \
+  static int _trigger_count = 0;   \
+  if (++_trigger_count == x)       \
+  asm volatile("str r0, [lr]")
 
 #endif /* _COMMON_DEFINE_H_ */

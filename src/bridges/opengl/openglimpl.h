@@ -19,4 +19,18 @@ void glPixelStorei(GLenum pname, GLint param);
 
 void *eglGetProcAddress(char const *procname);
 
+GLboolean glIsBuffer(GLuint buffer);
+
+GLboolean glIsRenderbuffer(GLuint renderbuffer);
+
+void glGenVertexArrays(GLsizei n, GLuint *arrays);
+
+void glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
+
+void glBindVertexArray(GLuint array);
+
+void *glMapBuffer(GLenum target, GLenum access);
+
+GLboolean glUnmapBuffer(GLenum target);
+
 #endif /* _BRIDGE_OPENGL_IMPL_H_ */

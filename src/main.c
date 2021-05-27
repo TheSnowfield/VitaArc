@@ -12,8 +12,7 @@
 #include "bridges/libc/libc.h"
 #include "bridges/opengl/opengl.h"
 #include "bridges/cocos2dx/cocos2dx.h"
-#include "bridges/android/ndk.h"
-#include "bridges/android/log.h"
+#include "bridges/android/android.h"
 #include "bridges/eabi/eabi.h"
 
 #include "solibrary/solib.h"
@@ -51,8 +50,7 @@ int main()
 
     // Setup bridges
     bridgePatchEABI(hLibCocos2dx);
-    bridgePatchAndroidNDK(hLibCocos2dx);
-    bridgePatchAndroidLog(hLibCocos2dx);
+    bridgePatchAndroid(hLibCocos2dx);
     bridgePatchLibC(hLibCocos2dx);
     bridgePatchGL(hLibCocos2dx);
     bridgePatchCocos2DX(hLibCocos2dx);

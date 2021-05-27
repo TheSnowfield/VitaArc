@@ -34,6 +34,7 @@ link_directories(
 ## Build and link
 # Add all the files needed to compile here
 add_library(${PROJECT_NAME}
-  log.c
-  ndk.c
+  impl/log.c
+  impl/assetmgr.c
+  android.c
 )

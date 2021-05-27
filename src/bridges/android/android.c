@@ -1,12 +1,16 @@
-#include <common/define.h>
-#include <utils/patcher.h>
-#include <logcat/logcat.h>
+#include <stdarg.h>
+#include <ctype.h>
 
-#include "ndk.h"
-#include "ndkimpl.h"
+#include "../../common/define.h"
+#include "../../utils/patcher.h"
+#include "../../logcat/logcat.h"
+#include "impl/assetmgr.h"
+#include "impl/log.h"
 
-static const BRIDGEFUNC BRIDGE_ANDROIDNDK[] =
+static const BRIDGEFUNC BRIDGE_ANDROID[] =
 {
+  {"__android_log_print", (uintptr_t)&__android_log_print},
+  {"__android_log_write", (uintptr_t)&__android_log_write},
   {"AAssetDir_close", (uintptr_t)&AAssetDir_close},
   {"AAssetDir_getNextFileName", (uintptr_t)&AAssetDir_getNextFileName},
   {"AAssetManager_fromJava", (uintptr_t)&AAssetManager_fromJava},
@@ -19,8 +23,8 @@ static const BRIDGEFUNC BRIDGE_ANDROIDNDK[] =
   {"AAsset_read", (uintptr_t)&AAsset_read}
 };
 
-void bridgePatchAndroidNDK(HSOLIB hSoLibrary)
+void bridgePatchAndroid(HSOLIB hSoLibrary)
 {
-  patchSymbols(hSoLibrary, BRIDGE_ANDROIDNDK,
-               sizeof(BRIDGE_ANDROIDNDK) / sizeof(BRIDGEFUNC));
+  patchSymbols(hSoLibrary, BRIDGE_ANDROID,
+               sizeof(BRIDGE_ANDROID) / sizeof(BRIDGEFUNC));
 }

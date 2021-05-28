@@ -12,6 +12,8 @@
 #define LIBRARY_LIBFMOD_PROVIDER "ux0:vitaarc/library/armeabi-v7a/libfmodProvider.so"
 
 #define PATH_TO_LOGFILE "ux0:vitaarc/boot.log"
+#define PATH_TO_DATA "ux0:vitaarc/persistent/data/"
+#define PATH_TO_OBB "ux0:vitaarc/persistent/obb/"
 
 #define TAG ((__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__))
 

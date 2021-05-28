@@ -155,7 +155,7 @@ static const BRIDGEFUNC BRIDGE_LIBC[] =
   {"perror", (uintptr_t)&perror},
   {"pow", (uintptr_t)&pow},
   {"powf", (uintptr_t)&powf},
-  {"printf", (uintptr_t)&printf},
+  {"printf", (uintptr_t)&logPrintf},
   {"pthread_cond_broadcast", (uintptr_t)&_pthread_cond_broadcast},
   {"pthread_cond_destroy", (uintptr_t)&_pthread_cond_destroy},
   {"pthread_cond_signal", (uintptr_t)&_pthread_cond_signal},

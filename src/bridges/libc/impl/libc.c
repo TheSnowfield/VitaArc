@@ -1,3 +1,6 @@
+#include <string.h>
+#include <wchar.h>
+
 #include "../../../logcat/logcat.h"
 #include "../../../common/define.h"
 #include "libc.h"
@@ -221,6 +224,23 @@ uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount)
 
 FILE *_fopen(const char *_name, const char *_type)
 {
-  logW(TAG, "Called _fopen(%s, %s)", _name, _type);
+  logW(TAG, "Called _fopen(\"%s\", \"%s\")", _name, _type);
+
+  // Redirect /data/data/
+  if (strstr(_name, "/data/data/") == _name)
+  {
+    char szRedirect[256] = {0};
+    sprintf(szRedirect, "%s%s", PATH_TO_DATA, _name + 11);
+
+    logI(TAG, "  Redirect fopen path to \"%s\"", szRedirect);
+    return fopen(szRedirect, _type);
+  }
+
   return fopen(_name, _type);
+}
+
+size_t _fread(void *_buf, size_t _size, size_t _n, FILE *_file)
+{
+  logW(TAG, "Called _fread(0x%08X, %d, %d, 0x%08X)", _buf, _size, _n, _file);
+  return fread(_buf, _size, _n, _file);
 }

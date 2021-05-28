@@ -5,19 +5,9 @@
 #include "../../../logcat/logcat.h"
 #include "../../../common/define.h"
 #include "../../../utils/debug.h"
+#include "../../../utils/string.h"
 #include "cocos.h"
 #include "jni.h"
-
-size_t jcharlen(jchar *_str)
-{
-  if (!_str)
-    return -1;
-
-  for (jchar *_s = _str;; ++_s)
-    if (*(_s) == 0) return _s - _str;
-
-  return -1;
-}
 
 jint GetVersion(JNIEnv *jniEnv)
 {
@@ -140,7 +130,7 @@ const jchar *GetStringChars(JNIEnv *jniEnv, jstring a1, jboolean *a2)
 jsize GetStringLength(JNIEnv *jniEnv, jstring a1)
 {
   logV(TAG, "Called GetStringLength(0x%08X,\"%s\")", jniEnv, a1);
-  return jcharlen((jchar *)a1);
+  return utilUcharLen((jchar *)a1);
 }
 
 const char *GetStringUTFChars(JNIEnv *jniEnv, jstring a1, jboolean *j)

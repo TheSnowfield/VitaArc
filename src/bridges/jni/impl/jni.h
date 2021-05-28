@@ -7,6 +7,7 @@ typedef enum METHODID
 {
   UNKNOWN = 0,
   GET_COCOS2DX_PACKAGE_NAME,
+  GET_COCOS2DX_WRITABLE_PATH,
   GET_CURRENT_LANGUAGE,
   GET_INTEGER_FOR_KEY,
   GET_STRING_FOR_KEY,
@@ -23,6 +24,7 @@ typedef struct JNIMETHOD
 static const JNIMETHOD JNI_METHODS[] =
 {
   {"getCocos2dxPackageName", GET_COCOS2DX_PACKAGE_NAME},
+  {"getCocos2dxWritablePath", GET_COCOS2DX_WRITABLE_PATH},
   {"getCurrentLanguage", GET_CURRENT_LANGUAGE},
   {"getIntegerForKey", GET_INTEGER_FOR_KEY},
   {"getStringForKey", GET_STRING_FOR_KEY},

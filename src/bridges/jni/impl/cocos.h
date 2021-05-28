@@ -1,12 +1,17 @@
 #ifndef _BRIDGE_JNI_COCOSIMPL_H_
 #define _BRIDGE_JNI_COCOSIMPL_H_
 
-char* getCocos2dxPackageName();
-
-char* getCurrentLanguage();
+#include <wchar.h>
+#include "android/jni.h"
 
 void loadClassMethod();
 
-char *getStringForKey(char *szKey, char *szDefaultValue);
+jstring getStringForKey(char *szKey, char *szDefaultValue);
+
+jstring getCocos2dxPackageName();
+
+jstring getCocos2dxWritablePath();
+
+jstring getCurrentLanguage();
 
 #endif /* _BRIDGE_JNI_COCOSIMPL_H_ */

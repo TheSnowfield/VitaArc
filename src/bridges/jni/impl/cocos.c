@@ -1,26 +1,36 @@
 #include "../../../common/define.h"
 #include "../../../logcat/logcat.h"
+
+#include "android/jni.h"
 #include "cocos.h"
 
-char *getCocos2dxPackageName()
-{
-  logV(TAG, "Called getCocos2dxPackageName()");
-  return "moe.low.arc";
-}
-
-char *getCurrentLanguage()
-{
-  logV(TAG, "Called getCurrentLanguage()");
-  return "en";
-}
+#define JSTRING(x) (jstring) u##x
 
 void loadClassMethod()
 {
   logV(TAG, "Called loadClassMethod()");
 }
 
-char *getStringForKey(char *szKey, char *szDefaultValue)
+jstring getStringForKey(char *szKey, char *szDefaultValue)
 {
   logV(TAG, "Called getStringForKey()");
-  return "NULL";
+  return JSTRING("NULL");
+}
+
+jstring getCocos2dxPackageName()
+{
+  logV(TAG, "Called getCocos2dxPackageName()");
+  return JSTRING("moe.low.arc");
+}
+
+jstring getCurrentLanguage()
+{
+  logV(TAG, "Called getCurrentLanguage()");
+  return JSTRING("en");
+}
+
+jstring getCocos2dxWritablePath()
+{
+  logV(TAG, "Called getCocos2dxWritablePath()");
+  return JSTRING("NULL");
 }

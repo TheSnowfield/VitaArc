@@ -1,10 +1,23 @@
 #include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "../../../logcat/logcat.h"
 #include "../../../common/define.h"
 #include "../../../utils/debug.h"
 #include "cocos.h"
 #include "jni.h"
+
+size_t jcharlen(jchar *_str)
+{
+  if (!_str)
+    return -1;
+
+  for (jchar *_s = _str;; ++_s)
+    if (*(_s) == 0) return _s - _str;
+
+  return -1;
+}
 
 jint GetVersion(JNIEnv *jniEnv)
 {
@@ -73,9 +86,9 @@ jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list
   switch ((METHODID)((uint32_t)a2))
   {
   case GET_COCOS2DX_PACKAGE_NAME:
-    return (jobject)getCocos2dxPackageName();
+    return getCocos2dxPackageName();
   case GET_CURRENT_LANGUAGE:
-    return (jobject)getCurrentLanguage();
+    return getCurrentLanguage();
   }
 
   return NULL;
@@ -120,14 +133,14 @@ jstring NewStringUTF(JNIEnv *jniEnv, const char *a1)
 
 const jchar *GetStringChars(JNIEnv *jniEnv, jstring a1, jboolean *a2)
 {
-  logV(TAG, "Called GetStringChars(0x%08X, \"%s\", 0x%08X)", a1, a2);
+  logV(TAG, "Called GetStringChars(0x%08X, \"%s\", 0x%08X)", jniEnv, a1, a2);
   return (jchar *)a1;
 }
 
 jsize GetStringLength(JNIEnv *jniEnv, jstring a1)
 {
-  logV(TAG, "Called GetStringLength(\"%s\")", a1);
-  return strlen((const char *)a1);
+  logV(TAG, "Called GetStringLength(0x%08X,\"%s\")", jniEnv, a1);
+  return jcharlen((jchar *)a1);
 }
 
 const char *GetStringUTFChars(JNIEnv *jniEnv, jstring a1, jboolean *j)
@@ -143,7 +156,7 @@ void ReleaseStringUTFChars(JNIEnv *jniEnv, jstring a1, const char *j)
 
 void ReleaseStringChars(JNIEnv *jniEnv, jstring a1, const jchar *a2)
 {
-  logV(TAG, "Called ReleaseStringChars(0x%08X, \"%s\", \"%s\")", jniEnv, a1, a2);
+  logV(TAG, "Called ReleaseStringChars(0x%08X, \"%ls\", \"%ls\")", jniEnv, a1, a2);
 }
 
 jint RegisterNatives(JNIEnv *jniEnv, jclass a1, const JNINativeMethod *a2, jint a3)
@@ -153,7 +166,7 @@ jint RegisterNatives(JNIEnv *jniEnv, jclass a1, const JNINativeMethod *a2, jint 
 
 jstring NewString(JNIEnv *jniEnv, const jchar *a1, jsize a2)
 {
-  logV(TAG, "Called NewString(0x%08X, \"%s\", %d)", jniEnv, a1, a2);
+  logV(TAG, "Called NewString(0x%08X, \"%ls\", %d)", jniEnv, a1, a2);
 
   for (int i = 0; i < a2 * 2; ++i)
   {

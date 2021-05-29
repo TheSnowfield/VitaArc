@@ -1,5 +1,9 @@
 #include <string.h>
 #include <wchar.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
+
+#include <psp2/kernel/rng.h>
 
 #include "../../../logcat/logcat.h"
 #include "../../../common/define.h"
@@ -241,6 +245,56 @@ FILE *_fopen(const char *_name, const char *_type)
 
 size_t _fread(void *_buf, size_t _size, size_t _n, FILE *_file)
 {
-  logW(TAG, "Called _fread(0x%08X, %d, %d, 0x%08X)", _buf, _size, _n, _file);
+  logV(TAG, "Called _fread(0x%08X, %d, %d, 0x%08X)", _buf, _size, _n, _file);
   return fread(_buf, _size, _n, _file);
+}
+
+size_t _strlen(const char *_str)
+{
+  logV(TAG, "Called _strlen(\"%s\")", _str);
+  return strlen(_str);
+}
+
+// Unix devices
+typedef enum DEVICES
+{
+  DEV_URANDOM = 1,
+};
+
+int _open(const char *_device, int _flg, ...)
+{
+  logV(TAG, "Called _open(\"%s\", %d)", _device, _flg);
+
+  // prandom number device
+  if (strcmp(_device, "/dev/urandom") == 0)
+    return DEV_URANDOM;
+
+  return open(_device, _flg);
+}
+
+int _read(int _fd, void *_buf, size_t _nbyte)
+{
+  logV(TAG, "Called _read(%d, 0x%08X, %d)", _fd, _buf, _nbyte);
+
+  switch (_fd)
+  {
+  case DEV_URANDOM:
+    sceKernelGetRandomNumber(_buf, _nbyte);
+    return _nbyte;
+  }
+
+  return read(_fd, _buf, _nbyte);
+}
+
+int _close(int _fd)
+{
+  logV(TAG, "Called _close(%d)", _fd);
+
+  switch (_fd)
+  {
+  case DEV_URANDOM:
+    return 0;
+  }
+
+  return close(_fd);
 }

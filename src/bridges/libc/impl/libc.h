@@ -87,4 +87,12 @@ uintptr_t __gnu_Unwind_Find_exidx(uintptr_t pc, int *pcount);
 
 FILE *_fopen(const char *_name, const char *_type);
 
+size_t _strlen(const char *_str);
+
+int _open(const char *_device, int _flg, ...);
+
+int _read(int _fd, void *_buf, size_t _nbyte);
+
+int _close(int _fd);
+
 #endif /* _BRIDGE_LIBC_LIBCIMPL_H_ */

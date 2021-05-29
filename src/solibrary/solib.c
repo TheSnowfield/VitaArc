@@ -309,7 +309,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
 
         case R_ARM_GLOB_DAT:
         case R_ARM_JUMP_SLOT:
-          if (lpRelocateInfo->st_shndx != SHN_UNDEF)
+          //if (lpRelocateInfo->st_shndx != SHN_UNDEF)
             (*lpRelocateAddress) = lpLinearAddressBase + OFFRST(lpRelocateInfo->st_value);
           break;
 

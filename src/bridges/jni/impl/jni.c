@@ -79,9 +79,21 @@ jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list
     return getCocos2dxPackageName();
   case GET_CURRENT_LANGUAGE:
     return getCurrentLanguage();
+  case GENERATE_GUID:
+    return generateGuid();
   }
 
   return NULL;
+}
+
+jint CallStaticIntMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
+{
+  logV(TAG, "Called CallStaticIntMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
+}
+
+jboolean CallStaticBooleanMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
+{
+  logV(TAG, "Called CallStaticBooleanMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
 }
 
 jboolean CallBooleanMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)

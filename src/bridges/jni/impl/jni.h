@@ -3,6 +3,8 @@
 
 #include "android/jni.h"
 
+#define JSTRING(x) (jstring) u##x
+
 typedef enum METHODID
 {
   UNKNOWN = 0,
@@ -12,6 +14,7 @@ typedef enum METHODID
   GET_INTEGER_FOR_KEY,
   GET_STRING_FOR_KEY,
   GET_BOOL_FOR_KEY,
+  GENERATE_GUID,
   LOAD_CLASS_METHOD = 0x23333333,
 } METHODID;
 
@@ -29,6 +32,7 @@ static const JNIMETHOD JNI_METHODS[] =
   {"getIntegerForKey", GET_INTEGER_FOR_KEY},
   {"getStringForKey", GET_STRING_FOR_KEY},
   {"getBoolForKey", GET_BOOL_FOR_KEY},
+  {"generateGuid", GENERATE_GUID},
 };
 
 jint GetVersion(JNIEnv *jniEnv);
@@ -48,6 +52,10 @@ jmethodID GetStaticMethodID(JNIEnv *jniEnv, jclass a1, const char *a2, const cha
 jobject CallObjectMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3);
 
 jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
+
+jint CallStaticIntMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
+
+jboolean CallStaticBooleanMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
 
 jboolean CallBooleanMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3);
 

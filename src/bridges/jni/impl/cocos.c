@@ -1,10 +1,8 @@
 #include "../../../common/define.h"
 #include "../../../logcat/logcat.h"
 
-#include "android/jni.h"
+#include "jni.h"
 #include "cocos.h"
-
-#define JSTRING(x) (jstring) u##x
 
 void loadClassMethod()
 {
@@ -33,4 +31,10 @@ jstring getCocos2dxWritablePath()
 {
   logV(TAG, "Called getCocos2dxWritablePath()");
   return JSTRING("NULL");
+}
+
+jstring generateGuid()
+{
+  logV(TAG, "Called generateGuid()");
+  return JSTRING("61616161");
 }

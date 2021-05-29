@@ -10,6 +10,7 @@
 #include "impl/cocos.h"
 
 jint GetEnv(JavaVM *javaVM, void **a1, jint i);
+jint GetJavaVM(JNIEnv* javaEnv, JavaVM** javaVM);
 
 static struct JNINativeInterface jniNativeEnv =
 {
@@ -21,12 +22,15 @@ static struct JNINativeInterface jniNativeEnv =
   .ExceptionClear = ExceptionClear,
   .NewGlobalRef = NewGlobalRef,
   .DeleteLocalRef = DeleteLocalRef,
+  .GetJavaVM = GetJavaVM,
   .GetMethodID = GetMethodID,
   .GetStaticMethodID = GetStaticMethodID,
   .GetStringChars = GetStringChars,
   .GetStringLength = GetStringLength,
   .CallObjectMethodV = CallObjectMethodV,
   .CallStaticObjectMethodV = CallStaticObjectMethodV,
+  .CallStaticIntMethodV = CallStaticIntMethodV,
+  .CallStaticBooleanMethodV = CallStaticBooleanMethodV,
   .CallBooleanMethodV = CallBooleanMethodV,
   .CallIntMethodV = CallIntMethodV,
   .CallFloatMethodV = CallFloatMethodV,
@@ -51,9 +55,17 @@ static struct JNIInvokeInterface jniInvokeEnv =
 
 jint GetEnv(JavaVM *javaVM, void **a1, jint i)
 {
-  logV(TAG, "Called GetEnv");
-
   *a1 = &jniNativeEnv;
+
+  logV(TAG, "Called GetEnv");
+  return 0;
+}
+
+jint GetJavaVM(JNIEnv* javaEnv, JavaVM** javaVM)
+{
+  *javaVM = &jniInvokeEnv;
+
+  logV(TAG, "Called GetJavaVM");
   return 0;
 }
 
@@ -65,3 +77,42 @@ void bridgeCallJNIMain(HSOLIB hSoLibrary)
 
   pfnJNIOnload(&jniInvokeEnv, NULL);
 }
+
+typedef int (*JNICocosNativeInit)(uint32_t, uint32_t);
+typedef int (*JNICocosInitApp)(struct JNINativeInterface *);
+typedef int (*JNICocosSetAppVersion)(struct JNINativeInterface *, jstring);
+typedef int (*JNICocosSetDeviceId)(struct JNINativeInterface *, jstring);
+
+void bridgeJNICocosNativeInit(HSOLIB hSoLibrary,
+                                      uint32_t nScreenWidth, uint32_t nScreenHeight)
+{
+  JNICocosNativeInit lpfnNativeInit =
+      solibGetProcAddress(hSoLibrary, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit");
+
+  lpfnNativeInit(nScreenWidth, nScreenHeight);
+}
+
+void bridgeJNICocosInitApp(HSOLIB hSoLibrary)
+{
+  JNICocosInitApp lpfnJNICocosInitApp =
+      solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_initJVMPlatformUtils");
+
+  lpfnJNICocosInitApp(&jniNativeEnv);
+}
+
+void bridgeJNICocosSetAppVersion(HSOLIB hSoLibrary)
+{
+  JNICocosSetAppVersion lpfnJNICocosSetAppVersion =
+      solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_setAppVersion");
+
+  lpfnJNICocosSetAppVersion(&jniNativeEnv, JSTRING("v6.1.6"));
+}
+
+void bridgeJNICocosSetDeviceId(HSOLIB hSoLibrary)
+{
+  JNICocosSetDeviceId lpfnJNICocosSetDeviceId =
+      solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_setDeviceId");
+
+  lpfnJNICocosSetDeviceId(&jniNativeEnv, JSTRING("61616161"));
+}
+

@@ -73,7 +73,9 @@ int main()
       // vglSwapBuffers(GL_FALSE);
 
       // Init Cocos2dx
-      bridgeCocos2DXRendererNativeInit(hLibCocos2dx, 960, 544);
+      bridgeJNICocosInitApp(hLibCocos2dx);
+      bridgeJNICocosSetDeviceId(hLibCocos2dx);
+      bridgeJNICocosNativeInit(hLibCocos2dx, 960, 544);
     }
   }
 

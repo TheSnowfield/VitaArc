@@ -15,11 +15,4 @@
 #define PATH_TO_DATA "ux0:vitaarc/persistent/data/"
 #define PATH_TO_OBB "ux0:vitaarc/persistent/obb/"
 
-#define TAG ((__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__))
-
-#define BREAKPOINT(x) \
-  static int _trigger_count = 0;   \
-  if (++_trigger_count == x)       \
-  asm volatile("mov r0, #0; ldr r0, [r0];")
-
 #endif /* _COMMON_DEFINE_H_ */

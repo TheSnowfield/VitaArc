@@ -181,7 +181,7 @@ static const BRIDGEFUNC BRIDGE_LIBC[] =
   {"pthread_setspecific", (uintptr_t)&_pthread_setspecific},
   {"puts", (uintptr_t)&puts},
   {"qsort", (uintptr_t)&qsort},
-  {"raise", (uintptr_t)&raise},
+  // {"raise", (uintptr_t)&raise},
   {"read", (uintptr_t)&read},
   {"readlink", (uintptr_t)&readlink},
   {"realloc", (uintptr_t)&realloc},

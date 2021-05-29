@@ -82,7 +82,7 @@ void debugMemoryDump(const char *szFile, void *lpMemoryBlock, uint32_t size)
 
 void debugBreakPoint(void *lpMemoryAddress)
 {
-  // LDR R0, #0
-  static uint8_t nDeadCode[] = {0x48, 0x00};
-  kuKernelCpuUnrestrictedMemcpy(lpMemoryAddress, &nDeadCode, 2);
+  // mov r0, #0; ldr r0, [r0];
+  const char nDeadCode[] = {0x4F, 0xF0, 0x00, 0x00, 0x00, 0x68};
+  kuKernelCpuUnrestrictedMemcpy(lpMemoryAddress, &nDeadCode, sizeof(nDeadCode));
 }

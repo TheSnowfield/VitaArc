@@ -101,7 +101,7 @@ void logBase(LOGLEVEL level, const char *tag, const char *format, va_list args)
 
 #ifdef LOG_OVERUDP
   sceNetSend(logStream, logBuffer, logPosition - logBuffer, 0);
-  sceKernelDelayThread(10);
+  sceKernelDelayThread(50);
 #else
   sceIoWrite(logStream, logBuffer, logPosition - logBuffer);
 #endif

@@ -18,6 +18,8 @@ typedef enum LOGLEVEL
   x;                     \
   va_end(opt);
 
+#define TAG ((__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__))
+
 void logEnd();
 
 void logBegin(const char *logFilePath);

@@ -226,6 +226,13 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       sceKernelGetMemBlockBase(nBlockID, &lpBlockData);
       lpElfProgramBase[i].p_vaddr += lpLinearAddressBase;
 
+      // Save text base
+      if (lpElfProgramBase[i].p_flags & PF_X)
+      {
+        lpInternal->lpTextBase = lpElfProgramBase[i].p_vaddr;
+        kuKernelFlushCaches(lpInternal->lpTextBase, lpElfProgramBase[i].p_memsz);
+      }
+
       // Copy data
       kuKernelCpuUnrestrictedMemset(lpBlockData, 0x00, nBlockSize);
       kuKernelCpuUnrestrictedMemcpy(lpElfProgramBase[i].p_vaddr,
@@ -250,6 +257,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   uint32_t nDynSymbolCount = 0;
   char *lpDynStrTab = NULL;
   char *lpSecStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  Elf32_Shdr *lpSectionInitArray = NULL;
 
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
   {
@@ -265,6 +273,10 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     // Find .dynstr section
     if (!lpDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
       lpDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+
+    // Find .init_array section
+    if (!lpSectionInitArray && strcmp(lpszSectionName, ".init_array") == 0)
+      lpSectionInitArray = &lpElfSectionBase[i];
   }
 
   logV(TAG, ".dynsym: [0x%08X], .dynstr: [0x%08X]", lpDynSymbols, lpDynStrTab);
@@ -310,7 +322,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
         case R_ARM_GLOB_DAT:
         case R_ARM_JUMP_SLOT:
           //if (lpRelocateInfo->st_shndx != SHN_UNDEF)
-            (*lpRelocateAddress) = lpLinearAddressBase + OFFRST(lpRelocateInfo->st_value);
+          (*lpRelocateAddress) = lpLinearAddressBase + OFFRST(lpRelocateInfo->st_value);
           break;
 
         default:
@@ -323,6 +335,10 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     }
   }
 
+  // Flush caches
+  // I don't know what it is used for
+  // kuKernelFlushCaches();
+
   // Save cache
   lpInternal->lpElfHeader = lpElfHeader;
   lpInternal->lpElfSectionBase = lpElfSectionBase;
@@ -331,10 +347,26 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   lpInternal->lpElfDynStrTab = lpDynStrTab;
   lpInternal->lpElfDynSymbols = lpDynSymbols;
   lpInternal->nElfDynSymbolCount = nDynSymbolCount;
-
+  lpInternal->lpElfSectionInitArray = lpSectionInitArray;
   logI(TAG, "Relocated all symbols.");
 
   return true;
+}
+
+void solibInitLibrary(HSOLIB hSoLibrary)
+{
+  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+
+  // Init array
+  int (**lpfnInit)() = (void *)(lpInternal->lpTextBase +
+                                lpInternal->lpElfSectionInitArray->sh_addr);
+
+  for (int i = 0; i < lpInternal->lpElfSectionInitArray->sh_size / 4; ++i)
+  {
+    logV(TAG, "InitArray 0x%08X", lpfnInit[i]);
+    if (lpfnInit[i] != NULL)
+      lpfnInit[i]();
+  }
 }
 
 void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)

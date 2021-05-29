@@ -16,11 +16,14 @@ typedef struct SOINTERNAL
   Elf32_Phdr *lpElfSegmentBase;
   Elf32_Shdr *lpElfSectionBase;
   Elf32_Shdr *lpElfSectionSymbol;
+  Elf32_Shdr *lpElfSectionInitArray;
 
   void *lpElfSecStrTab;
   Elf32_Sym *lpElfDynSymbols;
   void *lpElfDynStrTab;
   uint32_t nElfDynSymbolCount;
+
+  void *lpTextBase;
 
 } SOINTERNAL, *LPSOINTERNAL;
 

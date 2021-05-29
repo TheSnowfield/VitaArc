@@ -15,6 +15,14 @@ typedef void **HSOLIB;
 HSOLIB solibLoadLibrary(const char *szLibrary);
 
 /**
+ * Init so library
+ *
+ * @param hSoLibrary Library instance handle
+ *
+ */
+void solibInitLibrary(HSOLIB hSoLibrary);
+
+/**
  * Free so library
  *
  * @param hSoLibrary Library instance handle

@@ -27,5 +27,5 @@ void bridgePatchCocos2DX(HSOLIB hSoLibrary)
 
   // AudioManager::init
   // prevent initialize opensles
-  patchThumb(hSoLibrary, 0x50E284, 0x00BF);
+  // patchThumb(hSoLibrary, 0x50E284, 0x00BF);
 }

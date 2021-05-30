@@ -1,8 +1,8 @@
 #ifndef _UTILS_PATCHER_H_
 #define _UTILS_PATCHER_H_
 
-#include <common/types.h>
-#include <solibrary/solib.h>
+#include "../common/types.h"
+#include "../solibrary/solib.h"
 
 typedef struct BRIDGEFUNC
 {
@@ -29,5 +29,7 @@ void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
 void patchThumb(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue);
 
 void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue);
+
+void *hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback);
 
 #endif /* _UTILS_PATCHER_H_ */

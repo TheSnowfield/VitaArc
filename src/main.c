@@ -54,6 +54,7 @@ int main()
     bridgePatchLibC(hLibCocos2dx);
     bridgePatchGL(hLibCocos2dx);
     bridgePatchCocos2DX(hLibCocos2dx);
+    bridgeAudioProvider(hLibCocos2dx);
     solibInitLibrary(hLibCocos2dx);
 
     // Call JNI Main

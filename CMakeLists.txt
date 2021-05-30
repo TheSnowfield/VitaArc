@@ -58,6 +58,7 @@ add_subdirectory(src/bridges/eabi)
 add_subdirectory(src/bridges/jni)
 add_subdirectory(src/bridges/libc)
 add_subdirectory(src/bridges/opengl)
+add_subdirectory(src/bridges/audio)
 
 ## Build and link
 # Add all the files needed to compile here
@@ -83,6 +84,7 @@ target_link_libraries(${PROJECT_NAME}
   AndroidBridge
   OpenGLBridge
   Cocos2dxBridge
+  AudioBridge
 
   taihen_stub
   kubridge_stub

@@ -1,7 +1,7 @@
 #ifndef _SOLIB_H_
 #define _SOLIB_H_
 
-#include <common/types.h>
+#include "../common/types.h"
 
 typedef void **HSOLIB;
 

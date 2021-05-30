@@ -33,6 +33,11 @@ jstring getCocos2dxWritablePath()
   return JSTRING("NULL");
 }
 
+void setStringForKey(jstring key, jstring value)
+{
+  logV(TAG, "Called setStringForKey()");
+}
+
 jstring generateGuid()
 {
   logV(TAG, "Called generateGuid()");

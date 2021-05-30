@@ -14,6 +14,8 @@ jstring getCocos2dxWritablePath();
 
 jstring getCurrentLanguage();
 
+void setStringForKey(jstring key, jstring value);
+
 jstring generateGuid();
 
 #endif /* _BRIDGE_JNI_COCOSIMPL_H_ */

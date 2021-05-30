@@ -9,15 +9,15 @@
 #include "audio.h"
 
 static const BRIDGEFUNC BRIDGE_AUDIO[] =
-    {
-        // {"_ZTI13AudioProvider", (uintptr_t)&audioProviderConstruct},
-        {"_ZN13AudioProvider4initEff", (uintptr_t)&audioProviderInit},
-        {"_ZN13AudioProvider6resumeEv", (uintptr_t)&audioProviderResume},
-        {"_ZN13AudioProvider12setBGMVolumeEf", (uintptr_t)&audioProviderSetBGMVolume},
-        {"_ZN13AudioProvider12setSFXVolumeEf", (uintptr_t)&audioProviderSetSFXVolume},
-        {"_ZN13AudioProvider7suspendEv", (uintptr_t)&audioProviderSupsend},
-        {"_ZN13AudioProvider6updateEv", (uintptr_t)&audioProviderUpdate},
-        {"_ZN13AudioProviderD2Ev", (uintptr_t)&audioProviderDestruct},
+{
+  // {"_ZTI13AudioProvider", (uintptr_t)&audioProviderConstruct},
+  {"_ZN13AudioProvider4initEff", (uintptr_t)&audioProviderInit},
+  {"_ZN13AudioProvider6resumeEv", (uintptr_t)&audioProviderResume},
+  {"_ZN13AudioProvider12setBGMVolumeEf", (uintptr_t)&audioProviderSetBGMVolume},
+  {"_ZN13AudioProvider12setSFXVolumeEf", (uintptr_t)&audioProviderSetSFXVolume},
+  {"_ZN13AudioProvider7suspendEv", (uintptr_t)&audioProviderSupsend},
+  {"_ZN13AudioProvider6updateEv", (uintptr_t)&audioProviderUpdate},
+  {"_ZN13AudioProviderD2Ev", (uintptr_t)&audioProviderDestruct},
 };
 
 typedef void (*AudioManagerConstruct)(void *);

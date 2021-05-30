@@ -14,6 +14,7 @@ typedef enum METHODID
   GET_INTEGER_FOR_KEY,
   GET_STRING_FOR_KEY,
   GET_BOOL_FOR_KEY,
+  SET_STRING_FOR_KEY,
   GENERATE_GUID,
   LOAD_CLASS_METHOD = 0x23333333,
 } METHODID;
@@ -32,6 +33,7 @@ static const JNIMETHOD JNI_METHODS[] =
   {"getIntegerForKey", GET_INTEGER_FOR_KEY},
   {"getStringForKey", GET_STRING_FOR_KEY},
   {"getBoolForKey", GET_BOOL_FOR_KEY},
+  {"setStringForKey", SET_STRING_FOR_KEY},
   {"generateGuid", GENERATE_GUID},
 };
 

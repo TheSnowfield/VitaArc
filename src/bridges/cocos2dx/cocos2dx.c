@@ -32,4 +32,8 @@ void bridgePatchCocos2DX(HSOLIB hSoLibrary)
   // cocos2d::Node::onEnter
   // read nullptr
   patchThumb(hSoLibrary, 0x69A342, 0x00BF);
+
+  // AudioManager::internal_loadSFX
+  // prevent call opensles
+  patchThumb(hSoLibrary, 0x50E30E, 0x00BF);
 }

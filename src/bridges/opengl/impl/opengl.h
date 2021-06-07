@@ -33,4 +33,9 @@ void *glMapBuffer(GLenum target, GLenum access);
 
 GLboolean glUnmapBuffer(GLenum target);
 
+void _glShaderSource(GLuint handle, GLsizei count,
+                     const GLchar *const *string, const GLint *length);
+
+void _glGetShaderiv(GLuint handle, GLenum pname, GLint *params);
+
 #endif /* _BRIDGE_OPENGL_IMPL_H_ */

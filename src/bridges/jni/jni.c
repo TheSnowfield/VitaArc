@@ -31,6 +31,7 @@ static struct JNINativeInterface jniNativeEnv =
   .CallStaticObjectMethodV = CallStaticObjectMethodV,
   .CallStaticIntMethodV = CallStaticIntMethodV,
   .CallStaticBooleanMethodV = CallStaticBooleanMethodV,
+  .CallStaticVoidMethodV = CallStaticVoidMethodV,
   .CallBooleanMethodV = CallBooleanMethodV,
   .CallIntMethodV = CallIntMethodV,
   .CallFloatMethodV = CallFloatMethodV,

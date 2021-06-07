@@ -60,8 +60,8 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glGetProgramInfoLog", (uintptr_t)&glGetProgramInfoLog},
   {"glGetProgramiv", (uintptr_t)&glGetProgramiv},
   {"glGetShaderInfoLog", (uintptr_t)&glGetShaderInfoLog},
-  {"glShaderSource", (uintptr_t)&glShaderSource},
-  {"glGetShaderiv", (uintptr_t)&glGetShaderiv},
+  {"glShaderSource", (uintptr_t)&_glShaderSource},
+  {"glGetShaderiv", (uintptr_t)&_glGetShaderiv},
   {"glGetString", (uintptr_t)&glGetString},
   {"glGetUniformLocation", (uintptr_t)&glGetUniformLocation},
   {"glIsBuffer", (uintptr_t)&glIsBuffer},
@@ -74,7 +74,7 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glReadPixels", (uintptr_t)&glReadPixels},
   {"glRenderbufferStorage", (uintptr_t)&glRenderbufferStorage},
   {"glScissor", (uintptr_t)&glScissor},
-  {"glShaderSource", (uintptr_t)&glShaderSource},
+  // {"glGetShaderSource", (uintptr_t)&glGetShaderSource},
   {"glStencilFunc", (uintptr_t)&glStencilFunc},
   {"glStencilMask", (uintptr_t)&glStencilMask},
   {"glStencilOp", (uintptr_t)&glStencilOp},
@@ -106,7 +106,16 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"eglGetProcAddress", (uintptr_t)&eglGetProcAddress}
 };
 
-void bridgePatchGL(HSOLIB lpSoLibrary)
+void bridgePatchGL(HSOLIB hSoLibrary)
 {
-  patchSymbols(lpSoLibrary, BRIDGE_GL, sizeof(BRIDGE_GL) / sizeof(BRIDGEFUNC));
+  patchSymbols(hSoLibrary, BRIDGE_GL, sizeof(BRIDGE_GL) / sizeof(BRIDGEFUNC));
+  
+  // cocos2d::GLProgram::bindPredefinedVertexAttribs
+  // calling unsupported function
+  // patchARM(hSoLibrary, 0x6E6AD4, 0x00BF00BF);
+
+  // cocos2d::GLProgram::link
+  // calling unsupported function
+  // patchARM(hSoLibrary, 0x6E6534, 0x00BF00BF);
+
 }

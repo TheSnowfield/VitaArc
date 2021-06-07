@@ -55,6 +55,8 @@ jobject CallObjectMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3);
 
 jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
 
+void CallStaticVoidMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
+
 jint CallStaticIntMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);
 
 jboolean CallStaticBooleanMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3);

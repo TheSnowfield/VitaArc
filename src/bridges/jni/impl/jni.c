@@ -86,6 +86,19 @@ jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list
   return NULL;
 }
 
+void CallStaticVoidMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
+{
+  logV(TAG, "Called CallStaticVoidMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
+
+  switch ((METHODID)((uint32_t)a2))
+  {
+  case SET_STRING_FOR_KEY:
+    return NULL;
+  }
+  
+  return NULL;
+}
+
 jint CallStaticIntMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallStaticIntMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);

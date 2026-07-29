@@ -1,13 +1,14 @@
 #ifndef _UTILS_PATCHER_H_
 #define _UTILS_PATCHER_H_
 
-#include "../common/types.h"
-#include "../solibrary/solib.h"
+#include "types.h"
+#include "loader.h"
+
 
 typedef struct BRIDGEFUNC
 {
   const char *szSymbolName;
-  uintptr_t *pfnBridgeProc;
+  uintptr_t pfnBridgeProc;
 
 } BRIDGEFUNC, *LPBRIDGEFUNC;
 
@@ -30,6 +31,6 @@ void patchThumb(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue);
 
 void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue);
 
-void *hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback);
+void hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback);
 
 #endif /* _UTILS_PATCHER_H_ */

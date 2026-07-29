@@ -1,7 +1,7 @@
 #ifndef _BRIDGE_LIBC_H_
 #define _BRIDGE_LIBC_H_
 
-#include <solibrary/solib.h>
+#include <loader.h>
 
 void bridgePatchLibC(HSOLIB hSoLibrary);
 

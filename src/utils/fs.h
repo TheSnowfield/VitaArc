@@ -1,7 +1,7 @@
 #ifndef _UTILS_IO_H_
 #define _UTILS_IO_H_
 
-#include <common/types.h>
+#include <types.h>
 
 bool utilFileExists(const char* szFilePath);
 uint32_t utilGetFileSize(const char* szFilePath);

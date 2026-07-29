@@ -3,7 +3,7 @@
 #include <psp2/kernel/sysmem.h>
 #include <psp2/kernel/threadmgr.h>
 
-#include "../../../common/define.h"
+#include <define.h>
 #include "../../../logcat/logcat.h"
 #include "pthread.h"
 

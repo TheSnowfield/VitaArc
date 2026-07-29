@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../common/define.h"
-#include "../../utils/patcher.h"
+#include <define.h>
+#include <patcher.h>
 #include "../../utils/debug.h"
 #include "../../logcat/logcat.h"
 #include "impl/provider.h"

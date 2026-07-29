@@ -1,4 +1,4 @@
-#include "../../../common/define.h"
+#include <define.h>
 #include "../../../logcat/logcat.h"
 
 #include "jni.h"

@@ -1,7 +1,7 @@
 #ifndef _BRIDGE_OPENGL_H_
 #define _BRIDGE_OPENGL_H_
 
-#include <solibrary/solib.h>
+#include <loader.h>
 
 void bridgePatchGL(HSOLIB lpSoLibrary);
 

@@ -1,5 +1,5 @@
 #include "../../../logcat/logcat.h"
-#include "../../../common/define.h"
+#include <define.h>
 #include "../../../utils/debug.h"
 #include "jvm.h"
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "../../../logcat/logcat.h"
-#include "../../../common/define.h"
+#include <define.h>
 #include "../../../utils/debug.h"
 #include "../../../utils/string.h"
 #include "cocos.h"
@@ -40,6 +40,7 @@ void DeleteLocalRef(JNIEnv *jniEnv, jobject a1)
 jmethodID GetMethodID(JNIEnv *jniEnv, jclass a1, const char *a2, const char *a3)
 {
   logV(TAG, "Called GetMethodID");
+  return NULL;
 }
 
 jmethodID GetStaticMethodID(JNIEnv *jniEnv, jclass a1, const char *a2, const char *a3)
@@ -81,6 +82,8 @@ jobject CallStaticObjectMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list
     return getCurrentLanguage();
   case GENERATE_GUID:
     return generateGuid();
+  default:
+    break;
   }
 
   return NULL;
@@ -93,36 +96,42 @@ void CallStaticVoidMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
   switch ((METHODID)((uint32_t)a2))
   {
   case SET_STRING_FOR_KEY:
-    return NULL;
+    return;
+  default:
+    break;
   }
   
-  return NULL;
+  return;
 }
 
 jint CallStaticIntMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallStaticIntMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
+  return 0;
 }
 
 jboolean CallStaticBooleanMethodV(JNIEnv *jniEnv, jclass a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallStaticBooleanMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
+  return 0;
 }
 
 jboolean CallBooleanMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallBooleanMethodV(0x%08X, 0x%08X, %d, va_list)", jniEnv, a1, a2);
-  return NULL;
+  return 0;
 }
 
 jint CallIntMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallIntMethodV");
+  return 0;
 }
 
 jfloat CallFloatMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)
 {
   logV(TAG, "Called CallFloatMethodV");
+  return 0.0f;
 }
 
 void CallVoidMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)
@@ -133,11 +142,13 @@ void CallVoidMethodV(JNIEnv *jniEnv, jobject a1, jmethodID a2, va_list a3)
 jfieldID FromReflectedField(JNIEnv *jniEnv, jobject a1)
 {
   logV(TAG, "Called FromReflectedField");
+  return NULL;
 }
 
 jmethodID FromReflectedMethod(JNIEnv *jniEnv, jobject a1)
 {
   logV(TAG, "Called FromReflectedMethod");
+  return NULL;
 }
 
 jstring NewStringUTF(JNIEnv *jniEnv, const char *a1)
@@ -177,6 +188,7 @@ void ReleaseStringChars(JNIEnv *jniEnv, jstring a1, const jchar *a2)
 jint RegisterNatives(JNIEnv *jniEnv, jclass a1, const JNINativeMethod *a2, jint a3)
 {
   logV(TAG, "Called RegisterNatives");
+  return 0;
 }
 
 jstring NewString(JNIEnv *jniEnv, const jchar *a1, jsize a2)

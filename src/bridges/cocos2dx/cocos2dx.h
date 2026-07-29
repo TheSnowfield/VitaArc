@@ -1,7 +1,7 @@
 #ifndef _BRIDGE_COCOS2DX_H_
 #define _BRIDGE_COCOS2DX_H_
 
-#include <solibrary/solib.h>
+#include <loader.h>
 
 void bridgePatchCocos2DX(HSOLIB hSoLibrary);
 

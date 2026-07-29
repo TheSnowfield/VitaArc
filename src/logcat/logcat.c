@@ -3,20 +3,20 @@
 #include <psp2/io/fcntl.h>
 #include <psp2/net/net.h>
 #include <psp2/net/netctl.h>
+#include <psp2/kernel/threadmgr.h>
 #include <psp2/sysmodule.h>
 
-#include <common/types.h>
-#include <common/define.h>
+#include <types.h>
+#include <define.h>
 #include "logcat.h"
 
 #define LOG_OVERUDP
 #define UDP_PORT 23333
-#define UDP_HOST "192.168.1.2"
+#define UDP_HOST "10.20.0.227"
 
 static SceUID logStream;
 static bool logStarted = false;
 static const char logLvString[] = {'V', 'I', 'W', 'E', 'F'};
-static void *logUdpBuffer = NULL;
 
 void logBegin(const char *logFilePath)
 {
@@ -53,7 +53,8 @@ void logBegin(const char *logFilePath)
     logStream = sceNetSocket("logcat", SCE_NET_AF_INET,
                              SCE_NET_SOCK_DGRAM, SCE_NET_IPPROTO_UDP);
 
-    sceNetConnect(logStream, &sNetSockAddr, sizeof(sNetSockAddr));
+    sceNetConnect(logStream, (const SceNetSockaddr *)&sNetSockAddr,
+                  sizeof(sNetSockAddr));
   }
 
 #else

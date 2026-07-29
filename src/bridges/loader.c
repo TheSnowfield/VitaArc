@@ -6,18 +6,21 @@
 #include <psp2/kernel/sysmem.h>
 #include <psp2/kernel/modulemgr.h>
 
-#include <common/elf.h>
-#include <common/define.h>
+#include <elf.h>
+#include <define.h>
 #include <kubridge/kubridge.h>
 #include <logcat/logcat.h>
-#include <utils/kubridge.h>
+#include "kubridge.h"
 #include <utils/debug.h>
 
-#include "solib.h"
-#include "internal.h"
+#include "loader.h"
 
 #define _H(x) ((LPSOINTERNAL)(*x));
 #define MAX_LIBRARY 32
+
+#ifndef SCE_KERNEL_MEMBLOCK_TYPE_USER_RX
+#define SCE_KERNEL_MEMBLOCK_TYPE_USER_RX 0x0C20D050
+#endif
 
 // Symbol Values
 // In addition to the normal rules for symbol values
@@ -147,7 +150,7 @@ ReleaseInternal:
   return NULL;
 }
 
-void solibLoadSections(LPSOINTERNAL lpInternal)
+bool solibLoadSections(LPSOINTERNAL lpInternal)
 {
   // Image base address
   uintptr_t lpImageBase = (uintptr_t)lpInternal->lpLibraryImageBase;
@@ -159,7 +162,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   Elf32_Phdr *lpElfProgramBase = (Elf32_Phdr *)(lpImageBase + lpElfHeader->e_phoff);
 
   // ELF section base
-  Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
+  Elf32_Shdr *lpElfSectionBase = (Elf32_Shdr *)(lpImageBase + lpElfHeader->e_shoff);
 
   uintptr_t lpLinearAddressBase = 0x98000000;
   uintptr_t lpLinearAddress = lpLinearAddressBase;
@@ -189,7 +192,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       uint32_t nBlockSize =
           MEMALIGN(lpElfProgramBase[i].p_memsz + nBlockGapSize, lpElfProgramBase[i].p_align);
 
-      SceUID nBlockID = NULL;
+      SceUID nBlockID = -1;
       SceKernelAllocMemBlockKernelOpt sAllocOption = {0};
       {
         sAllocOption.size = sizeof(SceKernelAllocMemBlockKernelOpt);
@@ -229,14 +232,14 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       // Save text base
       if (lpElfProgramBase[i].p_flags & PF_X)
       {
-        lpInternal->lpTextBase = lpElfProgramBase[i].p_vaddr;
+        lpInternal->lpTextBase = (void *)(uintptr_t)lpElfProgramBase[i].p_vaddr;
         kuKernelFlushCaches(lpInternal->lpTextBase, lpElfProgramBase[i].p_memsz);
       }
 
       // Copy data
       kuKernelCpuUnrestrictedMemset(lpBlockData, 0x00, nBlockSize);
-      kuKernelCpuUnrestrictedMemcpy(lpElfProgramBase[i].p_vaddr,
-                                    lpImageBase + lpElfProgramBase[i].p_offset,
+      kuKernelCpuUnrestrictedMemcpy((void *)(uintptr_t)lpElfProgramBase[i].p_vaddr,
+                                    (const void *)(lpImageBase + lpElfProgramBase[i].p_offset),
                                     lpElfProgramBase[i].p_filesz);
 
       // Next segment
@@ -246,7 +249,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
       logV(TAG, "Load segment: [0x%08X]. Length %d.",
            lpElfProgramBase[i].p_vaddr, lpElfProgramBase[i].p_filesz);
 
-      debugPrintMemoryBlock(lpElfProgramBase[i].p_vaddr, 16, 16);
+      debugPrintMemoryBlock((void *)(uintptr_t)lpElfProgramBase[i].p_vaddr, 16, 16);
     }
   }
 
@@ -256,7 +259,7 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
   Elf32_Sym *lpDynSymbols = NULL;
   uint32_t nDynSymbolCount = 0;
   char *lpDynStrTab = NULL;
-  char *lpSecStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  char *lpSecStrTab = (char *)(lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset);
   Elf32_Shdr *lpSectionInitArray = NULL;
 
   for (int i = 0; i < lpElfHeader->e_shnum; ++i)
@@ -267,12 +270,12 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     if (!lpDynSymbols && strcmp(lpszSectionName, ".dynsym") == 0)
     {
       nDynSymbolCount = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
-      lpDynSymbols = lpImageBase + lpElfSectionBase[i].sh_offset;
+      lpDynSymbols = (Elf32_Sym *)(lpImageBase + lpElfSectionBase[i].sh_offset);
     }
 
     // Find .dynstr section
     if (!lpDynStrTab && strcmp(lpszSectionName, ".dynstr") == 0)
-      lpDynStrTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+      lpDynStrTab = (char *)(lpImageBase + lpElfSectionBase[i].sh_offset);
 
     // Find .init_array section
     if (!lpSectionInitArray && strcmp(lpszSectionName, ".init_array") == 0)
@@ -293,13 +296,14 @@ void solibLoadSections(LPSOINTERNAL lpInternal)
     if ((strcmp(lpszSectionName, ".rel.dyn") == 0) ||
         (strcmp(lpszSectionName, ".rel.plt") == 0))
     {
-      Elf32_Rel *lpSectionBase = lpImageBase + lpElfSectionBase[i].sh_addr;
+      Elf32_Rel *lpSectionBase = (Elf32_Rel *)(lpImageBase + lpElfSectionBase[i].sh_addr);
 
       // Process section relocation
       for (int j = 0; j < lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
       {
         Elf32_Sym *lpRelocateInfo = &lpDynSymbols[ELF32_R_SYM(lpSectionBase[j].r_info)];
-        uintptr_t *lpRelocateAddress = lpLinearAddressBase + lpSectionBase[j].r_offset;
+        uintptr_t *lpRelocateAddress =
+            (uintptr_t *)(lpLinearAddressBase + lpSectionBase[j].r_offset);
         uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
 
         // logV(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
@@ -392,7 +396,7 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
     logV(TAG, "ELF Object File Type: 0x%08X", lpElfHeader->e_type);
   }
 
-  Elf32_Phdr *lpElfProgramBase = lpImageBase + lpElfHeader->e_phoff;
+  Elf32_Phdr *lpElfProgramBase = (Elf32_Phdr *)(lpImageBase + lpElfHeader->e_phoff);
 
   for (int i = 0; i < lpElfHeader->e_phnum; ++i)
   {
@@ -410,8 +414,9 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
     logV(TAG, "    Physical Address: 0x%08X", lpElfProgramBase[i].p_paddr);
   }
 
-  Elf32_Shdr *lpElfSectionBase = lpImageBase + lpElfHeader->e_shoff;
-  char *lpSectionStrTab = lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset;
+  Elf32_Shdr *lpElfSectionBase = (Elf32_Shdr *)(lpImageBase + lpElfHeader->e_shoff);
+  char *lpSectionStrTab =
+      (char *)(lpImageBase + lpElfSectionBase[lpElfHeader->e_shstrndx].sh_offset);
   Elf32_Sym *lpDynamicSymbolTab = NULL;
   char *lpDynamicSymbolName = NULL;
   uint32_t nDynamicSymbols = 0;
@@ -439,22 +444,21 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
     if (strcmp(lpszSectionName, ".dynsym") == 0)
     {
       nDynamicSymbols = lpElfSectionBase[i].sh_size / sizeof(Elf32_Sym);
-      lpDynamicSymbolTab = lpImageBase + lpElfSectionBase[i].sh_offset;
+      lpDynamicSymbolTab = (Elf32_Sym *)(lpImageBase + lpElfSectionBase[i].sh_offset);
     }
 
     // Find .dynstr section
     if (strcmp(lpszSectionName, ".dynstr") == 0)
-      lpDynamicSymbolName = lpImageBase + lpElfSectionBase[i].sh_offset;
+      lpDynamicSymbolName = (char *)(lpImageBase + lpElfSectionBase[i].sh_offset);
   }
 
   logV(TAG, "Import Symbols");
 
   // Print all symbols of this library
-  for (int i = 0; i < nDynamicSymbols; ++i)
-  {
-    logV(TAG, "    [0x%08X] => [0x%08X] %s", ((uintptr_t)(lpDynamicSymbolTab + i)) + 4,
-         lpDynamicSymbolTab[i].st_value, lpDynamicSymbolName + lpDynamicSymbolTab[i].st_name);
-  }
+  // for (int i = 0; i < nDynamicSymbols; ++i) {
+  //   logV(TAG, "    [0x%08X] => [0x%08X] %s", ((uintptr_t)(lpDynamicSymbolTab + i)) + 4,
+  //        lpDynamicSymbolTab[i].st_value, lpDynamicSymbolName + lpDynamicSymbolTab[i].st_name);
+  // }
 }
 
 void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
@@ -477,14 +481,15 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
       logV(TAG, "ProcAddress found: %s [0x%08X] + [0x%08X]", szFunctionName,
            0x98000000, OFFRST(lpInternal->lpElfDynSymbols[i].st_value));
 
-      return 0x98000000 + OFFRST(lpInternal->lpElfDynSymbols[i].st_value);
+      return (void *)(uintptr_t)(0x98000000 +
+                                 OFFRST(lpInternal->lpElfDynSymbols[i].st_value));
     }
   }
 
   return NULL;
 }
 
-void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDestProc)
+void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, uintptr_t pfnDestProc)
 {
   if (!hSoLibrary)
     return NULL;
@@ -499,15 +504,16 @@ void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, void *pfnDes
     if ((strcmp(lpszSectionName, ".rel.dyn") == 0) ||
         (strcmp(lpszSectionName, ".rel.plt") == 0))
     {
-      Elf32_Rel *lpSectionBase = lpInternal->lpLibraryImageBase +
-                                 lpInternal->lpElfSectionBase[i].sh_addr;
+      Elf32_Rel *lpSectionBase =
+          (Elf32_Rel *)((uintptr_t)lpInternal->lpLibraryImageBase +
+                        lpInternal->lpElfSectionBase[i].sh_addr);
 
       // Process section relocation
       for (int j = 0; j < lpInternal->lpElfSectionBase[i].sh_size / sizeof(Elf32_Rel); ++j)
       {
         Elf32_Sym *lpRelocateInfo = &lpInternal->lpElfDynSymbols[ELF32_R_SYM(lpSectionBase[j].r_info)];
-        uintptr_t *lpRelocateAddress = 0x98000000 + lpSectionBase[j].r_offset;
-        uint32_t nRelocateType = ELF32_R_TYPE(lpSectionBase[j].r_info);
+        uintptr_t *lpRelocateAddress =
+            (uintptr_t *)(uintptr_t)(0x98000000 + lpSectionBase[j].r_offset);
 
         if (strcmp(lpInternal->lpElfDynStrTab + lpRelocateInfo->st_name, szSymbolName) == 0)
         {

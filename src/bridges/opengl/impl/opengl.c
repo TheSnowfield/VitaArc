@@ -1,39 +1,42 @@
 #include <stdlib.h>
 #include <vitaGL.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "../../../common/define.h"
+#include <define.h>
 #include "../../../logcat/logcat.h"
 #include "../../../utils/fs.h"
 #include "opengl.h"
+#include "glsl2cg.h"
 
-void glBindRenderbuffer(GLenum target, GLuint renderbuffer)
+void bridgeGlBindRenderbuffer(GLenum target, GLuint renderbuffer)
 {
   logV(TAG, "Unsupported 'glBindRenderbuffer' called.");
 }
 
-void glDeleteRenderbuffers(GLsizei n, GLuint *renderbuffers)
+void bridgeGlDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
 {
   logV(TAG, "Unsupported 'glDeleteRenderbuffers' called.");
 }
 
-void glGenRenderbuffers(GLsizei n, GLuint *renderbuffers)
+void bridgeGlGenRenderbuffers(GLsizei n, GLuint *renderbuffers)
 {
   logV(TAG, "Unsupported 'glGenRenderbuffers' called.");
 }
 
-void glFramebufferRenderbuffer(GLenum target, GLenum attachment,
-                               GLenum renderbuffertarget, GLuint renderbuffer)
+void bridgeGlFramebufferRenderbuffer(GLenum target, GLenum attachment,
+                                     GLenum renderbuffertarget, GLuint renderbuffer)
 {
   logV(TAG, "Unsupported 'glFramebufferRenderbuffer' called.");
 }
 
-void glRenderbufferStorage(GLenum target, GLenum internalformat,
-                           GLsizei width, GLsizei height)
+void bridgeGlRenderbufferStorage(GLenum target, GLenum internalformat,
+                                 GLsizei width, GLsizei height)
 {
   logV(TAG, "Unsupported 'glRenderbufferStorage' called.");
 }
 
-void glPixelStorei(GLenum pname, GLint param)
+void bridgeGlPixelStorei(GLenum pname, GLint param)
 {
   logV(TAG, "Unsupported 'glPixelStorei' called.");
 }
@@ -46,129 +49,130 @@ typedef struct
   GLboolean used;
 } _gpubuffer;
 
-GLboolean glIsBuffer(GLuint buffer)
+GLboolean bridgeGlIsBuffer(GLuint buffer)
 {
   logV(TAG, "Called glIsBuffer(%d)", buffer);
   _gpubuffer *p = (_gpubuffer *)buffer;
   return (p != NULL);
 }
 
-GLboolean glIsRenderbuffer(GLuint renderbuffer)
+GLboolean bridgeGlIsRenderbuffer(GLuint renderbuffer)
 {
   logV(TAG, "Called glIsRenderbuffer(%d)", renderbuffer);
   void *p = (void *)renderbuffer;
   return (p != NULL);
 }
 
-void *glMapBuffer(GLenum target, GLenum access)
+void *bridgeGlMapBuffer(GLenum target, GLenum access)
 {
   logV(TAG, "Unsupported 'glMapBuffer' called.");
   return NULL;
 }
 
-GLboolean glUnmapBuffer(GLenum target)
+GLboolean bridgeGlUnmapBuffer(GLenum target)
 {
   logV(TAG, "Unsupported 'glUnmapBuffer' called.");
   return GL_FALSE;
 }
 
-void glGenVertexArrays(GLsizei n, GLuint *arrays)
+void bridgeGlGenVertexArrays(GLsizei n, GLuint *arrays)
 {
   logV(TAG, "Unsupported 'glGenVertexArrays' called.");
 }
 
-void glDeleteVertexArrays(GLsizei n, const GLuint *arrays)
+void bridgeGlDeleteVertexArrays(GLsizei n, const GLuint *arrays)
 {
   logV(TAG, "Unsupported 'glDeleteVertexArrays' called.");
 }
 
-void glBindVertexArray(GLuint array)
+void bridgeGlBindVertexArray(GLuint array)
 {
   logV(TAG, "Unsupported 'glBindVertexArray' called.");
 }
 
-void *eglGetProcAddress(char const *procname)
+void (*bridgeEglGetProcAddress(char const *procname))(void)
 {
   logV(TAG, "eglGetProcAddress(\"%s\")", procname);
 
   if (strcmp("glGenVertexArraysOES", procname) == 0)
-    return glGenVertexArrays;
+    return (void (*)(void))bridgeGlGenVertexArrays;
   if (strcmp("glDeleteVertexArraysOES", procname) == 0)
-    return glDeleteVertexArrays;
+    return (void (*)(void))bridgeGlDeleteVertexArrays;
   if (strcmp("glBindVertexArrayOES", procname) == 0)
-    return glBindVertexArray;
+    return (void (*)(void))bridgeGlBindVertexArray;
 
   return NULL;
 }
 
-const char *SHADER_VERTEX_CC[] =
-{
-"uniform CC_PMatrix { float4x4 self; } CC_PMatrixRef;\n"
-"uniform CC_MVMatrix { float4x4 self; } CC_MVMatrixRef;\n"
-"uniform CC_MVPMatrix { float4x4 self; } CC_MVPMatrixRef;\n"
-"uniform CC_NormalMatrix { float3x3 self; } CC_NormalMatrixRef;\n"
-"uniform CC_Time { float4 self; } CC_TimeRef;\n"
-"uniform CC_SinTime { float4 self; } CC_SinTimeRef;\n"
-"uniform CC_CosTime { float4 self; } CC_CosTimeRef;\n"
-"uniform CC_Random01 { float4 self; } CC_Random01Ref;\n"
-"uniform sampler2D CC_Texture0;\n"
-"uniform sampler2D CC_Texture1;\n"
-"uniform sampler2D CC_Texture2;\n"
-"uniform sampler2D CC_Texture3;\n"
-"//CC INCLUDES END\n\n"
-
-"float4 a_position;\n"
-"float2 a_texCoord;\n"
-"float4 a_color;\n\n"
-
-"#define guy_empty\n\n"
-
-"varying float4 v_fragmentColor;\n"
-"varying float2 v_texCoord;\n"
-
-"void main()\n"
-"{\n"
-//"  vPosition = mul(CC_MVPMatrixRef.self, a_position);\n" float4 out vPosition : POSITION
-"  v_fragmentColor = a_color;\n"
-"  v_texCoord = a_texCoord;\n"
-"}\n",
-"\0"
-};
-
 void _glShaderSource(GLuint handle, GLsizei count,
                      const GLchar *const *string, const GLint *length)
 {
-  logV(TAG, "%d", count);
 
-  // replace shader
-  if (count == 4)
-  {
-    logV(TAG, "%s", string[2]);
-    // if (strcmp(string[2], "\n#define guy_empty\n") == 0)
-    //   return glShaderSource(handle, 1, SHADER_VERTEX_CC, NULL);
-    if (strcmp(string[2], "\n#define guy_empty\n") == 0)
-    {
-      uint32_t nFileSize = utilGetFileSize("ux0:vitaarc/shader/cc.gxp");
-      void *lpFile = malloc(nFileSize);
-      utilsReadFileAll("ux0:vitaarc/shader/cc.gxp", lpFile, nFileSize);
-      logV(TAG, "Loading shader cache %d %d %s", lpFile, nFileSize, "ux0:vitaarc/shader/cc.gxp");
-      glShaderBinary(1, &handle, NULL, lpFile, nFileSize);
-      logV(TAG, "Loaded %s", lpFile);
-      free(lpFile);
+  int type;
+  char *cg_shader;
+  char *gl_shader, *gl_shader_pos;
 
-      return;
-    }
+  // calculate shader length
+  size_t size = 0;
+  for(size_t i = 0; i < count; ++i) {
+    size += strlen(string[i]);
   }
 
-  logV(TAG, "nothing matched");
+  logI("opengl.c", "Accepted shader source: %d shaders, totoal size %d", count, size);
+
+  // combine the string array
+  gl_shader = malloc(size + 1);
+  gl_shader_pos = gl_shader;
+  for(size_t i = 0; i < count; ++i) {
+    memcpy(gl_shader_pos, string[i], strlen(string[i]));
+    gl_shader_pos += strlen(string[i]);
+  }
+
+  // sealed the string
+  gl_shader[size] = '\0';
+
+  logPrintf("====\n");
+  logPrintf("%s", gl_shader);
+  logPrintf("\n====\n");
+
+  FILE *fd = fopen("ux0:vitaarc/shader/1.glsl", "w+");
+  fwrite(gl_shader, size, 1, fd);
+  fclose(fd);
+
+  // convert glsl shader to cg
+  glGetShaderiv(handle, GL_SHADER_TYPE, &type); {
+    if (type == GL_FRAGMENT_SHADER) {
+      cg_shader = translate_frag_shader(gl_shader, size);
+    } else {
+      cg_shader = translate_vert_shader(gl_shader, size);
+    }
+  }
+  logPrintf("====\n");
+  logPrintf("%s", cg_shader);
+  logPrintf("====\n");
+
+  // create shader source
+  const GLchar *cg_shader_source = cg_shader;
+  glShaderSource(handle, 1, &cg_shader_source, NULL);
+  free(cg_shader);
+  free(gl_shader);
 }
 
-void _glGetShaderiv(GLuint handle, GLenum pname, GLint *params)
-{
-  logV(TAG, "called _glGetShaderiv(%d, %d, %08X)", handle, pname, params);
+// void _glGetShaderiv(GLuint handle, GLenum pname, GLint *params)
+// {
+//   logV(TAG, "called _glGetShaderiv(%d, %d, %08X), *params = %d", handle, pname, params, *params);
 
-  glGetShaderiv(handle, pname, params);
+//   glGetShaderiv(handle, pname, params);
   
-  if(pname == GL_COMPILE_STATUS)
-    logV(TAG, "compile result %d", *params);
+//   if(pname == GL_COMPILE_STATUS)
+//     logV(TAG, "compile result %d", *params);
+// }
+
+
+void _glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) {
+
+}
+
+void _glBindAttribLocation(GLuint program, GLuint index, const GLchar *name) {
+  logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
 }

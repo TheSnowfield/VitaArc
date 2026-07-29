@@ -1,5 +1,11 @@
 ## This file is a quick tutorial on writing CMakeLists for targeting the Vita
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.12)
+
+## Keep all generated files out of the source tree.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+  message(FATAL_ERROR
+    "In-source builds are disabled. Configure with: cmake -S . -B build")
+endif()
 
 ## This includes the Vita toolchain, must go before project definition
 # It is a convenience so you do not have to type
@@ -7,10 +13,15 @@ cmake_minimum_required(VERSION 2.8)
 # highly recommended that you include this block for all projects.
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   if(DEFINED ENV{VITASDK})
-    set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
+    set(VITA_SDK_ROOT "$ENV{VITASDK}")
+  elseif(EXISTS "/usr/local/vitasdk/share/vita.toolchain.cmake")
+    set(VITA_SDK_ROOT "/usr/local/vitasdk")
   else()
     message(FATAL_ERROR "Please define VITASDK to point to your SDK path!")
   endif()
+  set(CMAKE_TOOLCHAIN_FILE
+    "${VITA_SDK_ROOT}/share/vita.toolchain.cmake"
+    CACHE PATH "toolchain file")
 endif()
 
 ## Define project parameters here
@@ -40,6 +51,7 @@ set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 include_directories(
   "src"
   "src/bridges"
+  "third-party"
 )
 
 # Add any additional library paths here
@@ -48,23 +60,16 @@ link_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-## Build libraries
-add_subdirectory(src/utils)
-add_subdirectory(src/logcat)
-add_subdirectory(src/solibrary)
-add_subdirectory(src/bridges/android)
-add_subdirectory(src/bridges/cocos2dx)
-add_subdirectory(src/bridges/eabi)
-add_subdirectory(src/bridges/jni)
-add_subdirectory(src/bridges/libc)
-add_subdirectory(src/bridges/opengl)
-add_subdirectory(src/bridges/audio)
+## Collect every user-mode C/C++ source under src. CONFIGURE_DEPENDS causes
+## CMake to regenerate the list when a source file is added or removed.
+file(GLOB_RECURSE VITAARC_SOURCES
+  CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
 
 ## Build and link
-# Add all the files needed to compile here
-add_executable(${PROJECT_NAME}
-  src/main.c
-)
+add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.
 target_link_libraries(${PROJECT_NAME}
@@ -74,17 +79,8 @@ target_link_libraries(${PROJECT_NAME}
   vitaGL
   vitashark
   mathneon
-
-  Utils
-  Logcat
-  SoLibrary
-  CBridge
-  EabiBridge
-  JniBridge
-  AndroidBridge
-  OpenGLBridge
-  Cocos2dxBridge
-  AudioBridge
+  SceKernelDmacMgr_stub
+  SceShaccCgExt
 
   taihen_stub
   kubridge_stub
@@ -108,14 +104,52 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Create Vita files
 vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME} UNSAFE)
-# The FILE directive lets you add additional files to the VPK, the syntax is
-# FILE src_path dst_path_in_vpk. In this case, we add the LiveArea paths.
-vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
-  VERSION ${VITA_VERSION}
-  NAME ${VITA_APP_NAME}
-  FILE livearea/icon0.png sce_sys/icon0.png
-  FILE livearea/background.png sce_sys/livearea/contents/background.png
-  FILE livearea/startup.png sce_sys/livearea/contents/startup.png
-  FILE livearea/template.xml sce_sys/livearea/contents/template.xml
+# vita_create_vpk concatenates resource paths into a command-line string before
+# splitting it. That breaks source paths containing spaces, so keep every
+# resource mapping as an individual CMake argument instead.
+set(VITA_SELF "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.self")
+set(VITA_SFO "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk_param.sfo")
+set(VITA_VPK_OUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk.out")
+set(VITA_VPK "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk")
+
+add_custom_command(
+  OUTPUT "${VITA_SFO}"
+  COMMAND "${VITA_MKSFOEX}"
+    -d PARENTAL_LEVEL=1
+    -d ATTRIBUTE2=12
+    -s "APP_VER=${VITA_VERSION}"
+    -s "TITLE_ID=${VITA_TITLEID}"
+    "${VITA_APP_NAME}"
+    "${VITA_SFO}"
+  DEPENDS "${VITA_SELF}"
+  COMMENT "Generating param.sfo for ${PROJECT_NAME}.vpk"
+  VERBATIM
 )
 
+add_custom_command(
+  OUTPUT "${VITA_VPK_OUT}"
+  COMMAND "${VITA_PACK_VPK}"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png=sce_sys/icon0.png"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png=sce_sys/livearea/contents/background.png"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png=sce_sys/livearea/contents/startup.png"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/template.xml=sce_sys/livearea/contents/template.xml"
+    -s "${VITA_SFO}"
+    -b "${VITA_SELF}"
+    "${VITA_VPK_OUT}"
+  DEPENDS
+    "${VITA_SFO}"
+    "${VITA_SELF}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/livearea/template.xml"
+  COMMENT "Building vpk ${PROJECT_NAME}.vpk"
+  VERBATIM
+)
+
+add_custom_target(${PROJECT_NAME}.vpk-vpk ALL
+  DEPENDS "${VITA_VPK_OUT}"
+  COMMAND "${CMAKE_COMMAND}" -E copy "${VITA_VPK_OUT}" "${VITA_VPK}"
+  BYPRODUCTS "${VITA_VPK}"
+)
+add_dependencies(${PROJECT_NAME}.vpk-vpk ${PROJECT_NAME}.self-self)

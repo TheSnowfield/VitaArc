@@ -1,5 +1,5 @@
-#include <common/define.h>
-#include <utils/patcher.h>
+#include <define.h>
+#include <patcher.h>
 #include <logcat/logcat.h>
 
 #include "eabi.h"

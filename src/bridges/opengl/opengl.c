@@ -1,5 +1,5 @@
-#include <common/define.h>
-#include <utils/patcher.h>
+#include <define.h>
+#include <patcher.h>
 #include <logcat/logcat.h>
 
 #include "opengl.h"
@@ -9,10 +9,10 @@ static const BRIDGEFUNC BRIDGE_GL[] =
 {
   {"glActiveTexture", (uintptr_t)&glActiveTexture},
   {"glAttachShader", (uintptr_t)&glAttachShader},
-  {"glBindAttribLocation", (uintptr_t)&glBindAttribLocation},
+  {"glBindAttribLocation", (uintptr_t)&_glBindAttribLocation},
   {"glBindBuffer", (uintptr_t)&glBindBuffer},
   {"glBindFramebuffer", (uintptr_t)&glBindFramebuffer},
-  {"glBindRenderbuffer", (uintptr_t)&glBindRenderbuffer},
+  {"glBindRenderbuffer", (uintptr_t)&bridgeGlBindRenderbuffer},
   {"glBindTexture", (uintptr_t)&glBindTexture},
   {"glBlendEquation", (uintptr_t)&glBlendEquation},
   {"glBlendFunc", (uintptr_t)&glBlendFunc},
@@ -32,7 +32,7 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glDeleteBuffers", (uintptr_t)&glDeleteBuffers},
   {"glDeleteFramebuffers", (uintptr_t)&glDeleteFramebuffers},
   {"glDeleteProgram", (uintptr_t)&glDeleteProgram},
-  {"glDeleteRenderbuffers", (uintptr_t)&glDeleteRenderbuffers},
+  {"glDeleteRenderbuffers", (uintptr_t)&bridgeGlDeleteRenderbuffers},
   {"glDeleteShader", (uintptr_t)&glDeleteShader},
   {"glDeleteTextures", (uintptr_t)&glDeleteTextures},
   {"glDepthFunc", (uintptr_t)&glDepthFunc},
@@ -43,12 +43,12 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glDrawElements", (uintptr_t)&glDrawElements},
   {"glEnable", (uintptr_t)&glEnable},
   {"glEnableVertexAttribArray", (uintptr_t)&glEnableVertexAttribArray},
-  {"glFramebufferRenderbuffer", (uintptr_t)&glFramebufferRenderbuffer},
+  {"glFramebufferRenderbuffer", (uintptr_t)&bridgeGlFramebufferRenderbuffer},
   {"glFramebufferTexture2D", (uintptr_t)&glFramebufferTexture2D},
   {"glFrontFace", (uintptr_t)&glFrontFace},
   {"glGenBuffers", (uintptr_t)&glGenBuffers},
   {"glGenFramebuffers", (uintptr_t)&glGenFramebuffers},
-  {"glGenRenderbuffers", (uintptr_t)&glGenRenderbuffers},
+  {"glGenRenderbuffers", (uintptr_t)&bridgeGlGenRenderbuffers},
   {"glGenTextures", (uintptr_t)&glGenTextures},
   {"glGenerateMipmap", (uintptr_t)&glGenerateMipmap},
   {"glGetActiveAttrib", (uintptr_t)&glGetActiveAttrib},
@@ -61,20 +61,20 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glGetProgramiv", (uintptr_t)&glGetProgramiv},
   {"glGetShaderInfoLog", (uintptr_t)&glGetShaderInfoLog},
   {"glShaderSource", (uintptr_t)&_glShaderSource},
-  {"glGetShaderiv", (uintptr_t)&_glGetShaderiv},
+  {"glGetShaderiv", (uintptr_t)&glGetShaderiv},
   {"glGetString", (uintptr_t)&glGetString},
   {"glGetUniformLocation", (uintptr_t)&glGetUniformLocation},
-  {"glIsBuffer", (uintptr_t)&glIsBuffer},
+  {"glIsBuffer", (uintptr_t)&bridgeGlIsBuffer},
   {"glIsEnabled", (uintptr_t)&glIsEnabled},
-  {"glIsRenderbuffer", (uintptr_t)&glIsRenderbuffer},
+  {"glIsRenderbuffer", (uintptr_t)&bridgeGlIsRenderbuffer},
   {"glLineWidth", (uintptr_t)&glLineWidth},
   {"glLinkProgram", (uintptr_t)&glLinkProgram},
-  {"glMapBufferOES", (uintptr_t)&glMapBuffer},
-  {"glPixelStorei", (uintptr_t)&glPixelStorei},
+  {"glMapBufferOES", (uintptr_t)&bridgeGlMapBuffer},
+  {"glPixelStorei", (uintptr_t)&bridgeGlPixelStorei},
   {"glReadPixels", (uintptr_t)&glReadPixels},
-  {"glRenderbufferStorage", (uintptr_t)&glRenderbufferStorage},
+  {"glRenderbufferStorage", (uintptr_t)&bridgeGlRenderbufferStorage},
   {"glScissor", (uintptr_t)&glScissor},
-  // {"glGetShaderSource", (uintptr_t)&glGetShaderSource},
+  {"glGetShaderSource", (uintptr_t)&_glGetShaderSource},
   {"glStencilFunc", (uintptr_t)&glStencilFunc},
   {"glStencilMask", (uintptr_t)&glStencilMask},
   {"glStencilOp", (uintptr_t)&glStencilOp},
@@ -99,11 +99,11 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"glUniformMatrix2fv", (uintptr_t)&glUniformMatrix2fv},
   {"glUniformMatrix3fv", (uintptr_t)&glUniformMatrix3fv},
   {"glUniformMatrix4fv", (uintptr_t)&glUniformMatrix4fv},
-  {"glUnmapBufferOES", (uintptr_t)&glUnmapBuffer},
+  {"glUnmapBufferOES", (uintptr_t)&bridgeGlUnmapBuffer},
   {"glUseProgram", (uintptr_t)&glUseProgram},
   {"glVertexAttribPointer", (uintptr_t)&glVertexAttribPointer},
   {"glViewport", (uintptr_t)&glViewport},
-  {"eglGetProcAddress", (uintptr_t)&eglGetProcAddress}
+  {"eglGetProcAddress", (uintptr_t)&bridgeEglGetProcAddress}
 };
 
 void bridgePatchGL(HSOLIB hSoLibrary)

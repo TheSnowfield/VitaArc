@@ -1,8 +1,8 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "../../common/define.h"
-#include "../../utils/patcher.h"
+#include <define.h>
+#include <patcher.h>
 #include "../../logcat/logcat.h"
 #include "impl/assetmgr.h"
 #include "impl/log.h"

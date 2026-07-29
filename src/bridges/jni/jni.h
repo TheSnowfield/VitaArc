@@ -2,7 +2,7 @@
 #define _BRIDGE_JNI_H_
 
 #include <stddef.h>
-#include "../../solibrary/solib.h"
+#include <loader.h>
 
 void bridgeCallJNIMain(HSOLIB hSoLibrary);
 

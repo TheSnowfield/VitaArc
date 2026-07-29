@@ -1,5 +1,5 @@
-#!/bin/bash
-cmake . -B build \
-  && cd build    \
-  && make clean  \
-  && make -j 8
+#!/usr/bin/env bash
+set -e
+
+cmake -S . -B build
+cmake --build build --parallel 8

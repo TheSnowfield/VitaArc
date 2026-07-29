@@ -1,7 +1,7 @@
 #ifndef _BRIDGE_AUDIO_H_
 #define _BRIDGE_AUDIO_H_
 
-#include "../../solibrary/solib.h"
+#include <loader.h>
 
 void bridgeAudioProvider(HSOLIB hSoLibrary);
 

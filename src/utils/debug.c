@@ -1,7 +1,7 @@
 #include <psp2/io/fcntl.h>
 #include <kubridge/kubridge.h>
 #include <logcat/logcat.h>
-#include <common/define.h>
+#include <define.h>
 #include "debug.h"
 
 void debugPrintMemoryBlock(void *lpMemoryBlock,

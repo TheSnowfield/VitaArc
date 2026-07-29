@@ -1,4 +1,4 @@
-#include <utils/patcher.h>
+#include <patcher.h>
 #include <utils/debug.h>
 #include <stdlib.h>
 #include "cocos2dx.h"
@@ -36,4 +36,9 @@ void bridgePatchCocos2DX(HSOLIB hSoLibrary)
   // AudioManager::internal_loadSFX
   // prevent call opensles
   patchThumb(hSoLibrary, 0x50E30E, 0x00BF);
+
+  // cocos2d::GLProgram::bindPredefinedVertexAttribs
+  // prevent call glBindAttribLocation
+  patchARM(hSoLibrary, 0x6E6AD4, 0x00F020E3);
+
 }

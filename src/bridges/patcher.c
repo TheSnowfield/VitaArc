@@ -1,4 +1,4 @@
-#include <common/define.h>
+#include <define.h>
 #include <logcat/logcat.h>
 #include <kubridge/kubridge.h>
 #include "kubridge.h"
@@ -35,7 +35,7 @@ void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patc
 
     // Apply patch
     if (patches[i].nPatchLength < 8)
-      kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
+      kuKernelCpuUnrestrictedMemcpy((void *)lpPatchAddress,
                                     &patches[i].nPatchValue,
                                     patches[i].nPatchLength);
     else
@@ -59,7 +59,7 @@ void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
   uintptr_t lpPatchAddress = lpImageBase + nPatchOffset;
 
   // Apply patch
-  kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
+  kuKernelCpuUnrestrictedMemcpy((void *)lpPatchAddress,
                                 &nPatchValue, 4);
 }
 
@@ -79,7 +79,7 @@ void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
   uintptr_t lpPatchAddress = lpImageBase + nPatchOffset;
 
   // Apply patch
-  kuKernelCpuUnrestrictedMemcpy(lpPatchAddress,
+  kuKernelCpuUnrestrictedMemcpy((void *)lpPatchAddress,
                                 &nPatchValue, 2);
 }
 
@@ -93,12 +93,12 @@ void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
   return patchUint32(hSoLibrary, nPatchOffset, nPatchValue);
 }
 
-void *hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback)
+void hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback)
 {
   if (!hSoLibrary ||
       !nHookOffset ||
       !lpfnHookCallback)
-    return NULL;
+    return;
 
   // Get image base
   uintptr_t lpImageBase = 0x98000000;
@@ -116,6 +116,6 @@ void *hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallba
   // hook
   uint32_t nHook[2];
   nHook[0] = 0xE51FF004; // LDR PC, [PC, #-4]
-  nHook[1] = lpfnHookCallback;
+  nHook[1] = (uint32_t)(uintptr_t)lpfnHookCallback;
   kuKernelCpuUnrestrictedMemcpy((void *)lpHookAddress, nHook, sizeof(nHook));
 }

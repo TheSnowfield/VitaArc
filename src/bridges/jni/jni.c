@@ -1,8 +1,8 @@
-#include <solibrary/solib.h>
-#include <utils/patcher.h>
+#include <loader.h>
+#include <patcher.h>
 
 #include <logcat/logcat.h>
-#include <common/define.h>
+#include <define.h>
 #include <utils/debug.h>
 
 #include "impl/jvm.h"
@@ -54,6 +54,8 @@ static struct JNIInvokeInterface jniInvokeEnv =
   .AttachCurrentThreadAsDaemon = AttachCurrentThreadAsDaemon
 };
 
+static JavaVM jniJavaVM = &jniInvokeEnv;
+
 jint GetEnv(JavaVM *javaVM, void **a1, jint i)
 {
   *a1 = &jniNativeEnv;
@@ -64,7 +66,7 @@ jint GetEnv(JavaVM *javaVM, void **a1, jint i)
 
 jint GetJavaVM(JNIEnv* javaEnv, JavaVM** javaVM)
 {
-  *javaVM = &jniInvokeEnv;
+  *javaVM = &jniJavaVM;
 
   logV(TAG, "Called GetJavaVM");
   return 0;
@@ -76,7 +78,7 @@ void bridgeCallJNIMain(HSOLIB hSoLibrary)
   debugMemoryDump("ux0:vitaarc/memdump.bin", (void *)0x98000000, 0xA60AA0);
   // debugMemoryDump("ux0:vitaarc/vitaarc.bin", 0x81000000, 0x000100);
 
-  pfnJNIOnload(&jniInvokeEnv, NULL);
+  pfnJNIOnload(&jniJavaVM, NULL);
 }
 
 typedef int (*JNICocosNativeInit)(uint32_t, uint32_t);
@@ -116,4 +118,3 @@ void bridgeJNICocosSetDeviceId(HSOLIB hSoLibrary)
 
   lpfnJNICocosSetDeviceId(&jniNativeEnv, JSTRING("61616161"));
 }
-

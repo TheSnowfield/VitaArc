@@ -45,7 +45,7 @@ int main() {
     // }
 
     // Load library
-    HSOLIB hLibCocos2dx = solibLoadLibrary(LIBRARY_LIBCOCOS2DCPP); {
+    dynalib_t *hLibCocos2dx = solibLoadLibrary(LIBRARY_LIBCOCOS2DCPP); {
 
       // Check success
       if (!hLibCocos2dx) {

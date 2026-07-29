@@ -3,9 +3,9 @@
 
 #include <loader.h>
 
-void bridgePatchCocos2DX(HSOLIB hSoLibrary);
+void bridgePatchCocos2DX(dynalib_t *hSoLibrary);
 
-void bridgeCocos2DXRendererNativeInit(HSOLIB hSoLibrary,
+void bridgeCocos2DXRendererNativeInit(dynalib_t *hSoLibrary,
                                     uint32_t nScreenWidth, uint32_t nScreenHeight);
 
 #endif /* _BRIDGE_COCOS2DX_H_ */

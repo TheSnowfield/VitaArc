@@ -72,7 +72,7 @@ jint GetJavaVM(JNIEnv* javaEnv, JavaVM** javaVM)
   return 0;
 }
 
-void bridgeCallJNIMain(HSOLIB hSoLibrary)
+void bridgeCallJNIMain(dynalib_t *hSoLibrary)
 {
   JNI_OnLoad pfnJNIOnload = solibGetProcAddress(hSoLibrary, "JNI_OnLoad");
   debugMemoryDump("ux0:vitaarc/memdump.bin", (void *)0x98000000, 0xA60AA0);
@@ -86,7 +86,7 @@ typedef int (*JNICocosInitApp)(struct JNINativeInterface *);
 typedef int (*JNICocosSetAppVersion)(struct JNINativeInterface *, jstring);
 typedef int (*JNICocosSetDeviceId)(struct JNINativeInterface *, jstring);
 
-void bridgeJNICocosNativeInit(HSOLIB hSoLibrary,
+void bridgeJNICocosNativeInit(dynalib_t *hSoLibrary,
                                       uint32_t nScreenWidth, uint32_t nScreenHeight)
 {
   JNICocosNativeInit lpfnNativeInit =
@@ -95,7 +95,7 @@ void bridgeJNICocosNativeInit(HSOLIB hSoLibrary,
   lpfnNativeInit(nScreenWidth, nScreenHeight);
 }
 
-void bridgeJNICocosInitApp(HSOLIB hSoLibrary)
+void bridgeJNICocosInitApp(dynalib_t *hSoLibrary)
 {
   JNICocosInitApp lpfnJNICocosInitApp =
       solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_initJVMPlatformUtils");
@@ -103,7 +103,7 @@ void bridgeJNICocosInitApp(HSOLIB hSoLibrary)
   lpfnJNICocosInitApp(&jniNativeEnv);
 }
 
-void bridgeJNICocosSetAppVersion(HSOLIB hSoLibrary)
+void bridgeJNICocosSetAppVersion(dynalib_t *hSoLibrary)
 {
   JNICocosSetAppVersion lpfnJNICocosSetAppVersion =
       solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_setAppVersion");
@@ -111,7 +111,7 @@ void bridgeJNICocosSetAppVersion(HSOLIB hSoLibrary)
   lpfnJNICocosSetAppVersion(&jniNativeEnv, JSTRING("v6.1.6"));
 }
 
-void bridgeJNICocosSetDeviceId(HSOLIB hSoLibrary)
+void bridgeJNICocosSetDeviceId(dynalib_t *hSoLibrary)
 {
   JNICocosSetDeviceId lpfnJNICocosSetDeviceId =
       solibGetProcAddress(hSoLibrary, "Java_low_moe_AppActivity_setDeviceId");

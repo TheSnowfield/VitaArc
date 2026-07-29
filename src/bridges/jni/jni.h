@@ -4,13 +4,13 @@
 #include <stddef.h>
 #include <loader.h>
 
-void bridgeCallJNIMain(HSOLIB hSoLibrary);
+void bridgeCallJNIMain(dynalib_t *hSoLibrary);
 
-void bridgeJNICocosNativeInit(HSOLIB hSoLibrary,
+void bridgeJNICocosNativeInit(dynalib_t *hSoLibrary,
                                       uint32_t nScreenWidth, uint32_t nScreenHeight);
 
-void bridgeJNICocosInitApp(HSOLIB hSoLibrary);
+void bridgeJNICocosInitApp(dynalib_t *hSoLibrary);
 
-void bridgeJNICocosSetDeviceId(HSOLIB hSoLibrary);
+void bridgeJNICocosSetDeviceId(dynalib_t *hSoLibrary);
 
 #endif /* _BRIDGE_JNI_H_ */

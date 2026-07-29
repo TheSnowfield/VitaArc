@@ -1,12 +1,10 @@
-#ifndef _SOLIB_H_
-#define _SOLIB_H_
+#ifndef _LOADER_H_
+#define _LOADER_H_
 
 #include <types.h>
 #include <elf.h>
 
-typedef void **HSOLIB;
-
-typedef struct SOINTERNAL
+typedef struct dynalib_t
 {
   uint32_t nRefCount;
   uint32_t nSlotIndex;
@@ -28,7 +26,7 @@ typedef struct SOINTERNAL
 
   void *lpTextBase;
 
-} SOINTERNAL, *LPSOINTERNAL;
+} dynalib_t;
 
 /**
  * Load so library
@@ -37,7 +35,7 @@ typedef struct SOINTERNAL
  *
  * @return not 0 success
  */
-HSOLIB solibLoadLibrary(const char *szLibrary);
+dynalib_t *solibLoadLibrary(const char *szLibrary);
 
 /**
  * Init so library
@@ -45,7 +43,7 @@ HSOLIB solibLoadLibrary(const char *szLibrary);
  * @param hSoLibrary Library instance handle
  *
  */
-void solibInitLibrary(HSOLIB hSoLibrary);
+void solibInitLibrary(dynalib_t *library);
 
 /**
  * Free so library
@@ -54,7 +52,7 @@ void solibInitLibrary(HSOLIB hSoLibrary);
  *
  * @return void
  */
-void solibFreeLibrary(HSOLIB hSoLibrary);
+void solibFreeLibrary(dynalib_t *library);
 
 /**
  * Get proc address by symbol name
@@ -65,7 +63,7 @@ void solibFreeLibrary(HSOLIB hSoLibrary);
  *
  * @return not 0 success
  */
-void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
+void *solibGetProcAddress(dynalib_t *library, const char *szSymbolName);
 
 /**
  * Install relocation address by symbol name
@@ -78,7 +76,7 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szSymbolName);
  *
  * @return not 0 success
  */
-void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, uintptr_t pfnDestProc);
+void *solibInstallProc(dynalib_t *library, const char *szSymbolName, uintptr_t pfnDestProc);
 
 /**
  * Get library image base
@@ -87,7 +85,7 @@ void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, uintptr_t pf
  *
  * @return library image base
  */
-void *solibGetLibraryImageBase(HSOLIB hSoLibrary);
+void *solibGetLibraryImageBase(dynalib_t *library);
 
 /**
  * Find loaded library by name
@@ -96,7 +94,7 @@ void *solibGetLibraryImageBase(HSOLIB hSoLibrary);
  *
  * @return not 0 success
  */
-HSOLIB solibFindLibrary(const char *szLibraryName);
+dynalib_t *solibFindLibrary(const char *szLibraryName);
 
 /**
  * Clone a handle
@@ -105,17 +103,7 @@ HSOLIB solibFindLibrary(const char *szLibraryName);
  *
  * @return not 0 success
  */
-HSOLIB solibCloneHandle(HSOLIB hSoLibrary);
-
-
-/**
- * Clone a handle (Internal use)
- *
- * @param lpInternal Library base pointer
- *
- * @return not 0 success
- */
-HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal);
+dynalib_t *solibCloneHandle(dynalib_t *library);
 
 /**
  * Find an empty library slot (Internal use)
@@ -131,7 +119,7 @@ int32_t solibFindEmptySlot();
  *
  * @return not 0 success
  */
-bool solibLoadSections(LPSOINTERNAL lpInternal);
+bool solibLoadSections(dynalib_t *library);
 
 /**
  * Print ELF fotmat information (Internal use)
@@ -140,7 +128,7 @@ bool solibLoadSections(LPSOINTERNAL lpInternal);
  *
  * @return not 0 success
  */
-void solibDebugPrintElfTable(LPSOINTERNAL lpInternal);
+void solibDebugPrintElfTable(dynalib_t *library);
 
 
-#endif /* _SOLIB_H_ */
+#endif /* _LOADER_H_ */

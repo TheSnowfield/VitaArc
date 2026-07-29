@@ -106,7 +106,7 @@ static const BRIDGEFUNC BRIDGE_GL[] =
   {"eglGetProcAddress", (uintptr_t)&bridgeEglGetProcAddress}
 };
 
-void bridgePatchGL(HSOLIB hSoLibrary)
+void bridgePatchGL(dynalib_t *hSoLibrary)
 {
   patchSymbols(hSoLibrary, BRIDGE_GL, sizeof(BRIDGE_GL) / sizeof(BRIDGEFUNC));
   

@@ -4,7 +4,7 @@
 #include "kubridge.h"
 #include "patcher.h"
 
-void patchSymbols(HSOLIB hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bridgeSize)
+void patchSymbols(dynalib_t *hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bridgeSize)
 {
   for (int i = 0; i < bridgeSize; ++i)
   {
@@ -15,7 +15,7 @@ void patchSymbols(HSOLIB hSoLibrary, const BRIDGEFUNC bridgeFunc[], uint32_t bri
   }
 }
 
-void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patchSize)
+void patchAddress(dynalib_t *hSoLibrary, const PATCHADDRESS patches[], uint32_t patchSize)
 {
   // Get image base
   uintptr_t lpImageBase = 0x98000000;
@@ -43,7 +43,7 @@ void patchAddress(HSOLIB hSoLibrary, const PATCHADDRESS patches[], uint32_t patc
   }
 }
 
-void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
+void patchUint32(dynalib_t *hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
 {
   // Get image base
   uintptr_t lpImageBase = 0x98000000;
@@ -63,7 +63,7 @@ void patchUint32(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
                                 &nPatchValue, 4);
 }
 
-void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
+void patchUint16(dynalib_t *hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
 {
   // Get image base
   uintptr_t lpImageBase = 0x98000000;
@@ -83,17 +83,17 @@ void patchUint16(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
                                 &nPatchValue, 2);
 }
 
-void patchThumb(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
+void patchThumb(dynalib_t *hSoLibrary, uint32_t nPatchOffset, uint16_t nPatchValue)
 {
   return patchUint16(hSoLibrary, nPatchOffset, nPatchValue);
 }
 
-void patchARM(HSOLIB hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
+void patchARM(dynalib_t *hSoLibrary, uint32_t nPatchOffset, uint32_t nPatchValue)
 {
   return patchUint32(hSoLibrary, nPatchOffset, nPatchValue);
 }
 
-void hookStubProc(HSOLIB hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback)
+void hookStubProc(dynalib_t *hSoLibrary, uint32_t nHookOffset, void *lpfnHookCallback)
 {
   if (!hSoLibrary ||
       !nHookOffset ||

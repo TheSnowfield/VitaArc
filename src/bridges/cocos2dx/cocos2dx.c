@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "cocos2dx.h"
 
-void bridgePatchCocos2DX(HSOLIB hSoLibrary)
+void bridgePatchCocos2DX(dynalib_t *hSoLibrary)
 {
   void *lpPatchAddress = NULL;
 

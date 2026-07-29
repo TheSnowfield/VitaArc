@@ -256,7 +256,7 @@ static const BRIDGEFUNC BRIDGE_LIBC[] =
   {"write", (uintptr_t)&write}
 };
 
-void bridgePatchLibC(HSOLIB hSoLibrary)
+void bridgePatchLibC(dynalib_t *hSoLibrary)
 {
   patchSymbols(hSoLibrary, BRIDGE_LIBC, sizeof(BRIDGE_LIBC) / sizeof(BRIDGEFUNC));
 }

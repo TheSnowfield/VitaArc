@@ -28,7 +28,7 @@ static const BRIDGEFUNC BRIDGE_EABI[] =
   {"__aeabi_ul2d", (uintptr_t)&__aeabi_ul2d}
 };
 
-void bridgePatchEABI(HSOLIB hSoLibrary)
+void bridgePatchEABI(dynalib_t *hSoLibrary)
 {
   patchSymbols(hSoLibrary, BRIDGE_EABI, sizeof(BRIDGE_EABI) / sizeof(BRIDGEFUNC));
 }

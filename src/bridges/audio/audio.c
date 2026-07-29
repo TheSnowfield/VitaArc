@@ -58,7 +58,7 @@ void *audioManagerCreate(void *audioManager, void *audioProvider)
   return lpAudioManagerThis;
 }
 
-void bridgeAudioProvider(HSOLIB hSoLibrary)
+void bridgeAudioProvider(dynalib_t *hSoLibrary)
 {
   patchSymbols(hSoLibrary, BRIDGE_AUDIO, sizeof(BRIDGE_AUDIO) / sizeof(BRIDGEFUNC));
 

@@ -23,7 +23,7 @@ static const BRIDGEFUNC BRIDGE_ANDROID[] =
   {"AAsset_read", (uintptr_t)&AAsset_read}
 };
 
-void bridgePatchAndroid(HSOLIB hSoLibrary)
+void bridgePatchAndroid(dynalib_t *hSoLibrary)
 {
   patchSymbols(hSoLibrary, BRIDGE_ANDROID,
                sizeof(BRIDGE_ANDROID) / sizeof(BRIDGEFUNC));

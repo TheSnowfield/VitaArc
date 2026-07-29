@@ -15,7 +15,6 @@
 
 #include "loader.h"
 
-#define _H(x) ((LPSOINTERNAL)(*x));
 #define MAX_LIBRARY 32
 
 #ifndef SCE_KERNEL_MEMBLOCK_TYPE_USER_RX
@@ -63,9 +62,9 @@
 #define MEMALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
 
 static uint32_t libraryLoaded = 0;
-static LPSOINTERNAL librarySlots[MAX_LIBRARY] = {NULL};
+static dynalib_t *librarySlots[MAX_LIBRARY] = {NULL};
 
-HSOLIB solibLoadLibrary(const char *szLibrary)
+dynalib_t *solibLoadLibrary(const char *szLibrary)
 {
   logV(TAG, "Loading library '%s'", szLibrary);
 
@@ -79,37 +78,39 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     FAILED("File is empty.");
 
   // Find library instance
-  HSOLIB hSoLibrary = NULL;
+  dynalib_t *library = NULL;
   const char *szLibraryName = utilGetFileName(szLibrary);
-  hSoLibrary = solibFindLibrary(szLibraryName);
+  library = solibFindLibrary(szLibraryName);
 
   // If this library has been loaded
   // just duplicate the handle and return
-  if (hSoLibrary)
-    return solibCloneHandle(hSoLibrary);
+  if (library)
+    return solibCloneHandle(library);
 
   // Prepare new block
-  LPSOINTERNAL lpInternal = malloc(sizeof(SOINTERNAL));
+  dynalib_t *libraryNew = calloc(1, sizeof(*libraryNew));
+  if (!libraryNew)
+    FAILED("Allocate library state failed.");
   {
     // Allocate a memory block to
     // storage library image
-    lpInternal->sceImageMemBlock =
+    libraryNew->sceImageMemBlock =
         sceKernelAllocMemBlock("elf_image",
                                SCE_KERNEL_MEMBLOCK_TYPE_USER_RW,
                                (nfileSize + 0xFFF) & ~0xFFF,
                                NULL);
 
     // Check success
-    if (lpInternal->sceImageMemBlock <= 0)
+    if (libraryNew->sceImageMemBlock <= 0)
       FAILED_INTERNAL("Allocate memory block failed.");
 
     // Save the head of this memory block
-    sceKernelGetMemBlockBase(lpInternal->sceImageMemBlock,
-                             &lpInternal->lpLibraryImageBase);
+    sceKernelGetMemBlockBase(libraryNew->sceImageMemBlock,
+                             &libraryNew->lpLibraryImageBase);
 
     // Open file and read
     SceUID libFile = sceIoOpen(szLibrary, SCE_O_RDONLY, 0);
-    sceIoRead(libFile, lpInternal->lpLibraryImageBase, nfileSize);
+    sceIoRead(libFile, libraryNew->lpLibraryImageBase, nfileSize);
     sceIoClose(libFile);
 
     // Allocate a slot to store instance
@@ -118,12 +119,12 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
       FAILED_MEMBLOCK("Library loaded too much!");
 
     // Setup pointers
-    lpInternal->nSlotIndex = nSlotIndex;
-    strcpy(lpInternal->szLibraryPath, szLibrary);
-    strcpy(lpInternal->szLibraryName, szLibraryName);
+    libraryNew->nSlotIndex = nSlotIndex;
+    strcpy(libraryNew->szLibraryPath, szLibrary);
+    strcpy(libraryNew->szLibraryName, szLibraryName);
 
     ++libraryLoaded;
-    librarySlots[nSlotIndex] = lpInternal;
+    librarySlots[nSlotIndex] = libraryNew;
 
     // Print slots information
     logI(TAG, "Library '%s' loaded.", szLibraryName);
@@ -131,27 +132,28 @@ HSOLIB solibLoadLibrary(const char *szLibrary)
     logI(TAG, "  Available slots: %d", MAX_LIBRARY - libraryLoaded);
 
     // Print debug information
-    solibDebugPrintElfTable(lpInternal);
+    solibDebugPrintElfTable(libraryNew);
 
     // Process section
-    solibLoadSections(lpInternal);
+    solibLoadSections(libraryNew);
     logI(TAG, "Load and relocated all sections.");
 
     // Clone an userend handle
-    return solibCloneHandleInternal(lpInternal);
+    return solibCloneHandle(libraryNew);
 
   ReleaseMemblock:
-    sceKernelFreeMemBlock(lpInternal->sceImageMemBlock);
+    sceKernelFreeMemBlock(libraryNew->sceImageMemBlock);
   }
 
 ReleaseInternal:
-  free(lpInternal);
+  free(libraryNew);
 
   return NULL;
 }
 
-bool solibLoadSections(LPSOINTERNAL lpInternal)
+bool solibLoadSections(dynalib_t *library)
 {
+  dynalib_t *lpInternal = library;
   // Image base address
   uintptr_t lpImageBase = (uintptr_t)lpInternal->lpLibraryImageBase;
 
@@ -357,9 +359,9 @@ bool solibLoadSections(LPSOINTERNAL lpInternal)
   return true;
 }
 
-void solibInitLibrary(HSOLIB hSoLibrary)
+void solibInitLibrary(dynalib_t *library)
 {
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+  dynalib_t *lpInternal = library;
 
   // Init array
   int (**lpfnInit)() = (void *)(lpInternal->lpTextBase +
@@ -373,8 +375,9 @@ void solibInitLibrary(HSOLIB hSoLibrary)
   }
 }
 
-void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
+void solibDebugPrintElfTable(dynalib_t *library)
 {
+  dynalib_t *lpInternal = library;
   logV(TAG, "Image Base: 0x%08X", lpInternal->lpLibraryImageBase);
   debugPrintMemoryBlock(lpInternal->lpLibraryImageBase, 16, 16);
 
@@ -461,12 +464,12 @@ void solibDebugPrintElfTable(LPSOINTERNAL lpInternal)
   // }
 }
 
-void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
+void *solibGetProcAddress(dynalib_t *library, const char *szFunctionName)
 {
-  if (!hSoLibrary)
+  if (!library)
     return NULL;
 
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+  dynalib_t *lpInternal = library;
 
   // Enumerate symbol table
   for (int i = 0; i < lpInternal->nElfDynSymbolCount; ++i)
@@ -489,12 +492,12 @@ void *solibGetProcAddress(HSOLIB hSoLibrary, const char *szFunctionName)
   return NULL;
 }
 
-void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, uintptr_t pfnDestProc)
+void *solibInstallProc(dynalib_t *library, const char *szSymbolName, uintptr_t pfnDestProc)
 {
-  if (!hSoLibrary)
+  if (!library)
     return NULL;
 
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
+  dynalib_t *lpInternal = library;
 
   for (int i = 0; i < lpInternal->lpElfHeader->e_shnum; ++i)
   {
@@ -527,16 +530,15 @@ void *solibInstallProc(HSOLIB hSoLibrary, const char *szSymbolName, uintptr_t pf
   return NULL;
 }
 
-void *solibGetLibraryImageBase(HSOLIB hSoLibrary)
+void *solibGetLibraryImageBase(dynalib_t *library)
 {
-  if (!hSoLibrary)
+  if (!library)
     return NULL;
 
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
-  return lpInternal->lpLibraryImageBase;
+  return library->lpLibraryImageBase;
 }
 
-HSOLIB solibFindLibrary(const char *szLibraryName)
+dynalib_t *solibFindLibrary(const char *szLibraryName)
 {
   for (int i = 0; i < MAX_LIBRARY; ++i)
   {
@@ -544,54 +546,41 @@ HSOLIB solibFindLibrary(const char *szLibraryName)
         !strcmp(librarySlots[i]->szLibraryName, szLibraryName))
     {
       logV(TAG, "Library found. Index: %d", i);
-      return solibCloneHandleInternal(librarySlots[i]);
+      return librarySlots[i];
     }
   }
 
   return NULL;
 }
 
-void solibFreeLibrary(HSOLIB hSoLibrary)
+void solibFreeLibrary(dynalib_t *library)
 {
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
-  logV(TAG, "Free library %s", lpInternal->szLibraryName);
+  if (!library)
+    return;
+
+  logV(TAG, "Free library %s", library->szLibraryName);
 
   // Sub reference count
-  if (--(lpInternal->nRefCount) == 0)
-    solibFreeLibrary(*hSoLibrary);
+  if (library->nRefCount > 0 && --library->nRefCount > 0)
+    return;
 
-  // Destroy pointers
-  librarySlots[lpInternal->nSlotIndex] = NULL;
+  // Destroy library
+  librarySlots[library->nSlotIndex] = NULL;
   --libraryLoaded;
 
-  sceKernelFreeMemBlock(lpInternal->sceImageMemBlock);
-  free(hSoLibrary);
+  sceKernelFreeMemBlock(library->sceImageMemBlock);
+  free(library);
 }
 
-HSOLIB solibCloneHandle(HSOLIB hSoLibrary)
+dynalib_t *solibCloneHandle(dynalib_t *library)
 {
-  LPSOINTERNAL lpInternal = _H(hSoLibrary);
-
-  // Clone a pointer
-  HSOLIB hSoLibraryNew = (HSOLIB)malloc(sizeof(HSOLIB));
-  (*hSoLibraryNew) = lpInternal;
+  if (!library)
+    return NULL;
 
   // Add reference count
-  ++(lpInternal->nRefCount);
+  ++library->nRefCount;
 
-  return hSoLibraryNew;
-}
-
-HSOLIB solibCloneHandleInternal(LPSOINTERNAL lpInternal)
-{
-  // Clone a pointer
-  HSOLIB hSoLibraryNew = (HSOLIB)malloc(sizeof(HSOLIB));
-  (*hSoLibraryNew) = lpInternal;
-
-  // Add reference count
-  ++(lpInternal->nRefCount);
-
-  return hSoLibraryNew;
+  return library;
 }
 
 int32_t solibFindEmptySlot()

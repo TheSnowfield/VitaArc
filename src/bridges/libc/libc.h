@@ -3,6 +3,6 @@
 
 #include <loader.h>
 
-void bridgePatchLibC(HSOLIB hSoLibrary);
+void bridgePatchLibC(dynalib_t *hSoLibrary);
 
 #endif /* _BRIDGE_LIBC_H_ */

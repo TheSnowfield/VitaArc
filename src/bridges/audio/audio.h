@@ -3,6 +3,6 @@
 
 #include <loader.h>
 
-void bridgeAudioProvider(HSOLIB hSoLibrary);
+void bridgeAudioProvider(dynalib_t *hSoLibrary);
 
 #endif /* _BRIDGE_AUDIO_H_ */

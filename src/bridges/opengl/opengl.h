@@ -3,6 +3,6 @@
 
 #include <loader.h>
 
-void bridgePatchGL(HSOLIB lpSoLibrary);
+void bridgePatchGL(dynalib_t *lpSoLibrary);
 
 #endif /* _BRIDGE_OPENGL_H_ */

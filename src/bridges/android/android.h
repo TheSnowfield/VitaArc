@@ -3,6 +3,6 @@
 
 #include <loader.h>
 
-void bridgePatchAndroid(HSOLIB hSoLibrary);
+void bridgePatchAndroid(dynalib_t *hSoLibrary);
 
 #endif /* _BRIDGE_ANDROID_H_ */

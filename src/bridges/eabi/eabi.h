@@ -3,6 +3,6 @@
 
 #include <loader.h>
 
-void bridgePatchEABI(HSOLIB hSoLibrary);
+void bridgePatchEABI(dynalib_t *hSoLibrary);
 
 #endif /* _BRIDGE_EABI_H_ */

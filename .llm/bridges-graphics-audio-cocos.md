@@ -2,7 +2,8 @@
 
 ## OpenGL bridge strategy
 
-`bridgePatchGL` 将 Android `libcocos2dcpp.so` 的 OpenGL ES/EGL 导入重定向到：
+OpenGL ES/EGL 导入现在来自统一的 `src/bridges/symbol.def`，由 loader
+自动绑定到：
 
 - vitaGL 中已有的同名函数。
 - VitaArc 自己的包装函数。
@@ -197,12 +198,12 @@ glShaderSource(...); // NOTE: Uses CG shader sources
 3. `malloc(total + 1)`。
 4. 顺序拼接所有 shader source strings。
 5. 写 NUL。
-6. 使用 `logPrintf("%s", gl_shader)` 输出原始 GLSL。
+6. 使用 `log_printf("%s", gl_shader)` 输出原始 GLSL。
 7. 写入固定文件 `ux0:vitaarc/shader/1.glsl`。
 8. 调用 vitaGL `glGetShaderiv(handle, GL_SHADER_TYPE, &type)`。
 9. fragment → `translate_frag_shader`。
 10. vertex → `translate_vert_shader`。
-11. 使用 `logPrintf("%s", cg_shader)` 输出生成 Cg。
+11. 使用 `log_printf("%s", cg_shader)` 输出生成 Cg。
 12. `glShaderSource(handle, 1, &cg_shader_source, NULL)`。
 13. 立即 `free(cg_shader)` 和 `free(gl_shader)`。
 
@@ -232,7 +233,9 @@ logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
 
 当前日志调用参数顺序已正确。
 
-同时 `bridgePatchCocos2DX` 修改 `cocos2d::GLProgram::bindPredefinedVertexAttribs`，用于阻止原代码调用 attribute binding。
+同时 `bridge_patch_cocos2dx` 修改
+`cocos2d::GLProgram::bindPredefinedVertexAttribs`，用于阻止原代码调用
+attribute binding。
 
 本地 vitaGL 的真实 `glBindAttribLocation`：
 
@@ -345,7 +348,7 @@ logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
 - `cocos2d::JniHelper::convert`
 - `AudioManager::init`
 
-`bridgePatchGL` 中也保留了两个注释掉的 OpenGL 相关补丁：
+`bridge_patch_gl` 中也保留了两个注释掉的 OpenGL 相关补丁：
 
 - `0x6E6AD4`
 - `0x6E6534`
@@ -368,7 +371,7 @@ RTTI `_ZTI13AudioProvider` 的替换被注释。
 
 ### 本地伪对象布局
 
-`audioProviderConstruct` 分配：
+`audio_provider_construct` 分配：
 
 ```c
 struct IAMCLASS {
@@ -382,23 +385,23 @@ struct IAMETHODS {
 
 methods：
 
-1. `audioProviderInit`
-2. `audioProviderResume`
-3. `audioProviderSetBGMVolume`
-4. `audioProviderSetSFXVolume`
-5. `audioProviderSupsend`
-6. `audioProviderUpdate`
+1. `audio_provider_init`
+2. `audio_provider_resume`
+3. `audio_provider_set_bgm_volume`
+4. `audio_provider_set_sfx_volume`
+5. `audio_provider_suspend`
+6. `audio_provider_update`
 
 destructor 不在该 methods 数组中。
 
 当前方法行为：
 
-- `audioProviderInit` 返回 1。
-- `audioProviderSetBGMVolume` 返回 1。
-- `audioProviderSetSFXVolume` 返回 1。
+- `audio_provider_init` 返回 1。
+- `audio_provider_set_bgm_volume` 返回 1。
+- `audio_provider_set_sfx_volume` 返回 1。
 - 其他方法只记录日志。
 
-`audioProviderDestruct` 不释放对象或 methods 数组。
+`audio_provider_destruct` 不释放对象或 methods 数组。
 
 ### AudioManager hook
 
@@ -407,11 +410,12 @@ destructor 不在该 methods 数组中。
 - `_ZN12AudioManagerC2Ev`
 - `_ZN12AudioManager4initEP13AudioProvider`
 
-然后在固定偏移 `0x38FD1C` 安装绝对跳转到 `audioManagerCreate`。
+然后在固定偏移 `0x38FD1C` 安装绝对跳转到
+`audio_manager_create`。
 
-`audioManagerCreate`：
+`audio_manager_create`：
 
-1. 忽略传入的 `audioManager` 和 `audioProvider`。
+1. 忽略传入的 `audio_manager` 和 `audio_provider`。
 2. `malloc(0x268)`。
 3. 清零对象。
 4. 调用目标库 `AudioManager` constructor。
@@ -422,4 +426,4 @@ destructor 不在该 methods 数组中。
 
 constructor/init 查找结果没有空检查。
 
-失败路径调用 destructor 后没有 `free(lpAudioManagerThis)`。
+失败路径调用 destructor 后没有释放本地分配的 manager。

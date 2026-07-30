@@ -2,275 +2,406 @@
 
 ## Android log
 
-注册：
+统一 `symbol.def` 注册：
 
-- `__android_log_print`
-- `__android_log_write`
+```text
+__android_log_print
+__android_log_write
+```
 
-两个函数都：
+实现把 Android priority、tag 和文本传给 VitaArc logger。Android priority 数值和本地五级 `LOGLEVEL` 不完全同构，需继续注意越界/等级映射。
 
-1. 接收 Android priority、tag、format 和 varargs。
-2. 将 priority 强制转换为本地 `LOGLEVEL`。
-3. 调用 `logBase`。
-4. 返回 0。
+## Android AssetManager 类型
 
-本地 `LOGLEVEL` 只有 0..4 五个值，而 Android log priority 的数值体系不是同一个枚举。未经范围转换的 priority 可越界访问 `logLvString`。
+```c
+struct a_asset_manager {
+  const char *root_path;
+};
 
-## Android AssetManager
+struct a_asset_dir {
+  char **file_names;
+  size_t file_count;
+  size_t next_index;
+};
 
-注册表包含：
+struct a_asset {
+  FILE *stream;
+  char *path;
+  off_t length;
+  void *buffer;
+};
+```
 
-- `AAssetDir_close`，重复注册两次
-- `AAssetDir_getNextFileName`
-- `AAssetManager_fromJava`
-- `AAssetManager_open`
-- `AAssetManager_openDir`
-- `AAsset_close`
-- `AAsset_getLength`
-- `AAsset_openFileDescriptor`
-- `AAsset_read`
+全局 manager：
 
-当前行为：
+```text
+root_path = app0:package/assets
+```
 
-- `AAssetDir_close`：空。
-- `AAssetDir_getNextFileName`：返回 `NULL`。
-- `AAssetManager_fromJava`：函数没有返回语句。
-- `AAssetManager_open`：返回 `NULL`。
-- `AAssetManager_openDir`：返回 `NULL`。
-- `AAsset_close`：空。
-- `AAsset_getLength`：声明为 `void` 且空实现；Android NDK API 正常需要长度返回值。
-- `AAsset_openFileDescriptor`：返回 0，不写 `outStart/outLength`。
-- `AAsset_read`：返回 0，不读取。
+## AssetManager exported API
 
-README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManager bridge 没有把 Android asset path 映射到这个目录。
+`symbol.def` 当前包含：
 
-## JNI ABI 头
+```text
+AAssetDir_close
+AAssetDir_getNextFileName
+AAssetDir_rewind
+AAssetManager_fromJava
+AAssetManager_open
+AAssetManager_openDir
+AAsset_close
+AAsset_getBuffer
+AAsset_getLength
+AAsset_getRemainingLength
+AAsset_isAllocated
+AAsset_openFileDescriptor
+AAsset_read
+AAsset_seek
+```
 
-`src/bridges/jni/impl/android/jni.h` 是 Android/AOSP 风格的 JNI ABI 声明，包含：
+不存在旧表中的重复 `AAssetDir_close`。
 
-- Java primitive types。
-- jobject/jclass/jstring/jarray 等引用类型。
+## Asset path validation
+
+relative path 必须：
+
+- 非 NULL。
+- 不以 `/` 或 `\` 开头。
+- 不包含 `:`。
+- 不包含反斜杠。
+- 任一 `/` 分隔组件不能等于 `..`。
+
+允许空字符串用于打开 asset 根目录。内部 path capacity 为 1024。
+
+实际路径：
+
+```text
+<manager.root_path>/<relative_path>
+```
+
+## `AAssetManager_fromJava`
+
+忽略 fake `env` 和 `asset_manager` jobject，返回全局 `__asset_manager`。
+
+## `AAssetManager_open`
+
+1. 校验文件名和路径。
+2. `fopen(path, "rb")`。
+3. `fseek` 到末尾。
+4. `ftell` 保存长度。
+5. 回到开头。
+6. 分配 `a_asset_t`。
+7. 复制完整路径。
+8. 保存 stream/length。
+
+失败时关闭已打开 stream 并释放已分配对象。
+
+mode 当前被忽略，不区分 BUFFER/RANDOM/STREAMING/UNKNOWN。
+
+## `AAssetManager_openDir`
+
+1. 构造目录路径。
+2. `opendir`。
+3. 跳过 `.`、`..`。
+4. 对每个 entry 构造完整路径并 `stat`。
+5. 只保留普通文件；子目录不出现在结果中。
+6. 名字数组容量从 16 开始倍增。
+7. 每个名字单独复制。
+8. 最后按 `strcmp` 排序。
+
+`AAssetDir_getNextFileName` 依次返回内部 name；结束返回 NULL。
+
+`AAssetDir_rewind` 把 index 置 0。
+
+`AAssetDir_close` 释放所有 name、数组和 dir 对象。
+
+## Asset data API
+
+`AAsset_read`：
+
+- 无效 asset/stream/buffer 返回 -1。
+- count 为 0 返回 0。
+- 大于 `INT_MAX` 的 request 截到 `INT_MAX`。
+- `fread`。
+- 0 bytes 且 `ferror` 返回 -1。
+
+`AAsset_seek`：
+
+- 使用 `fseek`/`ftell`。
+- 失败返回 `(off_t)-1`。
+
+`AAsset_getLength` 返回保存长度。
+
+`AAsset_getRemainingLength`：
+
+```text
+length - current ftell position
+```
+
+position 错误或已到末尾返回 0。
+
+`AAsset_getBuffer`：
+
+1. 已缓存则返回原 buffer。
+2. 分配 length 字节；空文件分配 1 字节。
+3. 保存当前 stream position。
+4. 回到开头并读取完整文件。
+5. 恢复 position。
+6. 保存 buffer。
+
+`AAsset_isAllocated` 只在 `getBuffer` 已建立缓存时返回 1。
+
+`AAsset_openFileDescriptor`：
+
+- 对 asset path 再次 `open(O_RDONLY)`。
+- `out_start=0`。
+- `out_length=asset.length`。
+- 返回独立 fd。
+
+`AAsset_close` 关闭 stream，释放 buffer/path/object。
+
+## JNI ABI header
+
+`src/bridges/jni/aosp/jni.h` 保留 Android/AOSP 函数表布局：
+
+- primitive/reference types。
 - `JNINativeMethod`。
-- 完整 `JNINativeInterface` 函数表布局。
+- `JNINativeInterface`。
 - `JNIInvokeInterface`。
-- C++ `_JNIEnv` 和 `_JavaVM` convenience methods。
-- JNI 版本和错误码。
-- `JNI_OnLoad`/`JNI_OnUnload` 函数指针类型。
+- C++ convenience wrappers。
+- JNI version/error/reference type constants。
 
-该头的函数表字段顺序用于与 Android ARM 原生库的间接 JNI 调用 ABI 对齐。
+目标 Android ARM library 按该布局间接调用 JNI。
 
-## 本地 `JNINativeInterface`
+## fake runtime object model
 
-当前只填充以下字段：
+`runtime.c` 定义 kind：
 
-- `reserved0 = &jniNativeEnv`
-- `GetVersion`
-- `FromReflectedField`
-- `FromReflectedMethod`
-- `FindClass`
+```text
+FAKE_JNI_OBJECT
+FAKE_JNI_CLASS
+FAKE_JNI_STRING
+FAKE_JNI_METHOD
+FAKE_JNI_FIELD
+FAKE_JNI_ARRAY
+FAKE_JNI_DIRECT_BUFFER
+```
+
+每个对象：
+
+```text
+magic = 0x4A4E4931
+kind
+next
+clazz
+name
+signature
+utf8
+utf16
+length
+element_size
+data
+native_proc
+global_refs
+is_static
+```
+
+所有对象挂在 `__fake_objects` 单链表。当前没有 runtime shutdown 或对象回收；分配对象在进程生命周期内保留。
+
+`__runtime_cast` 只接受 magic 正确的 fake object。
+
+## strings
+
+runtime 实现 UTF-8 解码和 UTF-8/UTF-16 双向转换：
+
+- 支持 1/2/3/4-byte UTF-8 sequence。
+- 非法 sequence 写 U+FFFD。
+- 非 BMP codepoint 转 surrogate pair。
+- UTF-16 surrogate pair 转 4-byte UTF-8。
+
+fake string 同时保存：
+
+```text
+utf8 NUL-terminated copy
+utf16 NUL-terminated copy
+UTF-16 code unit length
+```
+
+`NewString` 和 `NewStringUTF` 创建独立 fake object，不再把调用者裸指针强制当作 `jstring`。
+
+`GetStringChars`/`GetStringUTFChars` 返回内部稳定地址并把 `is_copy` 设为 false。
+
+Release string 函数不释放，因为数据属于 fake object。
+
+`GetStringLength` 是 UTF-16 code unit 数；`GetStringUTFLength` 是 UTF-8 byte 数。
+
+## classes, methods and fields
+
+`FindClass` 按 class name 复用已有 fake class，否则分配新 class。
+
+method/field identity 包含：
+
+```text
+class
+name
+signature
+kind
+is_static
+```
+
+`GetMethodID`、`GetStaticMethodID`、`GetFieldID`、`GetStaticFieldID` 返回相应 fake member，不再使用固定整数枚举 method ID。
+
+普通 field accessor 当前由宏生成占位值；setter 不保存实例/静态 field state。
+
+## object calls
+
+`NewObject*`/`AllocObject` 创建 fake object 并关联 class。
+
+实例 object method 特例：
+
+```text
+getClassLoader -> fake java/lang/ClassLoader object
+loadClass      -> FindClass(jstring name)
+```
+
+其他实例 primitive/object/void calls 大多返回零/NULL或不执行。
+
+静态 Cocos method dispatch 通过 fake method name：
+
+```text
+getCocos2dxPackageName
+getCocos2dxWritablePath
+getCurrentLanguage
+generateGuid
+getStringForKey
+getIntegerForKey
+getBoolForKey
+setStringForKey
+```
+
+`getStringForKey` 返回 default value。
+
+`getIntegerForKey` 返回 default integer。
+
+`getBoolForKey` 返回 default boolean。
+
+`setStringForKey` 会调用本地函数，但本地函数仍只记录日志，不持久化。
+
+## arrays
+
+fake array 保存：
+
+```text
+length
+element_size
+calloc data
+```
+
+支持：
+
+- object arrays。
+- boolean/byte/char/short/int/long/float/double arrays。
+- Get/Set object element。
+- Get primitive elements。
+- Get/Set primitive regions。
+- GetArrayLength。
+- PrimitiveArrayCritical。
+
+越界 region/element 操作直接返回，不设置 Java exception。
+
+Release primitive elements 不执行 copy-back/free，因为 Elements 返回内部 data。
+
+## native registration
+
+`RegisterNatives`：
+
+1. 校验 class、methods、count。
+2. 按每个 name/signature 建立或复用 instance fake method。
+3. 把 `fnPtr` 保存到 `native_proc`。
+4. 记录映射日志。
+
+`UnregisterNatives` 把属于该 class 的 fake method `native_proc` 清空。
+
+当前普通 `Call*Method` dispatch 没有统一调用 `native_proc`，所以保存注册表不代表所有 registered native method 已能通过 JNI call API执行。
+
+## exceptions and references
+
+全局 `__pending_exception` 支持：
+
+- `Throw`
+- `ThrowNew`
+- `ExceptionOccurred`
+- `ExceptionDescribe`
 - `ExceptionClear`
-- `NewGlobalRef`
-- `DeleteLocalRef`
-- `GetJavaVM`
-- `GetMethodID`
-- `GetStaticMethodID`
-- `GetStringChars`
-- `GetStringLength`
-- `CallObjectMethodV`
-- `CallStaticObjectMethodV`
-- `CallStaticIntMethodV`
-- `CallStaticBooleanMethodV`
-- `CallStaticVoidMethodV`
-- `CallBooleanMethodV`
-- `CallIntMethodV`
-- `CallFloatMethodV`
-- `CallVoidMethodV`
-- `NewString`
-- `NewStringUTF`
-- `GetStringUTFChars`
-- `ReleaseStringChars`
-- `ReleaseStringUTFChars`
-- `RegisterNatives`
+- `ExceptionCheck`
 
-未初始化字段默认为 `NULL`。目标库调用未填字段时会跳到空地址。
+没有 exception class hierarchy 或 stack。
 
-## 本地 `JNIInvokeInterface`
+global ref 只增加/减少对象内 `global_refs`。local/weak refs 不维护 frame 生命周期。
 
-填充：
+`GetObjectRefType` 根据 magic/global_refs 返回 invalid/global/local。
 
-- `reserved0 = &jniInvokeEnv`
-- `GetEnv`
-- `DestroyJavaVM`
-- `AttachCurrentThread`
-- `DetachCurrentThread`
-- `AttachCurrentThreadAsDaemon`
+## direct buffers and monitor
 
-另外定义：
+`NewDirectByteBuffer` 保存外部 address/capacity。
 
-```c
-static JavaVM jniJavaVM = &jniInvokeEnv;
+`GetDirectBufferAddress`/`Capacity` 返回保存值。
+
+`MonitorEnter`/`MonitorExit` 固定成功，不做锁。
+
+## JavaVM
+
+`jvm.c` 已合并进 `runtime.c`。
+
+全局：
+
+```text
+__fake_native_interface
+__fake_invoke_interface
+__fake_env
+__fake_java_vm
 ```
 
-`GetEnv` 将输出环境设置为 `&jniNativeEnv`，记录日志，返回 0。
-
-`GetJavaVM` 将输出 VM 设置为 `&jniJavaVM`，记录日志，返回 0。
-
-注意实际 JNI C ABI 的 `JNIEnv`/`JavaVM` 是函数表指针的指针语义；当前代码在多个调用处直接传结构地址或伪 VM 指针，依赖目标二进制的具体解引用方式。
-
-## JavaVM 方法行为
-
-- `DestroyJavaVM`：记录日志，返回 0。
-- `AttachCurrentThread`：记录日志，返回 0，但不写 `JNIEnv **`。
-- `DetachCurrentThread`：记录日志，返回 0。
-- `AttachCurrentThreadAsDaemon`：记录日志，返回 0，但不写 `JNIEnv **`。
-
-## JNI method ID 模型
-
-不是创建真实 Java class/method 对象，而是定义内部枚举：
-
-- `UNKNOWN = 0`
-- `GET_COCOS2DX_PACKAGE_NAME`
-- `GET_COCOS2DX_WRITABLE_PATH`
-- `GET_CURRENT_LANGUAGE`
-- `GET_INTEGER_FOR_KEY`
-- `GET_STRING_FOR_KEY`
-- `GET_BOOL_FOR_KEY`
-- `SET_STRING_FOR_KEY`
-- `GENERATE_GUID`
-- `LOAD_CLASS_METHOD = 0x23333333`
-
-按方法名映射：
-
-- `getCocos2dxPackageName`
-- `getCocos2dxWritablePath`
-- `getCurrentLanguage`
-- `getIntegerForKey`
-- `getStringForKey`
-- `getBoolForKey`
-- `setStringForKey`
-- `generateGuid`
-
-签名字符串没有参与 method lookup。
-
-## JNI 函数行为
-
-### 版本、类和引用
-
-- `GetVersion`：记录日志，返回 0，不返回标准 JNI 版本。
-- `FindClass`：记录日志，返回 0。
-- `ExceptionClear`：仅记录。
-- `NewGlobalRef`：返回固定值 `0xDEADC0DE`。
-- `DeleteLocalRef`：仅记录。
-- `FromReflectedField`：记录日志，返回 `NULL`。
-- `FromReflectedMethod`：记录日志，返回 `NULL`。
-
-### method lookup
-
-`GetMethodID`：记录日志，返回 `NULL`。
-
-`GetStaticMethodID`：
-
-1. 记录 env、class、method name、signature。
-2. 只按 method name 遍历内部表。
-3. 返回枚举值强制转换的 `jmethodID`。
-4. 未命中返回 `NULL`。
-
-### method invocation
-
-`CallObjectMethodV`：
-
-- 若 object 为 0 且 method ID 为 0，返回 `LOAD_CLASS_METHOD`。
-- 其他返回 `NULL`。
-
-`CallStaticObjectMethodV`：
-
-- `GET_COCOS2DX_PACKAGE_NAME` → `getCocos2dxPackageName`
-- `GET_CURRENT_LANGUAGE` → `getCurrentLanguage`
-- `GENERATE_GUID` → `generateGuid`
-- 其他返回 `NULL`
-
-`CallStaticVoidMethodV`：
-
-- `SET_STRING_FOR_KEY` 分支直接 `return`，没有读取 varargs，也没有调用 `setStringForKey`。
-- 其他分支也只返回。
-
-以下函数记录日志并返回零值：
-
-- `CallStaticIntMethodV` → 0
-- `CallStaticBooleanMethodV` → 0
-- `CallBooleanMethodV` → 0
-- `CallIntMethodV` → 0
-- `CallFloatMethodV` → `0.0f`
-
-`CallVoidMethodV` 仅记录。
-
-### string
-
-宏：
+公开：
 
 ```c
-#define JSTRING(x) (jstring)u##x
+JNIEnv *jni_runtime_get_env(void);
+JavaVM *jni_runtime_get_java_vm(void);
 ```
 
-它把 C UTF-16 字面量地址直接伪装为 `jstring`。
+`GetEnv`：
 
-`NewStringUTF`：
+- 校验输出指针。
+- 接受 JNI 1.1/1.2/1.4/1.6。
+- 写入 fake env。
 
-- 直接把输入 UTF-8 `char *` 地址当 `jstring` 返回。
+`AttachCurrentThread` 和 daemon 版本现在会写 `JNIEnv **`，不再是假成功但不返回 env。
 
-`GetStringUTFChars`：
+`DestroyJavaVM`/`DetachCurrentThread` 固定成功。
 
-- 直接把 `jstring` 当 `char *` 返回。
+## Cocos platform values
 
-`GetStringChars`：
+```text
+package name   moe.low.arc
+language       en
+writable path  ux0:vitaarc/persistent/data/
+GUID           61616161
+app version    v6.1.6
+device ID      61616161
+```
 
-- 直接把 `jstring` 当 `jchar *` 返回。
+`getStringForKey` 返回传入 default。
 
-`GetStringLength`：
+`setStringForKey` 仍不落盘。
 
-- 将 `jstring` 当 UTF-16 `jchar *`，调用 `utilUcharLen`。
+## `JNI_OnLoad`
 
-`NewString`：
+`bridge_call_jni_main`：
 
-- 打印输入的 UTF-16 原始字节。
-- 直接返回输入地址。
+- 查找并空检 `JNI_OnLoad`。
+- dump 固定 SO 范围。
+- 传 `jni_runtime_get_java_vm()`。
+- 记录返回版本。
+- 非 1.1/1.2/1.4/1.6 时警告。
 
-`ReleaseStringChars` 和 `ReleaseStringUTFChars`：
-
-- 只记录，不释放。
-
-同一个伪 `jstring` 可能来自 UTF-8 地址或 UTF-16 地址，调用者必须恰好使用匹配的 accessor，否则编码解释不一致。
-
-### native registration
-
-`RegisterNatives` 只记录日志，不保存 method 表，返回 0。
-
-## Cocos/平台方法
-
-本地方法：
-
-- `loadClassMethod()`：仅记录。
-- `getStringForKey(key, default)`：返回 UTF-16 `"NULL"`。
-- `getCocos2dxPackageName()`：返回 UTF-16 `"moe.low.arc"`。
-- `getCurrentLanguage()`：返回 UTF-16 `"en"`。
-- `getCocos2dxWritablePath()`：返回 UTF-16 `"NULL"`。
-- `setStringForKey(key, value)`：仅记录，不持久化。
-- `generateGuid()`：返回 UTF-16 `"61616161"`。
-
-`getIntegerForKey` 和 `getBoolForKey` 有 method ID，但没有对应本地实现/调用分支。
-
-## 游戏导出调用
-
-通过动态符号表查找：
-
-- `JNI_OnLoad`
-- `Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit`
-- `Java_low_moe_AppActivity_initJVMPlatformUtils`
-- `Java_low_moe_AppActivity_setAppVersion`
-- `Java_low_moe_AppActivity_setDeviceId`
-
-函数指针没有做空检查。
-
-参数原型是按已逆向出的目标库调用方式手工定义，不包含标准 JNI 导出常见的 `JNIEnv *`/`jobject` 全部参数。
-
-当前 `main()` 只调用 `bridgeCallJNIMain`；Cocos init/device/native init 调用被注释。
+Cocos exported JNI wrapper 也会在调用前检查 symbol 是否存在。

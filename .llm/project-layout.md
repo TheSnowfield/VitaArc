@@ -2,108 +2,174 @@
 
 ## 项目用途
 
-VitaArc 的目标是在 HENkaku PSVita 上运行 Arcaea Android ARMv7 原生代码。实现不是重写游戏逻辑，而是：
+VitaArc 的目标是在 HENkaku PSVita 用户进程中运行 Arcaea Android ARMv7 原生代码：
 
-- 读取 APK 中的 ARMv7 ELF shared object。
-- 在 Vita 用户进程中手动映射 `libcocos2dcpp.so`。
-- 将 Android/Bionic/JNI/OpenGL ES 等导入符号重定向到 Vita 侧实现。
-- 对特定版本 Cocos2d-x/Arcaea 机器码按固定偏移打补丁。
-- 调用原始库导出的 `JNI_OnLoad`，并保留后续 Cocos JNI 导出调用封装。
+- 从被打包进 VPK 的 APK 内容读取 ARMv7 ELF shared object。
+- 把 `libcocos2dcpp.so` 映射到 Vita 用户地址空间。
+- 将 Android/Bionic/JNI/OpenGL ES 导入绑定到 VitaArc 本地实现。
+- 对特定 Arcaea/Cocos2d-x 二进制偏移打机器码补丁。
+- 提供 fake JavaVM/JNIEnv 和 Android AssetManager。
+- 调用目标库 `.init_array` 和 `JNI_OnLoad`。
 
-README 明确声明项目与 Lowiro 和 Arcaea 无隶属关系，并提示项目仍在开发、不能保证游戏正确运行。
+项目不隶属于 Lowiro 或 Arcaea。
 
 ## 根目录
 
-- `.git/`：Git 仓库元数据。
-- `.agents/`、`.codex/`：Codex 桌面环境只读元数据。
-- `.llm/`：本知识库。
-- `livearea/`：VPK 的 LiveArea 图标、背景、启动图和模板。
-- `src/`：VitaArc 用户态源码。
-- `third-party/`：第三方依赖目录；`.gitmodules` 声明 `third-party/kubridge` 子模块。
-- `tools/udp_logger.py`：UDP 日志接收器，默认监听 `0.0.0.0:23333`。
-- `.gitignore`：忽略构建缓存、Makefile、`build/` 和 VS Code目录。
-- `.gitmodules`：声明 `third-party/kubridge`，上游为 `https://github.com/TheOfficialFloW/kubridge.git`。
-- `build.sh`：执行 `cmake -S . -B build` 和 `cmake --build build --parallel 8`。
-- `CMakeLists.txt`：顶层 VitaSDK 构建和 VPK 打包配置。
-- `README.md`：项目目的、免责声明、安装、APK资源目录。
-
-当前仓库根目录没有 `build/`，也没有旧文档中提到的根目录 `CMakeCache.txt`。
-
-## `src/` 当前布局
-
-### `src/main.c`
-
-Vita 用户程序入口。负责日志、vitaGL shader compiler 参数、SO 装载、导入符号桥接、二进制补丁、SO 初始化和 `JNI_OnLoad` 调用。
-
-### `src/bridges`
-
-当前大量基础桥接文件都在这个目录下：
-
-- `define.h`：Android 库路径、日志路径、持久化数据路径和 OBB 路径。
-- `types.h`：本地 `bool`、`true`、`false` 定义。
-- `elf.h`：ELF32 类型、常量、ARM 重定位常量等定义。
-- `loader.h/.c`：SO 状态结构、固定地址映射、ARM 重定位、符号查找、导入项安装、`.init_array` 调用、引用计数释放。
-- `patcher.h/.c`：符号补丁、地址补丁、ARM/Thumb 指令补丁和绝对跳转 hook。
-- `kubridge.h/.c`：用户态辅助包装，目前只实现 `kuKernelCpuUnrestrictedMemset`。
-
-### `src/bridges/*`
-
-- `eabi/`：ARM EABI helper 符号桥接。
-- `libc/`：Bionic fortify、C 标准库、POSIX、网络和 pthread 桥接。
-- `android/`：Android log 和 AssetManager API。
-- `jni/`：JNI ABI 头、JavaVM/JNIEnv 函数表和游戏使用的平台方法。
-- `opengl/`：OpenGL ES 到 vitaGL 的符号映射、自定义包装及 GLSL 到 Cg 转换。
-- `audio/`：替换游戏 `AudioProvider`，绕开 OpenSL ES。
-- `cocos2dx/`：按固定偏移修改游戏/Cocos2d-x 机器码。
-
-### `src/utils`
-
-- `fs.c/.h`：文件存在、文件大小和全文件读取。
-- `string.c/.h`：文件名和 UTF-16 字符串长度辅助。
-- `debug.c/.h`：内存十六进制输出、内存 dump 和人为崩溃断点。
-
-### `src/logcat`
-
-日志抽象，可输出到 UDP 或设备文件。当前编译期启用 UDP。
-
-## LiveArea/VPK 资源
-
-- `livearea/icon0.png` → `sce_sys/icon0.png`
-- `livearea/background.png` → `sce_sys/livearea/contents/background.png`
-- `livearea/startup.png` → `sce_sys/livearea/contents/startup.png`
-- `livearea/template.xml` → `sce_sys/livearea/contents/template.xml`
-
-## 设备目录要求
-
-README 要求从官方 Android 游戏 APK 中解压资源，并在 Vita 建立：
-
 ```text
-ux0:vitaarc/
-├── assets/
-│   ├── app-data/
-│   ├── audio/
-│   ├── char/
-│   ├── Default/
-│   ├── Fonts/
-│   ├── img/
-│   └── ...
-├── library/
-│   └── armeabi-v7a/
-│       ├── libcocos2dcpp.so
-│       ├── libcrashlytics.so
-│       ├── libcrashlytics-common.so
-│       ├── libcrashlytics-handler.so
-│       ├── libcrashlytics-trampoline.so
-│       └── ...
-└── persistent/
+.git/                       Git metadata
+.llm/                       本知识库
+.vscode/                    VS Code/WSL C/C++ 配置
+build/                      全部 CMake 和最终构建输出
+livearea/                   LiveArea 图像和 XML
+src/                        Vita 用户态实现
+third-party/arcaea/         可选择的官方 APK 输入
+third-party/kubridge/       kuBridge submodule source
+tools/generate_symbols.py   bridge symbol 生成器
+tools/package_apk.py        APK -> VPK importer
+tools/udp_logger.py         UDP 日志接收器
+.gitignore
+.gitmodules
+build.sh
+CMakeLists.txt
+README.md
 ```
 
-源码中的路径常量还包括：
+## `src/` 顶级
 
-- `ux0:vitaarc/library/armeabi-v7a/libfmod.so`
-- `ux0:vitaarc/library/armeabi-v7a/libfmodProvider.so`
-- `ux0:vitaarc/boot.log`
-- `ux0:vitaarc/persistent/data/`
-- `ux0:vitaarc/persistent/obb/`
+```text
+src/init.c          Vita 程序入口
+src/config.h        app0/ux0 路径
+src/types.h         项目基础类型
+src/elf.h           ELF32/ARM definitions
+src/dynalib.h       dynalib_t 独立类型定义
+src/loader.h/.c     SO loader 和自动 symbol binding
+src/patcher.h/.c    地址、ARM/Thumb、hook 补丁
+src/kubridge.h/.c   用户态 kuBridge helper
+```
 
-`define.h` 中 `LIBRARY_LIBFMOD` 被重复定义；`LIBRARY_LIBFMODPROVIDER` 和 `LIBRARY_LIBFMOD_PROVIDER` 同时存在。
+旧路径 `src/main.c`、`src/bridges/loader.*`、`src/bridges/patcher.*`、`src/bridges/kubridge.*` 已不属于当前布局。
+
+## `src/bridges/`
+
+```text
+android/     Android logging 和 AssetManager
+audio/       AudioManager/AudioProvider compatibility
+cocos2dx/    固定版本 Cocos2d-x patch
+jni/         AOSP ABI header、fake runtime、Cocos platform methods
+libc/        libc/Bionic/pthread bridge
+opengl/      OpenGL ES symbols、vitaGL wrappers、GLSL->Cg
+eabi.h       ARM EABI declarations
+symbol.def   统一 imported symbol -> callback definition
+```
+
+不再有每类 bridge 的 `BRIDGEFUNC` 表和显式 `bridge_patch_eabi/android/libc` 启动调用。普通导入由生成符号表统一解析。
+
+## JNI 当前布局
+
+```text
+src/bridges/jni/aosp/jni.h
+src/bridges/jni/runtime.h
+src/bridges/jni/runtime.c
+src/bridges/jni/cocos.h
+src/bridges/jni/cocos.c
+src/bridges/jni/jni.h
+src/bridges/jni/jni.c
+```
+
+旧的 `jvm.c` 已合并入 `runtime.c`。公开 runtime 函数不带 `fake_` 前缀；内部 fake object 类型仍使用 `FakeJni*` 名称。
+
+## Android bridge 当前布局
+
+```text
+src/bridges/android/log.h/.c
+src/bridges/android/assetmgr.h/.c
+```
+
+AssetManager 已有完整文件/目录读取实现，不再位于 `impl/` 子目录。
+
+## Audio 当前布局
+
+```text
+src/bridges/audio/provider.h/.c
+src/bridges/audio/manager.h/.c
+```
+
+旧的 `audio.c` 和 `impl/provider.c` 布局已拆平。
+
+## `src/utils`
+
+```text
+debug.h/.c
+fs.h/.c
+string.h/.c
+```
+
+私有 helper 使用 snake_case；static symbol 以 `__` 开头。`fs.c` 的公开函数不再带 `utils_` 前缀，例如 `util_file_exists`、`util_get_file_size`。
+
+## 命名约定
+
+项目私有函数、变量、参数使用小写下划线。static 函数和变量以前缀 `__` 标识。
+
+Vita/外部 ABI 名字不按私有命名规则改写：
+
+- `sce*`
+- `kuKernel*`
+- JNI/AAsset exported ABI
+- Android/C++ imported symbol spelling
+
+include guard 按相对头文件路径生成，忽略顶级 `src`，格式：
+
+```text
+__PATH_TO_HEADER_NAME_H
+```
+
+例如：
+
+```text
+src/bridges/jni/runtime.h -> __BRIDGES_JNI_RUNTIME_H
+src/config.h              -> __CONFIG_H
+```
+
+## third-party APK
+
+当前四个文件：
+
+```text
+arcaea_1.6.1c.apk  493455233 bytes
+arcaea_1.9.0c.apk  466613809 bytes
+arcaea_2.0.0c.apk  336090287 bytes
+arcaea_3.0.0c.apk  511009155 bytes
+```
+
+各版本均包含：
+
+```text
+lib/armeabi-v7a/libcocos2dcpp.so
+lib/armeabi-v7a/libfmod.so
+lib/armeabi-v7a/libfmodProvider.so
+```
+
+1.6.1c/1.9.0c 还包含 crashlytics envelope/unwind 库；不同版本 APK native library 集合不完全相同。
+
+## LiveArea 映射
+
+```text
+livearea/icon0.png       -> sce_sys/icon0.png
+livearea/background.png  -> sce_sys/livearea/contents/background.png
+livearea/startup.png     -> sce_sys/livearea/contents/startup.png
+livearea/template.xml    -> sce_sys/livearea/contents/template.xml
+```
+
+## 当前生成物
+
+```text
+build/generated/bridge_symbols.h
+build/VitaArc
+build/VitaArc.velf
+build/VitaArc.self
+build/VitaArc.vpk_param.sfo
+build/VitaArc.vpk.out
+build/VitaArc.vpk
+```
+
+生成文件不写入 `src`。

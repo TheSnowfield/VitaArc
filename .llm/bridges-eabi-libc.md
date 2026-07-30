@@ -2,7 +2,8 @@
 
 ## EABI bridge
 
-`bridgePatchEABI` 注册以下导入符号：
+这些 EABI 导入现在统一列在 `src/bridges/symbol.def`，构建时进入
+`generated/bridge_symbols.h`，由 loader 自动解析：
 
 - `__aeabi_d2uiz`
 - `__aeabi_dmul`
@@ -28,7 +29,8 @@
 
 ## libc bridge 表
 
-`bridgePatchLibC` 用一个大型静态表映射 Android/Bionic 导入。
+Android/Bionic 导入和本地 callback 现在统一列在
+`src/bridges/symbol.def`，不再由旧的独立静态表逐项安装。
 
 ### C++/Bionic runtime
 
@@ -121,7 +123,7 @@
 - `fwrite`
 - `getc`
 - `perror`
-- `printf` → `logPrintf`
+- `printf` → `log_printf`
 - `puts`
 - `snprintf`
 - `sprintf`
@@ -215,7 +217,8 @@ DEV_URANDOM = 1
 - `dlerror` 返回 `NULL`。
 - `dladdr`/`dlclose`/`munmap` 返回 0。
 
-这些函数没有接入本项目的 `solibLoadLibrary`/`solibGetProcAddress`。
+这些函数没有接入本项目的
+`loader_load_library`/`loader_get_proc_address`。
 
 ### 时间、进程和系统
 

@@ -1,308 +1,204 @@
 # ELF shared-object loader
 
-## 对外类型和 API
+## Files and public API
 
-当前 SO 句柄类型是 `dynalib_t *`，定义在 `src/bridges/loader.h`。
+The loader state type is `dynalib_t`, declared independently in `src/dynalib.h`.
+The implementation and public declarations are in `src/loader.c` and
+`src/loader.h`.
 
-对外 API：
+Public functions:
 
-- `solibLoadLibrary(path)`
-- `solibInitLibrary(library)`
-- `solibFreeLibrary(library)`
-- `solibGetProcAddress(library, symbol)`
-- `solibInstallProc(library, symbol, destination)`
-- `solibGetLibraryImageBase(library)`
-- `solibFindLibrary(name)`
-- `solibCloneHandle(library)`
+- `loader_load_library(const char *library_path)`
+- `loader_init_library(dynalib_t *library)`
+- `loader_free_library(dynalib_t *library)`
+- `loader_get_proc_address(dynalib_t *library, const char *symbol_name)`
+- `loader_get_library_image_base(dynalib_t *library)`
+- `loader_find_library(const char *library_name)`
+- `loader_clone_handle(dynalib_t *library)`
+- `loader_find_empty_slot(void)`
+- `loader_load_sections(dynalib_t *library)`
+- `loader_debug_print_elf_table(dynalib_t *library)`
+- `loader_symbol_ref(dynalib_t *library)`
 
-内部 API：
-
-- `solibFindEmptySlot()`
-- `solibLoadSections(library)`
-- `solibDebugPrintElfTable(library)`
+The old `HSOLIB`, `SOINTERNAL`, `LPSOINTERNAL` and `solib_*` interfaces no
+longer exist.
 
 ## `dynalib_t`
 
-内部实例保存：
+The structure contains:
 
-- `nRefCount`
-- `nSlotIndex`
-- 64 字节库名缓冲区
-- 128 字节完整路径缓冲区
-- 原 ELF 文件镜像地址
-- 原 ELF 文件镜像 Vita memblock ID
-- ELF header
-- program header 数组
-- section header 数组
-- symbol section 指针
-- `.init_array` section header
-- section string table
-- dynamic symbol table
-- dynamic string table
-- dynamic symbol数量
-- executable text base
+- `ref_count`
+- `slot_index`
+- `library_name[64]`
+- `library_path[128]`
+- original ELF file image pointer `library_image_base`
+- original image memblock ID `image_mem_block`
+- ELF header, program-header and section-header pointers
+- dynamic symbol section metadata
+- `.init_array` section pointer
+- section-name table
+- dynamic symbol and string tables
+- dynamic symbol count
+- executable segment base `text_base`
 
-全局最多 32 个内部库实例：
+The loader has 32 process-global slots:
 
 ```c
 #define MAX_LIBRARY 32
-static uint32_t libraryLoaded = 0;
-static dynalib_t *librarySlots[MAX_LIBRARY] = {NULL};
+static uint32_t __library_loaded;
+static dynalib_t *__library_slots[MAX_LIBRARY];
 ```
 
-## `solibLoadLibrary`
+Library identity is the basename, not the complete path.
 
-### 输入校验
+## Load flow
 
-1. `utilFileExists(path)` 必须为真。
-2. `utilGetFileSize(path)` 必须大于 0。
-3. 通过最后一个路径组件得到库名。
-4. 如果同名库已存在，返回同一个 `dynalib_t *` 并递增引用计数。
+`loader_load_library`:
 
-### 原始文件镜像
+1. Uses `util_file_exists` and `util_get_file_size`.
+2. Extracts the basename with `util_get_file_name`.
+3. Reuses a library with the same basename, resolves its symbols again, and
+   increments its reference count.
+4. Allocates a zeroed `dynalib_t`.
+5. Allocates a page-aligned user RW memblock for the complete source ELF.
+6. Opens and reads the ELF into that memblock.
+7. Reserves a loader slot and copies the name and path.
+8. Prints ELF diagnostics.
+9. Calls `loader_load_sections`; failure now rolls back the slot, original
+   image memblock, and state allocation.
+10. Calls `loader_symbol_ref` to bind undefined imports against the generated
+    local bridge table.
+11. Returns the same state pointer through `loader_clone_handle`.
 
-内部对象使用 `calloc(1, sizeof(*libraryNew))` 创建，因此引用计数和缓存字段初始为 0。
+Remaining unchecked operations include the `sceIoOpen`, `sceIoRead`,
+`sceKernelGetMemBlockBase` results and actual read length. The two `strcpy`
+calls have no length guard.
 
-申请：
+## Fixed runtime mapping
+
+Every loaded ELF currently uses:
 
 ```c
-sceKernelAllocMemBlock(
-    "elf_image",
-    SCE_KERNEL_MEMBLOCK_TYPE_USER_RW,
-    PAGE_ALIGN(file_size),
-    NULL);
+uintptr_t linear_address_base = 0x98000000;
 ```
 
-然后：
+Only one distinct shared object can therefore be mapped safely. Although the
+slot model accepts 32 libraries, a second distinct ELF will attempt to occupy
+the same virtual range.
 
-- 取得 memblock base。
-- `sceIoOpen` 原 SO。
-- 将整个文件读进 memblock。
-- 关闭文件。
-- 在 32 个槽位中找空位。
-- 保存路径、库名和槽位。
-- 增加 `libraryLoaded`。
-- 打印 ELF 调试信息。
-- 调用 `solibLoadSections`。
-- 返回 `solibCloneHandle(libraryNew)`，也就是同一指针并递增引用计数。
+## `PT_LOAD` mapping
 
-仍未检查 `sceIoOpen`/`sceIoRead` 返回值，也未验证实际读取字节数。
+For every `PT_LOAD` program header:
 
-`strcpy` 直接写入固定 64/128 字节数组，没有长度保护。
+1. Compute the gap from the end of the previous mapped block.
+2. Align `p_memsz + gap` to `p_align`.
+3. Request a fixed-address memblock using
+   `SceKernelAllocMemBlockKernelOpt.field_C`.
+4. Use `kuKernelAllocMemBlock` with user RX for `PF_X`, otherwise user RW.
+5. Add `0x98000000` directly to the program header's `p_vaddr`.
+6. Save the executable segment address as `text_base`.
+7. Zero the allocation with `kuKernelCpuUnrestrictedMemset`.
+8. Copy `p_filesz` bytes from the source image with
+   `kuKernelCpuUnrestrictedMemcpy`.
 
-## ELF 映射地址
+The allocated segment memblock IDs are local variables and are not retained in
+`dynalib_t`; `loader_free_library` cannot release those mapped segments.
 
-运行时映射固定基址：
+## Sections and relocations
 
-```c
-uintptr_t lpLinearAddressBase = 0x98000000;
-```
-
-槽位系统允许多个库，但 `solibLoadSections`、`solibGetProcAddress`、`solibInstallProc` 和补丁器都固定使用这个运行时基址。第二个不同库会与第一个库地址空间冲突。
-
-## Program header/segment 处理
-
-遍历 `e_phnum`，只处理 `p_type == PT_LOAD`。
-
-对每个 loadable segment：
-
-1. 根据前一段结束地址计算 gap。
-2. `nBlockSize = align(p_memsz + gap, p_align)`。
-3. 填充 `SceKernelAllocMemBlockKernelOpt`：
-   - `size = sizeof(...)`
-   - `field_C = lpLinearAddress`
-   - `attr = 0x01`
-4. 若 `p_flags & PF_X`：
-   - 通过 kuBridge 申请 `SCE_KERNEL_MEMBLOCK_TYPE_USER_RX`
-5. 否则：
-   - 通过 kuBridge 申请 `SCE_KERNEL_MEMBLOCK_TYPE_USER_RW`
-6. 取得实际 memblock base。
-7. 将 program header 中的 `p_vaddr` 原地增加 `0x98000000`。
-8. 可执行段保存为 `lpTextBase`，并刷新 cache。
-9. 使用 `kuKernelCpuUnrestrictedMemset` 清零整个分配块。
-10. 从 ELF 原始文件镜像的 `p_offset` 复制 `p_filesz` 字节到运行地址。
-11. 推进线性分配地址。
-
-各运行时 segment 的 memblock ID 只存在于局部变量，未存入 `dynalib_t`，因此当前释放流程无法释放这些映射。
-
-`solibLoadSections` 返回 `bool`。调用方记录 “Load and relocated all sections.”，但没有检查返回值。
-
-## Section 扫描
-
-从 section header string table 查找：
+The source ELF's section table is scanned for:
 
 - `.dynsym`
 - `.dynstr`
 - `.init_array`
-
-动态符号数为：
-
-```c
-dynsym_section.sh_size / sizeof(Elf32_Sym)
-```
-
-若 `.dynsym` 或 `.dynstr` 缺失，映射函数返回 `false`。
-
-`.init_array` 缺失时没有错误处理；之后 `solibInitLibrary` 会解引用空 section pointer。
-
-## ARM relocation
-
-处理 section 名：
-
 - `.rel.dyn`
 - `.rel.plt`
 
-relocation 表地址的计算使用：
+Missing `.dynsym` or `.dynstr` makes `loader_load_sections` fail. Missing
+`.init_array` is accepted during loading but later dereferenced by
+`loader_init_library`.
+
+Supported ARM relocation types:
+
+- `R_ARM_ABS32`
+- `R_ARM_RELATIVE`
+- `R_ARM_GLOB_DAT`
+- `R_ARM_JUMP_SLOT`
+
+For a defined symbol, the runtime symbol address is
+`0x98000000 + st_value`. Undefined symbols initially resolve to zero for the
+ABS/GLOB/JUMP cases and are handled by the later local-symbol pass. Unknown
+relocation types are logged and loading continues.
+
+`OFFRST(x)` is currently `(x)`. The commented alternative clears the Thumb bit,
+but is not active.
+
+Relocation targets are computed as `0x98000000 + r_offset`. The relocation
+tables themselves are addressed as `library_image_base + section.sh_addr`,
+not `sh_offset`; this depends on the target ELF layout.
+
+## Automatic local-symbol binding
+
+`loader.c` directly includes `generated/bridge_symbols.h`. The generated array
+is lexically sorted.
+
+`loader_symbol_ref` derives its length with `sizeof` and passes it to static
+`__resolve_symbols`. That routine:
+
+1. Scans `.rel.dyn` and `.rel.plt`.
+2. Rejects invalid symbol indices.
+3. Processes only symbols whose `st_shndx == SHN_UNDEF`.
+4. Uses static `__find_bridge_symbol` for binary search.
+5. Writes `patch_func_t.bridge_proc` directly to the relocation target.
+
+It runs at the end of a new load and again when a loaded library is reused.
+There is no separate `bridge_symbol_count`, generated `.c` file,
+`patch_bridge_symbols`, or public `patch_symbols` routine.
+
+See `symbol-resolution.md` for the definition/generation pipeline.
+
+## Initialization and symbol lookup
+
+`loader_init_library` calculates the init table as:
 
 ```c
-lpImageBase + section.sh_addr
+internal->text_base + internal->elf_init_array_section->sh_addr
 ```
 
-待改写运行时地址：
+It walks `sh_size / 4` entries and calls non-null functions. There is no null
+check for the `.init_array` section.
 
-```c
-0x98000000 + relocation.r_offset
-```
+`loader_get_proc_address` performs a linear search over `.dynsym` and returns
+`0x98000000 + st_value` on a name match. It does not reject undefined symbols
+or inspect binding/type.
 
-支持 relocation type：
+## Lifetime
 
-### `R_ARM_ABS32`
+`loader_clone_handle` increments `ref_count` and returns the same pointer.
 
-```c
-*target += 0x98000000 + OFFRST(symbol.st_value);
-```
+`loader_free_library` decrements the reference count, removes the global slot,
+releases only the original ELF-image memblock, and frees `dynalib_t`. It does
+not release RX/RW segment memblocks. The current `main` never calls it because
+execution finishes in an infinite loop.
 
-### `R_ARM_RELATIVE`
+## Fixed-offset patcher
 
-```c
-*target = OFFRST(*target) + 0x98000000;
-```
+`src/patcher.c` provides:
 
-### `R_ARM_GLOB_DAT`
+- `patch_address`
+- `patch_uint32`
+- `patch_uint16`
+- `patch_thumb`
+- `patch_arm`
+- `hook_stub_proc`
 
-```c
-*target = 0x98000000 + OFFRST(symbol.st_value);
-```
-
-### `R_ARM_JUMP_SLOT`
-
-与 `R_ARM_GLOB_DAT` 相同。
-
-未知 relocation 只记录错误，继续处理。
-
-ARM/Thumb symbol bit 0 的说明写在源码注释中，但当前：
-
-```c
-#define OFFRST(x) (x)
-```
-
-即不清除 Thumb bit。被注释的原意是 `x & ~1`。
-
-初次 relocation 阶段连 `SHN_UNDEF` 导入符号也会暂时写成 `0x98000000 + st_value`。后续 bridge 通过符号名覆盖实际导入目标。
-
-## `.init_array`
-
-初始化函数表地址计算：
-
-```c
-lpInternal->lpTextBase +
-lpInternal->lpElfSectionInitArray->sh_addr
-```
-
-函数表按 4 字节一项遍历；非空函数指针直接调用。
-
-这里假定 `.init_array` 的 `sh_addr` 相对 `lpTextBase`，而不是统一相对映射基址。
-
-## `solibGetProcAddress`
-
-遍历 dynamic symbol table，比较 `.dynstr + st_name`。
-
-命中后返回：
-
-```c
-0x98000000 + OFFRST(st_value)
-```
-
-不检查：
-
-- symbol binding/type
-- `SHN_UNDEF`
-- symbol 所属 segment
-- 另一个库的基址
-
-未命中返回 `NULL`。
-
-## `solibInstallProc`
-
-再次遍历 `.rel.dyn` 和 `.rel.plt`：
-
-1. 用 relocation symbol index 找到 `Elf32_Sym`。
-2. 比较动态字符串中的符号名。
-3. 命中时直接将运行时 relocation target 写为 Vita 侧函数地址。
-
-它不返回原地址，函数签名虽然是 `void *`，结尾始终 `return NULL`。
-
-匹配同名符号的所有 relocation entries 都会被覆盖。
-
-写入目标不经过 kuBridge copy，也没有在每次符号安装后显式 cache flush。
-
-## 句柄克隆和查找
-
-`solibFindLibrary`：
-
-- 遍历 32 个槽位。
-- 按库文件名而不是完整路径匹配。
-- 命中时返回同一个 `dynalib_t *`。
-
-`solibCloneHandle`：
-
-- 递增 `library->nRefCount`。
-- 返回同一个 `dynalib_t *`，不再分配单独句柄。
-
-## 释放逻辑当前行为
-
-`solibFreeLibrary`：
-
-1. 空指针直接返回。
-2. 若 `nRefCount > 0`，先递减；递减后仍大于 0 则返回。
-3. 清除全局槽位。
-4. 减少 `libraryLoaded`。
-5. 释放原 ELF 文件镜像 memblock。
-6. `free(library)`。
-
-已经不再存在旧实现中“把 `SOINTERNAL *` 当 `HSOLIB` 递归传入”的错误。
-
-仍存在的问题：
-
-- 若 `nRefCount == 0` 时被调用，会直接释放。
-- 映射后的 RX/RW segment memblocks 没有记录，也无法释放。
-- 正常 `main()` 当前不会调用 `solibFreeLibrary`。
-
-## Patcher 与装载器关系
-
-`patchSymbols` 遍历 `BRIDGEFUNC` 数组，对每个条目调用 `solibInstallProc`。
-
-所有按地址补丁都忽略 `dynalib_t` 的真实 image base，固定使用：
-
-```c
-uintptr_t lpImageBase = 0x98000000;
-```
-
-补丁类型：
-
-- `patchUint16`
-- `patchUint32`
-- `patchThumb` → `patchUint16`
-- `patchARM` → `patchUint32`
-- `patchAddress` → 最多写 7 字节
-
-写机器码使用 `kuKernelCpuUnrestrictedMemcpy`。
-
-`hookStubProc` 在目标写 8 字节：
+`hook_stub_proc` writes an ARM absolute jump:
 
 ```text
 E51FF004    LDR PC, [PC, #-4]
-callback    callback absolute address
+callback    absolute address
 ```
 
-当前 hook 后没有显式调用 `kuKernelFlushCaches`。
+These routines still use the fixed runtime base and kuBridge unrestricted copy.
+They are separate from automatic undefined-symbol resolution and are used for
+version-specific code offsets.

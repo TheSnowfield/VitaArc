@@ -10,10 +10,10 @@
 M:\Projects\PSV Projects\vitaGL
 ```
 
-当前 VitaArc 工作区是 Linux 路径：
+当前 VitaArc 工作区是 Windows 路径：
 
 ```text
-/home/thesnowfield/Desktop/projects/VitaArc
+M:\Projects\PSV Projects\VitaArc
 ```
 
 本次 `.llm` 对齐没有重新读取或验证外部 vitaGL 工作区，因此下面内容应视为“历史已读实现背景”，而不是当前仓库内源码清单。
@@ -156,7 +156,17 @@ vglInitWithCustomThreshold(
     msaa);
 ```
 
-当前 VitaArc `main()` 中 `vglInitExtended` 调用被注释。
+当前 VitaArc `src/init.c` 中已经启用：
+
+```c
+vglInitExtended(
+    0, 960, 544, 24 * 1024 * 1024,
+    SCE_GXM_MULTISAMPLE_NONE);
+```
+
+用户报告该调用在运行期崩溃；当前仓库只有成功构建结果，没有保存可确定
+崩溃位置的 Vita/Vita3K backtrace。首帧 `glClear`、`glClearColor` 和
+`vglSwapBuffers` 测试仍被注释。
 
 ## Shader object
 

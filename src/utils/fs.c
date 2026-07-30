@@ -21,8 +21,8 @@ uint32_t util_get_file_size(const char *file_path)
   return file_size;
 }
 
-bool utils_read_file_all(const char *file_path, void *memory,
-                         uint32_t buffer_size)
+bool read_file_all(const char *file_path, void *memory,
+                   uint32_t buffer_size)
 {
   if (util_file_exists(file_path))
     return false;

@@ -15,14 +15,6 @@ typedef struct {
   uint8_t patch_length;
 } patch_address_t;
 
-/**
- * Patch all matching ELF relocations in one pass.
- * bridge_functions must be sorted by symbol_name.
- */
-void patch_symbols(dynalib_t *library,
-                   const patch_func_t bridge_functions[],
-                   uint32_t bridge_count);
-
 void patch_address(dynalib_t *library, const patch_address_t patches[],
                    uint32_t patch_count);
 

@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <string.h>
 #include <utils/fs.h>
@@ -10,7 +12,10 @@
 #include <config.h>
 #include <kubridge/kubridge.h>
 #include <logcat/logcat.h>
+#include <patcher.h>
 #include <utils/debug.h>
+
+#include <generated/bridge_symbols.h>
 
 #include "loader.h"
 #include "kubridge.h"
@@ -63,22 +68,22 @@
 
 static uint32_t __library_loaded = 0;
 static dynalib_t *__library_slots[MAX_LIBRARY] = {NULL};
-static const patch_func_t *__symbol_refs = NULL;
-static uint32_t __symbol_ref_count = 0;
 
-static const patch_func_t *__find_symbol_ref(const char *symbol_name)
+static const patch_func_t *__find_bridge_symbol(
+    const patch_func_t bridge_functions[], uint32_t bridge_count,
+    const char *symbol_name)
 {
   uint32_t left = 0;
-  uint32_t right = __symbol_ref_count;
+  uint32_t right = bridge_count;
 
   while (left < right)
   {
     uint32_t middle = left + (right - left) / 2;
     int result =
-        strcmp(symbol_name, __symbol_refs[middle].symbol_name);
+        strcmp(symbol_name, bridge_functions[middle].symbol_name);
 
     if (result == 0)
-      return &__symbol_refs[middle];
+      return &bridge_functions[middle];
     if (result < 0)
       right = middle;
     else
@@ -88,13 +93,63 @@ static const patch_func_t *__find_symbol_ref(const char *symbol_name)
   return NULL;
 }
 
-void loader_register_symbol_ref(const patch_func_t symbol_refs[],
-                                uint32_t symbol_count)
+static void __resolve_symbols(dynalib_t *library,
+                              const patch_func_t bridge_functions[],
+                              uint32_t bridge_count)
 {
-  __symbol_refs = symbol_refs;
-  __symbol_ref_count = symbol_refs ? symbol_count : 0;
-  log_i(TAG, "Registered %u local symbol references.",
-        __symbol_ref_count);
+  if (!library || !bridge_functions || !bridge_count)
+    return;
+
+  uint32_t resolved_relocations = 0;
+  for (uint32_t i = 0; i < library->elf_header->e_shnum; ++i)
+  {
+    const char *section_name =
+        (const char *)library->elf_section_string_table +
+        library->elf_section_base[i].sh_name;
+
+    if (strcmp(section_name, ".rel.dyn") != 0 &&
+        strcmp(section_name, ".rel.plt") != 0)
+      continue;
+
+    Elf32_Rel *relocations =
+        (Elf32_Rel *)((uintptr_t)library->library_image_base +
+                      library->elf_section_base[i].sh_addr);
+    uint32_t relocation_count =
+        library->elf_section_base[i].sh_size / sizeof(*relocations);
+
+    for (uint32_t j = 0; j < relocation_count; ++j)
+    {
+      uint32_t symbol_index = ELF32_R_SYM(relocations[j].r_info);
+      if (symbol_index >= library->elf_dynamic_symbol_count)
+        continue;
+
+      Elf32_Sym *symbol = &library->elf_dynamic_symbols[symbol_index];
+      if (symbol->st_shndx != SHN_UNDEF)
+        continue;
+
+      const char *symbol_name =
+          (const char *)library->elf_dynamic_string_table + symbol->st_name;
+      const patch_func_t *bridge =
+          __find_bridge_symbol(bridge_functions, bridge_count, symbol_name);
+      if (!bridge)
+        continue;
+
+      uintptr_t *relocation_address =
+          (uintptr_t *)(uintptr_t)(0x98000000 + relocations[j].r_offset);
+      *relocation_address = bridge->bridge_proc;
+      ++resolved_relocations;
+    }
+  }
+
+  log_i(TAG, "Resolved %u relocations from %u local symbols.",
+        resolved_relocations, bridge_count);
+}
+
+void loader_symbol_ref(dynalib_t *library)
+{
+  __resolve_symbols(
+      library, __bridge_symbols,
+      sizeof(__bridge_symbols) / sizeof(__bridge_symbols[0]));
 }
 
 dynalib_t *loader_load_library(const char *library_path)
@@ -118,7 +173,10 @@ dynalib_t *loader_load_library(const char *library_path)
   // If this library has been loaded
   // just duplicate the handle and return
   if (library)
+  {
+    loader_symbol_ref(library);
     return loader_clone_handle(library);
+  }
 
   // Prepare new block
   dynalib_t *new_library = calloc(1, sizeof(*new_library));
@@ -175,6 +233,9 @@ dynalib_t *loader_load_library(const char *library_path)
       FAILED_MEMBLOCK("Load or relocation failed.");
     }
     log_i(TAG, "Load and relocated all sections.");
+
+    // Resolve imported dependencies against the generated local symbol table.
+    loader_symbol_ref(new_library);
 
     // Clone an userend handle
     return loader_clone_handle(new_library);
@@ -342,8 +403,6 @@ bool loader_load_sections(dynalib_t *library)
   if (!(dynamic_symbols && dynamic_string_table))
     return false;
 
-  uint32_t bound_symbol_count = 0;
-
   for (int i = 0; i < elf_header->e_shnum; ++i)
   {
     char *section_name =
@@ -372,30 +431,10 @@ bool loader_load_sections(dynalib_t *library)
             relocation_type == R_ARM_GLOB_DAT ||
             relocation_type == R_ARM_JUMP_SLOT)
         {
-          if (relocation_symbol->st_shndx == SHN_UNDEF)
-          {
-            const char *symbol_name =
-                dynamic_string_table + relocation_symbol->st_name;
-            const patch_func_t *symbol_ref =
-                __find_symbol_ref(symbol_name);
-
-            if (symbol_ref)
-            {
-              symbol_address = symbol_ref->bridge_proc;
-              ++bound_symbol_count;
-            }
-            else if (ELF32_ST_BIND(relocation_symbol->st_info) != STB_WEAK)
-            {
-              log_e(TAG, "Unresolved required symbol: %s", symbol_name);
-              return false;
-            }
-          }
-          else
-          {
+          if (relocation_symbol->st_shndx != SHN_UNDEF)
             symbol_address =
                 linear_address_base +
                 OFFRST(relocation_symbol->st_value);
-          }
         }
 
         // log_v(TAG, "Relocating symbol: %s => [0x%08X], 0x%08X, %d, %d",
@@ -442,8 +481,7 @@ bool loader_load_sections(dynalib_t *library)
   internal->elf_dynamic_symbols = dynamic_symbols;
   internal->elf_dynamic_symbol_count = dynamic_symbol_count;
   internal->elf_init_array_section = init_array_section;
-  log_i(TAG, "Relocated all symbols; bound %u local references.",
-        bound_symbol_count);
+  log_i(TAG, "Relocated all symbols.");
 
   return true;
 }

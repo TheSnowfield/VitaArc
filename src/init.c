@@ -12,7 +12,6 @@
 #include "bridges/opengl/opengl.h"
 #include "bridges/cocos2dx/cocos2dx.h"
 #include "bridges/audio/manager.h"
-#include "bridges/symbols.h"
 
 #include "loader.h"
 #include "logcat/logcat.h"
@@ -41,8 +40,6 @@ int main(void) {
       glClearColor(1, 1, 1, 0.5);
       vglSwapBuffers(GL_FALSE);
     }
-
-    loader_symbol_ref();
 
     // Load library
     dynalib_t *_cocos =

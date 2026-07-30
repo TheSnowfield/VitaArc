@@ -53,6 +53,7 @@ include_directories(
   "src"
   "src/bridges"
   "third-party"
+  "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 # Add any additional library paths here
@@ -73,15 +74,15 @@ set(BRIDGE_SYMBOL_DEFINITION
   "${CMAKE_CURRENT_SOURCE_DIR}/src/bridges/symbol.def")
 set(BRIDGE_SYMBOL_GENERATOR
   "${CMAKE_CURRENT_SOURCE_DIR}/tools/generate_symbols.py")
-set(BRIDGE_SYMBOL_SOURCE
-  "${CMAKE_CURRENT_BINARY_DIR}/generated/bridge_symbols.c")
+set(BRIDGE_SYMBOL_HEADER
+  "${CMAKE_CURRENT_BINARY_DIR}/generated/bridge_symbols.h")
 
 add_custom_command(
-  OUTPUT "${BRIDGE_SYMBOL_SOURCE}"
+  OUTPUT "${BRIDGE_SYMBOL_HEADER}"
   COMMAND "${Python3_EXECUTABLE}"
     "${BRIDGE_SYMBOL_GENERATOR}"
     "${BRIDGE_SYMBOL_DEFINITION}"
-    "${BRIDGE_SYMBOL_SOURCE}"
+    "${BRIDGE_SYMBOL_HEADER}"
   DEPENDS
     "${BRIDGE_SYMBOL_DEFINITION}"
     "${BRIDGE_SYMBOL_GENERATOR}"
@@ -89,8 +90,11 @@ add_custom_command(
   VERBATIM
 )
 
-set_source_files_properties("${BRIDGE_SYMBOL_SOURCE}" PROPERTIES GENERATED TRUE)
-list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_SOURCE}")
+set_source_files_properties(
+  "${BRIDGE_SYMBOL_HEADER}"
+  PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE
+)
+list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_HEADER}")
 
 ## Build and link
 add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})

@@ -2,16 +2,6 @@
 #define __LOADER_H
 
 #include "dynalib.h"
-#include "patcher.h"
-
-/**
- * Register a sorted local symbol library used to bind ELF imports.
- *
- * @param symbol_refs Sorted local symbol references
- * @param symbol_count Number of local symbol references
- */
-void loader_register_symbol_ref(const patch_func_t symbol_refs[],
-                                uint32_t symbol_count);
 
 /**
  * Load so library

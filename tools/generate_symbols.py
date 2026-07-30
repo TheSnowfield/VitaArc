@@ -11,8 +11,6 @@ from pathlib import Path
 callback_pattern = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 generated_includes = r"""
-#define _GNU_SOURCE
-
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -38,7 +36,6 @@ generated_includes = r"""
 #include <sys/unistd.h>
 
 #include <patcher.h>
-#include <loader.h>
 #include <logcat/logcat.h>
 
 #include <android/assetmgr.h>
@@ -49,7 +46,6 @@ generated_includes = r"""
 #include <libc/impl/libc.h>
 #include <libc/impl/pthread.h>
 #include <opengl/impl/opengl.h>
-#include <symbols.h>
 """.strip()
 
 
@@ -112,6 +108,9 @@ def generate(entries: list[tuple[str, str]], source: Path) -> str:
  * The table is sorted by imported symbol for binary-search patching.
  */
 
+#ifndef __GENERATED_BRIDGE_SYMBOLS_H
+#define __GENERATED_BRIDGE_SYMBOLS_H
+
 {generated_includes}
 
 static const patch_func_t __bridge_symbols[] =
@@ -119,23 +118,7 @@ static const patch_func_t __bridge_symbols[] =
 {rows}
 }};
 
-void loader_symbol_ref(void)
-{{
-  loader_register_symbol_ref(
-      __bridge_symbols,
-      sizeof(__bridge_symbols) / sizeof(__bridge_symbols[0]));
-}}
-
-void patch_bridge_symbols(dynalib_t *library)
-{{
-  patch_symbols(library, __bridge_symbols,
-               sizeof(__bridge_symbols) / sizeof(__bridge_symbols[0]));
-}}
-
-uint32_t bridge_symbol_count(void)
-{{
-  return sizeof(__bridge_symbols) / sizeof(__bridge_symbols[0]);
-}}
+#endif /* __GENERATED_BRIDGE_SYMBOLS_H */
 """
 
 

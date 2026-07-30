@@ -36,9 +36,9 @@ int main(void) {
     vglSetFragmentBufferSize(512 * 1024);    // default 512 * 1024
     vglSetUSSEBufferSize(16 * 1024);         // default 16 * 1024
     vglInitExtended(0, 960, 544, 24 * 1024 * 1024, SCE_GXM_MULTISAMPLE_NONE); {
-      glClear(GL_COLOR_BUFFER_BIT);
-      glClearColor(1, 1, 1, 0.5);
-      vglSwapBuffers(GL_FALSE);
+      // glClear(GL_COLOR_BUFFER_BIT);
+      // glClearColor(1, 1, 1, 0.5);
+      // vglSwapBuffers(GL_FALSE);
     }
 
     // Load library

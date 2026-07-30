@@ -1,19 +1,16 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define LIBRARY_LIBFMOD "ux0:vitaarc/library/armeabi-v7a/libfmod.so"
-#define LIBRARY_LIBFMODPROVIDER "ux0:vitaarc/library/armeabi-v7a/libfmodProvider.so"
-#define LIBRARY_LIBCOCOS2DCPP "ux0:vitaarc/library/armeabi-v7a/libcocos2dcpp.so"
-#define LIBRARY_LIBCRASHLYTICS "ux0:vitaarc/library/armeabi-v7a/libcrashlytics.so"
-#define LIBRARY_LIBCRASHLYTICS_COMMON "ux0:vitaarc/library/armeabi-v7a/libcrashlytics-common.so"
-#define LIBRARY_LIBCRASHLYTICS_HANDLER "ux0:vitaarc/library/armeabi-v7a/libcrashlytics-handler.so"
-#define LIBRARY_LIBCRASHLYTICS_TRAMPOLINE "ux0:vitaarc/library/armeabi-v7a/libcrashlytics-trampoline.so"
-#define LIBRARY_LIBFMOD "ux0:vitaarc/library/armeabi-v7a/libfmod.so"
-#define LIBRARY_LIBFMOD_PROVIDER "ux0:vitaarc/library/armeabi-v7a/libfmodProvider.so"
+#define PATH_TO_APP "app0:"
+#define PATH_TO_PACKAGE PATH_TO_APP "package/"
+#define PATH_TO_LIBRARY PATH_TO_PACKAGE "lib/armeabi-v7a/"
+#define PATH_TO_ASSETS PATH_TO_PACKAGE "assets"
+#define PATH_TO_OBB PATH_TO_PACKAGE "obb/"
 
-#define PATH_TO_LOGFILE "ux0:vitaarc/boot.log"
-#define PATH_TO_ASSETS "ux0:vitaarc/assets"
-#define PATH_TO_DATA "ux0:vitaarc/persistent/data/"
-#define PATH_TO_OBB "ux0:vitaarc/persistent/obb/"
+#define LIBRARY_LIBCOCOS2DCPP PATH_TO_LIBRARY "libcocos2dcpp.so"
+
+#define PATH_TO_USER "ux0:vitaarc/"
+#define PATH_TO_LOGFILE PATH_TO_USER "boot.log"
+#define PATH_TO_DATA PATH_TO_USER "persistent/data/"
 
 #endif /* __CONFIG_H */

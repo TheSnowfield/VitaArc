@@ -17,32 +17,15 @@ You may not get the game running correctly.
  - Connect your PSVita to PC via VitaShell and copy `VitaArc.vpk` into it.
  - Install VitaArc.
 
-### Make directory tree
- - Download the game from the official website.
- - Extract the apk (~~ToS Warning~~) to any where on your PC.
- - Make a directory named `vitaarc` under `ux0:` root partition on your PSVita.
- - Copy `lib/arbeabi-v7a` to `ux0:vitaarc/library/`.
- - Copy `assets` to `ux0:vitaarc/`.
- - Make a directory named `persistent` under `ux0:vitaarc/`.
- 
-If you follows the tutorial correctly, The directory tree should be like
- - assets
-   + app-data
-   + audio
-   + char
-   + Default
-   + Fonts
-   + img
-   + ...
- - library
-   + armeabi-v7a
-     - libcocos2dcpp.so
-     - libcrashlytics.so
-     - libcrashlytics-common.so
-     - libcrashlytics-handler.so
-     - libcrashlytics-trampoline.so
-     - ...
- - persistent
+### Package game resources
+
+Place the official APK in `third-party/arcaea/` before building. The packaging
+script imports the selected APK into `package/` in the VPK. At runtime these
+read-only files are available below `app0:package/`; no manual extraction of
+the APK to the memory card is required.
+
+Writable files such as logs and persistent game data remain below
+`ux0:vitaarc/`.
 ### Play & PM
  - Click VitaArc bubble.
  - Wait for the game load.

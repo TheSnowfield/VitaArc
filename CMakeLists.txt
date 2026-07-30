@@ -139,6 +139,29 @@ set(VITA_SELF "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.self")
 set(VITA_SFO "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk_param.sfo")
 set(VITA_VPK_OUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk.out")
 set(VITA_VPK "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk")
+set(APK_IMPORT_SCRIPT
+  "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_apk.py")
+
+file(GLOB ARCAEA_APK_FILES
+  CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea/*.apk"
+)
+list(LENGTH ARCAEA_APK_FILES ARCAEA_APK_COUNT)
+if(ARCAEA_APK_COUNT EQUAL 0)
+  message(FATAL_ERROR
+    "No APK files found under third-party/arcaea")
+endif()
+
+set(ARCAEA_VERSION "" CACHE STRING
+  "Arcaea APK version to package without an interactive prompt")
+set(APK_IMPORT_ARGUMENTS
+  --vpk "${VITA_VPK_OUT}"
+  --apk-dir "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea"
+  --prefix package
+)
+if(ARCAEA_VERSION)
+  list(APPEND APK_IMPORT_ARGUMENTS --version "${ARCAEA_VERSION}")
+endif()
 
 add_custom_command(
   OUTPUT "${VITA_SFO}"
@@ -164,14 +187,20 @@ add_custom_command(
     -s "${VITA_SFO}"
     -b "${VITA_SELF}"
     "${VITA_VPK_OUT}"
+  COMMAND "${Python3_EXECUTABLE}"
+    "${APK_IMPORT_SCRIPT}"
+    ${APK_IMPORT_ARGUMENTS}
   DEPENDS
     "${VITA_SFO}"
     "${VITA_SELF}"
+    "${APK_IMPORT_SCRIPT}"
+    ${ARCAEA_APK_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/template.xml"
   COMMENT "Building vpk ${PROJECT_NAME}.vpk"
+  USES_TERMINAL
   VERBATIM
 )
 

@@ -2,49 +2,51 @@
 
 ## 项目用途
 
-VitaArc 的目标是在 HENkaku PSVita 上运行 Arcaea Android ARMv7 原生代码。实现不是重新实现游戏逻辑，而是：
+VitaArc 的目标是在 HENkaku PSVita 上运行 Arcaea Android ARMv7 原生代码。实现不是重写游戏逻辑，而是：
 
-- 读取 Android APK 中的 ARMv7 ELF shared object。
+- 读取 APK 中的 ARMv7 ELF shared object。
 - 在 Vita 用户进程中手动映射 `libcocos2dcpp.so`。
 - 将 Android/Bionic/JNI/OpenGL ES 等导入符号重定向到 Vita 侧实现。
-- 对特定版本的 Cocos2d-x/Arcaea 机器码按固定偏移打补丁。
-- 调用原始库导出的 JNI 和 Cocos2d-x 初始化函数。
+- 对特定版本 Cocos2d-x/Arcaea 机器码按固定偏移打补丁。
+- 调用原始库导出的 `JNI_OnLoad`，并保留后续 Cocos JNI 导出调用封装。
 
-README 明确声明项目与 Lowiro 和 Arcaea 无隶属关系，并警告项目仍在开发、不能保证游戏正确运行。
+README 明确声明项目与 Lowiro 和 Arcaea 无隶属关系，并提示项目仍在开发、不能保证游戏正确运行。
 
 ## 根目录
 
 - `.git/`：Git 仓库元数据。
-- `.vscode/`：本地 VS Code 配置；被 `.gitignore` 忽略。
-- `build/`：旧构建目录和调试现场；被 `.gitignore` 忽略。
+- `.agents/`、`.codex/`：Codex 桌面环境只读元数据。
+- `.llm/`：本知识库。
 - `livearea/`：VPK 的 LiveArea 图标、背景、启动图和模板。
-- `src/`：VitaArc 源码。
-- `.gitignore`：忽略 CMake 中间文件、Makefile、`build/` 和 `.vscode/`。
-- `.gitmodules`：声明 `src/kubridge` 子模块，上游为 `https://github.com/TheOfficialFloW/kubridge.git`。
-- `build.sh`：执行 `cmake . -B build`、进入 `build`、`make clean`、`make -j 8`。
+- `src/`：VitaArc 用户态源码。
+- `third-party/`：第三方依赖目录；`.gitmodules` 声明 `third-party/kubridge` 子模块。
+- `tools/udp_logger.py`：UDP 日志接收器，默认监听 `0.0.0.0:23333`。
+- `.gitignore`：忽略构建缓存、Makefile、`build/` 和 VS Code目录。
+- `.gitmodules`：声明 `third-party/kubridge`，上游为 `https://github.com/TheOfficialFloW/kubridge.git`。
+- `build.sh`：执行 `cmake -S . -B build` 和 `cmake --build build --parallel 8`。
 - `CMakeLists.txt`：顶层 VitaSDK 构建和 VPK 打包配置。
-- `README.md`：项目目的、设备安装和 Android 游戏文件目录说明。
-- `CMakeCache.txt`：根目录遗留 CMake 缓存，不是源码。
+- `README.md`：项目目的、免责声明、安装、APK资源目录。
 
-## `src/` 分类
+当前仓库根目录没有 `build/`，也没有旧文档中提到的根目录 `CMakeCache.txt`。
+
+## `src/` 当前布局
 
 ### `src/main.c`
 
-Vita 用户程序入口。负责日志、vitaGL、SO 装载、导入符号桥接、二进制补丁、SO 初始化、JNI 启动及 Cocos2d-x 原生初始化。
+Vita 用户程序入口。负责日志、vitaGL shader compiler 参数、SO 装载、导入符号桥接、二进制补丁、SO 初始化和 `JNI_OnLoad` 调用。
 
-### `src/common`
+### `src/bridges`
+
+当前大量基础桥接文件都在这个目录下：
 
 - `define.h`：Android 库路径、日志路径、持久化数据路径和 OBB 路径。
 - `types.h`：本地 `bool`、`true`、`false` 定义。
-- `elf.h`：完整 ELF32 类型、常量、ARM 重定位常量等定义，约 3527 行。
+- `elf.h`：ELF32 类型、常量、ARM 重定位常量等定义。
+- `loader.h/.c`：SO 状态结构、固定地址映射、ARM 重定位、符号查找、导入项安装、`.init_array` 调用、引用计数释放。
+- `patcher.h/.c`：符号补丁、地址补丁、ARM/Thumb 指令补丁和绝对跳转 hook。
+- `kubridge.h/.c`：用户态辅助包装，目前只实现 `kuKernelCpuUnrestrictedMemset`。
 
-### `src/solibrary`
-
-- `solib.h`：对外 SO 句柄和装载器 API。
-- `internal.h`：`SOINTERNAL`、槽位和 ELF 缓存字段。
-- `solib.c`：文件读取、段映射、ARM 重定位、符号查找、导入项安装和初始化数组调用。
-
-### `src/bridges`
+### `src/bridges/*`
 
 - `eabi/`：ARM EABI helper 符号桥接。
 - `libc/`：Bionic fortify、C 标准库、POSIX、网络和 pthread 桥接。
@@ -58,17 +60,11 @@ Vita 用户程序入口。负责日志、vitaGL、SO 装载、导入符号桥接
 
 - `fs.c/.h`：文件存在、文件大小和全文件读取。
 - `string.c/.h`：文件名和 UTF-16 字符串长度辅助。
-- `patcher.c/.h`：符号补丁、地址补丁、ARM/Thumb 指令补丁和绝对跳转 hook。
 - `debug.c/.h`：内存十六进制输出、内存 dump 和人为崩溃断点。
-- `kubridge.c/.h`：基于 `kuKernelCpuUnrestrictedMemcpy` 实现越权 memset。
 
 ### `src/logcat`
 
-日志抽象，可输出到 UDP 或设备文件。
-
-### `src/kubridge`
-
-独立内核插件源码及导出配置，提供固定地址内存分配、缓存刷新和不受用户态访问权限限制的复制。
+日志抽象，可输出到 UDP 或设备文件。当前编译期启用 UDP。
 
 ## LiveArea/VPK 资源
 
@@ -111,4 +107,3 @@ ux0:vitaarc/
 - `ux0:vitaarc/persistent/obb/`
 
 `define.h` 中 `LIBRARY_LIBFMOD` 被重复定义；`LIBRARY_LIBFMODPROVIDER` 和 `LIBRARY_LIBFMOD_PROVIDER` 同时存在。
-

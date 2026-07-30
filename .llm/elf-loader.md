@@ -2,26 +2,26 @@
 
 ## 对外类型和 API
 
-`HSOLIB` 定义为：
-
-```c
-typedef void **HSOLIB;
-```
-
-句柄本身是堆分配的指针，指向一个内部 `SOINTERNAL *`。
+当前 SO 句柄类型是 `dynalib_t *`，定义在 `src/bridges/loader.h`。
 
 对外 API：
 
 - `solibLoadLibrary(path)`
-- `solibInitLibrary(handle)`
-- `solibFreeLibrary(handle)`
-- `solibGetProcAddress(handle, symbol)`
-- `solibInstallProc(handle, symbol, destination)`
-- `solibGetLibraryImageBase(handle)`
+- `solibInitLibrary(library)`
+- `solibFreeLibrary(library)`
+- `solibGetProcAddress(library, symbol)`
+- `solibInstallProc(library, symbol, destination)`
+- `solibGetLibraryImageBase(library)`
 - `solibFindLibrary(name)`
-- `solibCloneHandle(handle)`
+- `solibCloneHandle(library)`
 
-## `SOINTERNAL`
+内部 API：
+
+- `solibFindEmptySlot()`
+- `solibLoadSections(library)`
+- `solibDebugPrintElfTable(library)`
+
+## `dynalib_t`
 
 内部实例保存：
 
@@ -46,8 +46,8 @@ typedef void **HSOLIB;
 
 ```c
 #define MAX_LIBRARY 32
-static uint32_t libraryLoaded;
-static LPSOINTERNAL librarySlots[32];
+static uint32_t libraryLoaded = 0;
+static dynalib_t *librarySlots[MAX_LIBRARY] = {NULL};
 ```
 
 ## `solibLoadLibrary`
@@ -57,11 +57,11 @@ static LPSOINTERNAL librarySlots[32];
 1. `utilFileExists(path)` 必须为真。
 2. `utilGetFileSize(path)` 必须大于 0。
 3. 通过最后一个路径组件得到库名。
-4. 如果同名库已存在，返回克隆句柄，不再次映射。
+4. 如果同名库已存在，返回同一个 `dynalib_t *` 并递增引用计数。
 
 ### 原始文件镜像
 
-内部对象使用 `malloc(sizeof(SOINTERNAL))` 创建，当前没有清零。
+内部对象使用 `calloc(1, sizeof(*libraryNew))` 创建，因此引用计数和缓存字段初始为 0。
 
 申请：
 
@@ -84,13 +84,11 @@ sceKernelAllocMemBlock(
 - 增加 `libraryLoaded`。
 - 打印 ELF 调试信息。
 - 调用 `solibLoadSections`。
-- 返回一个克隆句柄。
+- 返回 `solibCloneHandle(libraryNew)`，也就是同一指针并递增引用计数。
 
-`nRefCount` 在第一次克隆前没有显式初始化，因此第一次 `++nRefCount` 依赖未初始化堆内容。
+仍未检查 `sceIoOpen`/`sceIoRead` 返回值，也未验证实际读取字节数。
 
 `strcpy` 直接写入固定 64/128 字节数组，没有长度保护。
-
-文件 open/read 返回值未检查，也未验证实际读取字节数。
 
 ## ELF 映射地址
 
@@ -100,7 +98,7 @@ sceKernelAllocMemBlock(
 uintptr_t lpLinearAddressBase = 0x98000000;
 ```
 
-所有库共享这个固定基址设计。当前槽位系统允许多个库，但 `solibLoadSections`、`solibGetProcAddress`、`solibInstallProc` 和补丁器都没有为每个库选择不同的运行时基址。
+槽位系统允许多个库，但 `solibLoadSections`、`solibGetProcAddress`、`solibInstallProc` 和补丁器都固定使用这个运行时基址。第二个不同库会与第一个库地址空间冲突。
 
 ## Program header/segment 处理
 
@@ -121,13 +119,13 @@ uintptr_t lpLinearAddressBase = 0x98000000;
 6. 取得实际 memblock base。
 7. 将 program header 中的 `p_vaddr` 原地增加 `0x98000000`。
 8. 可执行段保存为 `lpTextBase`，并刷新 cache。
-9. 使用 kuBridge memset 清零整个分配块。
+9. 使用 `kuKernelCpuUnrestrictedMemset` 清零整个分配块。
 10. 从 ELF 原始文件镜像的 `p_offset` 复制 `p_filesz` 字节到运行地址。
 11. 推进线性分配地址。
 
-各运行时 segment 的 memblock ID 只存在于局部变量，未存入 `SOINTERNAL`，因此当前释放流程无法释放这些映射。
+各运行时 segment 的 memblock ID 只存在于局部变量，未存入 `dynalib_t`，因此当前释放流程无法释放这些映射。
 
-函数声明为 `void solibLoadSections(...)`，但内部使用 `return false`、`return true`，类型不一致。
+`solibLoadSections` 返回 `bool`。调用方记录 “Load and relocated all sections.”，但没有检查返回值。
 
 ## Section 扫描
 
@@ -143,7 +141,7 @@ uintptr_t lpLinearAddressBase = 0x98000000;
 dynsym_section.sh_size / sizeof(Elf32_Sym)
 ```
 
-若 `.dynsym` 或 `.dynstr` 缺失，映射函数提前返回。
+若 `.dynsym` 或 `.dynstr` 缺失，映射函数返回 `false`。
 
 `.init_array` 缺失时没有错误处理；之后 `solibInitLibrary` 会解引用空 section pointer。
 
@@ -171,19 +169,19 @@ lpImageBase + section.sh_addr
 ### `R_ARM_ABS32`
 
 ```c
-*target += 0x98000000 + symbol.st_value;
+*target += 0x98000000 + OFFRST(symbol.st_value);
 ```
 
 ### `R_ARM_RELATIVE`
 
 ```c
-*target = *target + 0x98000000;
+*target = OFFRST(*target) + 0x98000000;
 ```
 
 ### `R_ARM_GLOB_DAT`
 
 ```c
-*target = 0x98000000 + symbol.st_value;
+*target = 0x98000000 + OFFRST(symbol.st_value);
 ```
 
 ### `R_ARM_JUMP_SLOT`
@@ -222,7 +220,7 @@ lpInternal->lpElfSectionInitArray->sh_addr
 命中后返回：
 
 ```c
-0x98000000 + st_value
+0x98000000 + OFFRST(st_value)
 ```
 
 不检查：
@@ -254,39 +252,37 @@ lpInternal->lpElfSectionInitArray->sh_addr
 
 - 遍历 32 个槽位。
 - 按库文件名而不是完整路径匹配。
-- 命中时返回新克隆句柄。
+- 命中时返回同一个 `dynalib_t *`。
 
-`solibCloneHandle` 和 `solibCloneHandleInternal`：
+`solibCloneHandle`：
 
-- `malloc(sizeof(HSOLIB))`
-- 令 `*new_handle = internal`
-- `++internal->nRefCount`
+- 递增 `library->nRefCount`。
+- 返回同一个 `dynalib_t *`，不再分配单独句柄。
 
 ## 释放逻辑当前行为
 
 `solibFreeLibrary`：
 
-1. 取得内部实例。
-2. `--nRefCount`。
-3. 如果变为 0，则执行 `solibFreeLibrary(*hSoLibrary)`。
-4. 无条件清除全局槽位。
-5. 无条件减少 `libraryLoaded`。
-6. 只释放原 ELF 文件镜像 memblock。
-7. 只 `free(hSoLibrary)`。
+1. 空指针直接返回。
+2. 若 `nRefCount > 0`，先递减；递减后仍大于 0 则返回。
+3. 清除全局槽位。
+4. 减少 `libraryLoaded`。
+5. 释放原 ELF 文件镜像 memblock。
+6. `free(library)`。
 
-问题：
+已经不再存在旧实现中“把 `SOINTERNAL *` 当 `HSOLIB` 递归传入”的错误。
 
-- 第 3 步把 `SOINTERNAL *` 当作 `HSOLIB` 递归传入，类型/内存布局错误。
-- 引用计数不为 0 时仍删除槽位和 memblock。
-- 内部 `SOINTERNAL` 本身没有释放。
+仍存在的问题：
+
+- 若 `nRefCount == 0` 时被调用，会直接释放。
 - 映射后的 RX/RW segment memblocks 没有记录，也无法释放。
-- 初始引用计数未初始化。
+- 正常 `main()` 当前不会调用 `solibFreeLibrary`。
 
 ## Patcher 与装载器关系
 
 `patchSymbols` 遍历 `BRIDGEFUNC` 数组，对每个条目调用 `solibInstallProc`。
 
-所有按地址补丁都忽略 `hSoLibrary` 的真实 image base，固定使用：
+所有按地址补丁都忽略 `dynalib_t` 的真实 image base，固定使用：
 
 ```c
 uintptr_t lpImageBase = 0x98000000;
@@ -310,4 +306,3 @@ callback    callback absolute address
 ```
 
 当前 hook 后没有显式调用 `kuKernelFlushCaches`。
-

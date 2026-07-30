@@ -53,7 +53,7 @@
 - `__vsnprintf_chk`
 - `__vsprintf_chk`
 
-相关实现位于 `impl/bionic/*.cpp`。`__fortify_chk_fail` 记录 fatal 并退出。
+相关实现位于 `src/bridges/libc/impl/bionic/*.cpp`。`__fortify_chk_fail` 记录 fatal 并退出。
 
 ### 内存和字符串
 
@@ -80,7 +80,7 @@
 - `strdup`
 - `strerror`
 - `strerror_r`
-- `strlen` → `_strlen`
+- `strlen` → `bridgeStrlen`
 - `strncmp`
 - `strncpy`
 - `strrchr`
@@ -96,8 +96,10 @@
 - `strxfrm`
 - `sscanf`
 - `vsscanf`
+- `atoi`
+- `atol`
 
-`_strlen` 记录字符串内容后调用 Vita libc `strlen`。
+`bridgeStrlen` 记录字符串内容后调用 Vita libc `strlen`。
 
 `memmem` 是占位实现，记录 unsupported，返回 `NULL`。
 
@@ -108,7 +110,7 @@
 - `fclose`
 - `ferror`
 - `fflush`
-- `fopen` → `_fopen`
+- `fopen` → `bridgeFopen`
 - `fprintf`
 - `fputc`
 - `fread`
@@ -128,7 +130,7 @@
 - `vfprintf`
 - `vsnprintf`
 
-`_fopen` 对以 `/data/data/` 开头的路径执行重定向：
+`bridgeFopen` 对以 `/data/data/` 开头的路径执行重定向：
 
 ```text
 /data/data/<suffix>
@@ -138,12 +140,12 @@ ux0:vitaarc/persistent/data/<suffix after 11 chars>
 
 重定向使用 256 字节栈缓冲区和 `sprintf`，没有边界检查。
 
-存在 `_fread` 包装函数，但 bridge 表中的 `fread` 当前直接指向系统 `fread`，没有使用 `_fread`。
+存在 `bridgeFread` 包装函数，但 bridge 表中的 `fread` 当前直接指向系统 `fread`，没有使用 `bridgeFread`。
 
 ### 文件描述符和文件系统
 
 - `access`
-- `close` → `_close`
+- `close` → `bridgeClose`
 - `closedir`
 - `fchmod`
 - `fchown`
@@ -155,10 +157,10 @@ ux0:vitaarc/persistent/data/<suffix after 11 chars>
 - `lseek64`
 - `lstat`
 - `mkdir`
-- `open` → `_open`
-- `__open_2` → 系统 `open`，不是 `_open`
+- `open` → `bridgeOpen`
+- `__open_2` → 系统 `open`，不是 `bridgeOpen`
 - `opendir`
-- `read` → `_read`
+- `read` → `bridgeRead`
 - `readlink`
 - `remove`
 - `rename`
@@ -184,17 +186,15 @@ ux0:vitaarc/persistent/data/<suffix after 11 chars>
 
 ### `/dev/urandom`
 
-`_open("/dev/urandom", ...)` 返回伪 fd：
+`bridgeOpen("/dev/urandom", ...)` 返回伪 fd：
 
 ```c
 DEV_URANDOM = 1
 ```
 
-`_read(DEV_URANDOM, buffer, size)` 调用 `sceKernelGetRandomNumber` 并返回请求长度。
+`bridgeRead(DEV_URANDOM, buffer, size)` 调用 `sceKernelGetRandomNumber` 并返回请求长度。
 
-`_close(DEV_URANDOM)` 返回 0。
-
-其他路径/fd 交给 Vita libc 的 `open/read/close`。
+`bridgeClose(DEV_URANDOM)` 返回 0。
 
 伪 fd 1 可能与正常 POSIX stdout fd 值冲突。
 
@@ -205,7 +205,7 @@ DEV_URANDOM = 1
 - `dlerror`
 - `dlopen`
 - `dlsym`
-- `__mmap2` → `mmap2`
+- `__mmap2` → `bridgeMmap2`
 - `mremap`
 - `munmap`
 
@@ -229,6 +229,7 @@ DEV_URANDOM = 1
 - `syscall` → 占位
 - `sysconf` → 占位
 - `time`
+- `strftime`
 - `geteuid` → 占位
 - `getenv`
 - `exit`
@@ -401,4 +402,3 @@ bridge 表没有注册 `pthread_mutex_timedlock`，虽然本地实现存在。
 condition variable本身直接作为 Vita `pthread_cond_t` 使用；传入的 mutex 则改为内部 `_MUTEX(mutex)`。
 
 没有 `pthread_cond_init` bridge。代码依赖零初始化 condition variable 可被底层实现接受，或目标库不导入该函数。
-

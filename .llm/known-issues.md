@@ -1,35 +1,58 @@
 # Known incomplete behavior and directly observed defects
 
-本文档只记录从当前源码和当前本地 vitaGL 源码直接可见的行为。
+本文档只记录从当前源码和已记录的 vitaGL 行为直接可见的行为。
+
+## Runtime currently stops after `JNI_OnLoad`
+
+`main()` 只调用 `bridgeCallJNIMain(hLibCocos2dx)`。
+
+以下 Cocos JNI 启动调用被注释：
+
+- `bridgeJNICocosInitApp`
+- `bridgeJNICocosSetDeviceId`
+- `bridgeJNICocosNativeInit`
+
+`ExitProgram` 是无限循环：
+
+```c
+for(;;);
+```
+
+因此 `logEnd()`、`return 0` 和任何正常清理都不可达。
+
+## vitaGL/GXM initialization disabled
+
+`main()` 当前只配置 `vglSetupRuntimeShaderCompiler` 和若干 buffer size setter。
+
+`vglInitExtended(...)`、首帧 `glClear/glClearColor/vglSwapBuffers` 整段被注释。若目标库在 `JNI_OnLoad` 或后续路径调用 OpenGL/vitaGL API，图形后端可能尚未初始化。
 
 ## Shader source 生命周期
 
 VitaArc `_glShaderSource`：
 
 1. 分配 `cg_shader`。
-2. 调用 vitaGL `glShaderSource(handle, 1, &cg_shader, NULL)`。
+2. 调用 vitaGL `glShaderSource(handle, 1, &cg_shader_source, NULL)`。
 3. 立即 `free(cg_shader)`。
 
-本地 vitaGL `glShaderSource` 不复制 source，只保存该地址，直到稍后的 `glCompileShader` 使用。
+历史读取的本地 vitaGL `glShaderSource` 不复制 source，只保存该地址，直到稍后的 `glCompileShader` 使用。
 
 结果：`glCompileShader` 读取已释放内存，属于 use-after-free。
-
-## Shader format string
-
-VitaArc 调用：
-
-```c
-logPrintf(gl_shader);
-logPrintf(cg_shader);
-```
-
-shader 中的 `%` 会被 `vsnprintf` 当格式占位符，导致读取不存在的 varargs、错误日志、崩溃或内存暴露。正确调用形态应是 `logPrintf("%s", shader)`。
 
 ## Shader `length[]` 未处理
 
 Android OpenGL ES `glShaderSource` 允许每段由 `length[i]` 指定长度且不以 NUL 结束。
 
-VitaArc忽略 `length`，对每段 `strlen`。非 NUL source 会越界读；包含内嵌 NUL 时会截断。
+VitaArc 忽略 `length`，对每段 `strlen`。非 NUL source 会越界读；包含内嵌 NUL 时会截断。
+
+## Shader output file handling
+
+`_glShaderSource` 每次写固定文件：
+
+```text
+ux0:vitaarc/shader/1.glsl
+```
+
+不区分 shader handle/type，不检查目录是否存在，也不检查 `fopen` 是否成功。若 `fopen` 返回 `NULL`，随后的 `fwrite`/`fclose` 会崩溃。
 
 ## Shader output buffer
 
@@ -47,27 +70,19 @@ GLSL→Cg converter 固定 `malloc(0x8000)`，没有完整容量检查。输入�
 
 ## `glBindAttribLocation`
 
-当前 bridge 包装只记录，不执行绑定，同时固定偏移补丁跳过 Cocos预绑定流程。
-
-包装中的日志调用为：
-
-```c
-logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
-```
-
-但 `logI` 原型是 `logI(tag, format, ...)`。这里：
-
-- 第一参数被当作 tag。
-- 整数 `program` 被当作 `const char *format`。
-- `index` 和 `name` 成为后续 varargs。
-
-调用该 wrapper 时会把小整数 program handle 当地址读取，可能立即崩溃。
+当前 bridge 包装只记录，不执行绑定，同时固定偏移补丁跳过 Cocos 预绑定流程。
 
 可能后果：
 
-- Cocos固定 attribute index 与 vitaGL 自动分配不一致。
+- Cocos 固定 attribute index 与 vitaGL 自动分配不一致。
 - `glVertexAttribPointer(index, ...)` 的 index 与 GXM parameter resource mapping 不一致。
 - 绘制时 attribute 数据错位或 vertex program patch 失败。
+
+日志调用参数顺序当前是正确的：
+
+```c
+logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
+```
 
 ## `glGetShaderSource`
 
@@ -77,34 +92,11 @@ logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
 
 Renderbuffer、VAO OES、map/unmap buffer 均为空或失败返回。Cocos2d-x 的 FBO depth/stencil、VAO cache、映射更新路径不能按 OpenGL ES 语义工作。
 
-## `glClearColor` 调用顺序
-
-`main` 当前先 `glClear`，再 `glClearColor`。第一帧 clear 不使用白色半透明值。
-
-## `vglUseVram` 调用顺序
-
-当前在 `vglInitExtended` 后调用，只影响后续分配。若意图让初始化内存使用 VRAM，需要在 init 前设置。
-
-## `vglSetVertexPoolSize`
-
-默认 vitaGL Makefile没有开启 `CIRCULAR_VERTEX_POOL=1`。此时该 setter 是编译期空操作，VitaArc 设置 48 MiB 不生效。
-
-## SO loader内部对象未初始化
-
-`malloc(sizeof(SOINTERNAL))` 后没有清零。以下字段在赋值前可能含垃圾：
-
-- `nRefCount`
-- 多个 cached section pointer
-- text base
-- 其他结构字段
-
-第一次 clone 对未初始化 `nRefCount` 执行自增。
-
 ## SO 固定基址与多库模型冲突
 
 loader允许 32 个库实例，但所有库都映射到 `0x98000000`。第二个不同库会与第一个地址空间冲突。
 
-README目录列出了多份 `.so`，源码也有 Crashlytics/FM0D 常量，但当前装载器不是通用多库动态链接器。
+README目录列出了多份 `.so`，源码也有 Crashlytics/FMOD 常量，但当前装载器不是通用多库动态链接器。
 
 ## ELF 校验缺失
 
@@ -122,22 +114,21 @@ loader不验证：
 
 损坏或不同格式文件可导致任意地址读写。
 
+## `solibLoadSections` 返回值被忽略
+
+`solibLoadSections` 返回 `bool`，但 `solibLoadLibrary` 调用后没有检查返回值，仍记录 “Load and relocated all sections.” 并返回克隆句柄。
+
 ## Segment memblock 泄漏
 
 每个 `PT_LOAD` 申请的 memblock ID 未保存。释放时只释放原文件镜像，不释放运行时 RX/RW 段。
 
-## `solibFreeLibrary` 错误
-
-- 引用计数为 0 时递归参数类型错误。
-- 引用计数仍大于 0 时也清除槽位和 memblock。
-- 不释放内部对象。
-- 不释放 segment。
-
-当前 `main` 没有调用它，所以正常启动路径表现为泄漏而不是立即触发该释放错误。
+当前 `main` 没有调用 `solibFreeLibrary`，所以正常启动路径表现为泄漏而不是释放段。
 
 ## `.init_array` 地址假设
 
 函数表地址用 `lpTextBase + sh_addr`。若 text base 已包含映射基址且 `sh_addr` 是 ELF virtual address，此计算可能重复/错误偏移，取决于目标 ELF layout。
+
+`.init_array` 缺失时没有空检查。
 
 ## 重定位覆盖范围
 
@@ -173,7 +164,7 @@ README要求复制 `assets`，但 AssetManager全部为空。依赖 Android NDK 
 
 ## JNI 大面积为空
 
-函数表只填一部分，填入的函数中也有大量无返回语句或固定伪对象。目标库调用其他 JNI 方法会跳空指针。
+函数表只填一部分，填入的函数中也有大量固定伪对象或零值返回。目标库调用其他 JNI 方法会跳空指针。
 
 ## JNI string表示不一致
 
@@ -183,9 +174,9 @@ README要求复制 `assets`，但 AssetManager全部为空。依赖 Android NDK 
 
 `AttachCurrentThread` 和 `AttachCurrentThreadAsDaemon` 返回成功但不设置 `JNIEnv **`。
 
-## `RegisterNatives` 无返回/不注册
+## `RegisterNatives` 不注册
 
-目标库可能认为 native 方法注册成功/失败取决于未定义寄存器返回值，且实际调用表没有保存。
+`RegisterNatives` 返回 0，但实际调用表没有保存。
 
 ## Platform persistence为空
 
@@ -219,11 +210,11 @@ README要求复制 `assets`，但 AssetManager全部为空。依赖 Android NDK 
 
 ## `/dev/urandom` fd 冲突
 
-伪 fd 固定为 1，通常与 stdout 数字相同。目标库若同时操作普通 fd 1，`_read/_close` 会错误视为 urandom。
+伪 fd 固定为 1，通常与 stdout 数字相同。目标库若同时操作普通 fd 1，`bridgeRead/bridgeClose` 会错误视为 urandom。
 
 ## 文件路径重定向边界
 
-`_fopen` 用 256 字节 buffer 和 `sprintf` 拼接，长路径可覆盖栈。
+`bridgeFopen` 用 256 字节 buffer 和 `sprintf` 拼接，长路径可覆盖栈。
 
 只有 `fopen` 被重定向。`open/stat/access/remove/rename/opendir` 等路径没有同样重定向，文件 API 间路径语义不一致。
 
@@ -243,7 +234,7 @@ Android log priority 直接转换成本地五级 enum，也可能造成 `logLvSt
 
 ## UDP日志资源
 
-- host 固定 `192.168.1.2`
+- host 固定 `10.20.0.227`
 - net memory 泄漏
 - 无 net termination
 - `logEnd` 在发 stop 日志前先禁用 logger
@@ -253,36 +244,17 @@ Android log priority 直接转换成本地五级 enum，也可能造成 `logLvSt
 
 `bridgeCallJNIMain` 每次 dump `0xA60AA0` 字节，不根据实际映射段范围，可能读取未映射区域，或少 dump/多 dump不同版本 SO。
 
-## AudioProvider返回值和释放
+## AudioProvider释放
 
-多个返回 `int` 的 provider 方法无 return。provider/destructor 不释放内存。AudioManager失败路径也不 free自身。
+provider/destructor 不释放内存。AudioManager失败路径也不 free 自身。
 
 ## 性能配置未使用
 
 `setupPerformanceProfile` 定义但从不调用。
 
-## Audio bridge声明未包含
-
-`main.c` 调用 `bridgeAudioProvider(hLibCocos2dx)`，但当前 include 列表没有：
-
-```c
-#include "bridges/audio/audio.h"
-```
-
-顶层 C 编译标志没有显式指定现代 C 标准。工具链若允许隐式函数声明则产生 warning 并继续；若按禁止隐式声明的标准/错误策略构建则编译失败。
-
-## vitaGL `glGetAttribLocation` 末尾缺少返回
-
-本地 vitaGL 中，如果找到目标 GXM attribute parameter，但：
-
-- 没有已绑定 slot；
-- `0 .. attr_num-1` 也没有 `0xDEAD` 空 slot；
-
-函数会走到末尾而没有返回值。
-
 ## 清理缺失
 
-正常退出没有：
+正常控制流没有：
 
 - `vglEnd`
 - `solibFreeLibrary`
@@ -292,4 +264,4 @@ Android log priority 直接转换成本地五级 enum，也可能造成 `logLvSt
 
 ## 构建验证缺失
 
-现有 VPK 是旧产物。当前工作区新增未跟踪 `glsl2cg.c/.h`，并修改 CMake，但没有当前构建结果。
+当前工作区没有 `build/`，本次 `.llm` 对齐没有运行 VitaSDK 构建。

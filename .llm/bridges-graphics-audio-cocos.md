@@ -171,7 +171,7 @@ Renderbuffer 相关函数由 VitaArc 占位。
 
 ## vitaGL 对 shader source 的要求
 
-本地 vitaGL `source/vitaGL.h` 明确注释：
+历史读取的本地 vitaGL `source/vitaGL.h` 注释说明：
 
 ```c
 glShaderSource(...); // NOTE: Uses CG shader sources
@@ -197,16 +197,16 @@ glShaderSource(...); // NOTE: Uses CG shader sources
 3. `malloc(total + 1)`。
 4. 顺序拼接所有 shader source strings。
 5. 写 NUL。
-6. 将原始 GLSL 作为 format string 传给 `logPrintf`。
+6. 使用 `logPrintf("%s", gl_shader)` 输出原始 GLSL。
 7. 写入固定文件 `ux0:vitaarc/shader/1.glsl`。
 8. 调用 vitaGL `glGetShaderiv(handle, GL_SHADER_TYPE, &type)`。
 9. fragment → `translate_frag_shader`。
 10. vertex → `translate_vert_shader`。
-11. 将生成的 Cg 作为 format string 传给 `logPrintf`。
-12. `glShaderSource(handle, 1, &cg_shader, NULL)`。
+11. 使用 `logPrintf("%s", cg_shader)` 输出生成 Cg。
+12. `glShaderSource(handle, 1, &cg_shader_source, NULL)`。
 13. 立即 `free(cg_shader)` 和 `free(gl_shader)`。
 
-本地 vitaGL 的 `glShaderSource` 不复制 Cg，而只是保存指针；VitaArc 在返回前释放 `cg_shader`。之后 Cocos2d-x 再调用 `glCompileShader` 时，vitaGL 会读取已释放内存。这是当前 shader 路径中的生命周期冲突。
+当前已经避免了旧版 “shader 文本当 format string” 的日志问题，但仍有 source 生命周期问题：vitaGL 不复制 Cg，而 VitaArc 在返回前释放 `cg_shader`。之后 Cocos2d-x 再调用 `glCompileShader` 时，vitaGL 会读取已释放内存。
 
 若 Android 调用者传入非 NUL 结尾 source 并依赖显式 `length`，当前 `strlen` 会越界。
 
@@ -224,17 +224,15 @@ glShaderSource(...); // NOTE: Uses CG shader sources
 
 ## `_glBindAttribLocation`
 
-当前只记录 program、index、name，不调用 vitaGL。
-
-当前日志调用本身没有按 logger 原型传 tag：
+当前只记录 program、index、name，不调用 vitaGL：
 
 ```c
-logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
+logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
 ```
 
-`program` 会落到 logger 的 `format` 参数位置并被解释为指针。
+当前日志调用参数顺序已正确。
 
-同时 `bridgePatchCocos2DX` 又修改 `cocos2d::GLProgram::bindPredefinedVertexAttribs`，用于阻止原代码调用 attribute binding。
+同时 `bridgePatchCocos2DX` 修改 `cocos2d::GLProgram::bindPredefinedVertexAttribs`，用于阻止原代码调用 attribute binding。
 
 本地 vitaGL 的真实 `glBindAttribLocation`：
 
@@ -251,7 +249,7 @@ logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
 - `src/bridges/opengl/impl/glsl2cg.c`
 - `src/bridges/opengl/impl/glsl2cg.h`
 
-当前为未跟踪文件。源码头标注 2022 Rinnegatamante、MIT license 文本说明。
+当前这些文件已存在于 `src` 下，并由顶层 `GLOB_RECURSE` 自动编译。
 
 入口：
 
@@ -337,7 +335,7 @@ logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
 ### `0x6E6AD4`
 
 - 注释：`cocos2d::GLProgram::bindPredefinedVertexAttribs`
-- 原因：阻止调用 `glBindAttribLocation`。
+- 原因：阻止调用 `glBindAttribLocation`
 - 写入 32-bit ARM 值 `0x00F020E3`。
 
 当前注释掉的实验补丁包括：
@@ -346,6 +344,11 @@ logI("_glBindAttribLocation(%d, %d, %s)", program, index, name);
 - `cocos2d::JniHelper::deleteLocalRefs`
 - `cocos2d::JniHelper::convert`
 - `AudioManager::init`
+
+`bridgePatchGL` 中也保留了两个注释掉的 OpenGL 相关补丁：
+
+- `0x6E6AD4`
+- `0x6E6534`
 
 这些偏移依赖目标 `libcocos2dcpp.so` 的精确版本和链接布局。任何版本变化都可能修改错误指令。
 
@@ -388,7 +391,12 @@ methods：
 
 destructor 不在该 methods 数组中。
 
-所有方法只记录日志。`audioProviderInit`、`audioProviderSetBGMVolume`、`audioProviderSetSFXVolume` 声明返回 `int`，但没有返回语句。
+当前方法行为：
+
+- `audioProviderInit` 返回 1。
+- `audioProviderSetBGMVolume` 返回 1。
+- `audioProviderSetSFXVolume` 返回 1。
+- 其他方法只记录日志。
 
 `audioProviderDestruct` 不释放对象或 methods 数组。
 

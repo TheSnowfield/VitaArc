@@ -46,7 +46,7 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 
 ## JNI ABI 头
 
-`src/bridges/jni/impl/android/jni.h` 是 Android/AOSP 风格的 JNI ABI 声明，约 983 行，包含：
+`src/bridges/jni/impl/android/jni.h` 是 Android/AOSP 风格的 JNI ABI 声明，包含：
 
 - Java primitive types。
 - jobject/jclass/jstring/jarray 等引用类型。
@@ -105,11 +105,17 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 - `DetachCurrentThread`
 - `AttachCurrentThreadAsDaemon`
 
+另外定义：
+
+```c
+static JavaVM jniJavaVM = &jniInvokeEnv;
+```
+
 `GetEnv` 将输出环境设置为 `&jniNativeEnv`，记录日志，返回 0。
 
-`GetJavaVM` 将输出 VM 设置为 `&jniInvokeEnv`，记录日志，返回 0。
+`GetJavaVM` 将输出 VM 设置为 `&jniJavaVM`，记录日志，返回 0。
 
-注意实际 JNI C ABI 的 `JNIEnv`/`JavaVM` 是函数表指针的指针语义；当前代码在多个调用处直接传结构地址，依赖目标二进制的具体解引用方式。
+注意实际 JNI C ABI 的 `JNIEnv`/`JavaVM` 是函数表指针的指针语义；当前代码在多个调用处直接传结构地址或伪 VM 指针，依赖目标二进制的具体解引用方式。
 
 ## JavaVM 方法行为
 
@@ -155,12 +161,12 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 - `ExceptionClear`：仅记录。
 - `NewGlobalRef`：返回固定值 `0xDEADC0DE`。
 - `DeleteLocalRef`：仅记录。
-- `FromReflectedField`：没有返回语句。
-- `FromReflectedMethod`：没有返回语句。
+- `FromReflectedField`：记录日志，返回 `NULL`。
+- `FromReflectedMethod`：记录日志，返回 `NULL`。
 
 ### method lookup
 
-`GetMethodID`：仅记录，没有返回语句。
+`GetMethodID`：记录日志，返回 `NULL`。
 
 `GetStaticMethodID`：
 
@@ -185,17 +191,16 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 
 `CallStaticVoidMethodV`：
 
-- `SET_STRING_FOR_KEY` 分支直接 `return NULL`，没有读取 varargs，也没有调用 `setStringForKey`。
-- 函数返回类型为 `void`，源码使用 `return NULL`。
+- `SET_STRING_FOR_KEY` 分支直接 `return`，没有读取 varargs，也没有调用 `setStringForKey`。
+- 其他分支也只返回。
 
-以下函数主要只记录日志，没有确定返回值：
+以下函数记录日志并返回零值：
 
-- `CallStaticIntMethodV`
-- `CallStaticBooleanMethodV`
-- `CallIntMethodV`
-- `CallFloatMethodV`
-
-`CallBooleanMethodV` 记录后返回 `NULL`，等价于 false/0。
+- `CallStaticIntMethodV` → 0
+- `CallStaticBooleanMethodV` → 0
+- `CallBooleanMethodV` → 0
+- `CallIntMethodV` → 0
+- `CallFloatMethodV` → `0.0f`
 
 `CallVoidMethodV` 仅记录。
 
@@ -238,7 +243,7 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 
 ### native registration
 
-`RegisterNatives` 只记录日志，没有保存 method 表，也没有返回语句。
+`RegisterNatives` 只记录日志，不保存 method 表，返回 0。
 
 ## Cocos/平台方法
 
@@ -268,3 +273,4 @@ README 要求复制 APK `assets` 到 `ux0:vitaarc/assets`，但当前 AssetManag
 
 参数原型是按已逆向出的目标库调用方式手工定义，不包含标准 JNI 导出常见的 `JNIEnv *`/`jobject` 全部参数。
 
+当前 `main()` 只调用 `bridgeCallJNIMain`；Cocos init/device/native init 调用被注释。

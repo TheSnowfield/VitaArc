@@ -1,14 +1,26 @@
-# Local vitaGL source used as graphics backend
+# Historical vitaGL source notes used by VitaArc
 
-## 本地路径和版本
+## Scope
 
-路径：
+本文档保留此前读取过的本地 vitaGL 源码知识，用于解释当前 VitaArc 的 OpenGL bridge 为什么要把 GLSL 转成 Cg、为什么 shader source 生命周期敏感。
+
+此前记录的外部路径是：
 
 ```text
 M:\Projects\PSV Projects\vitaGL
 ```
 
-Git：
+当前 VitaArc 工作区是 Linux 路径：
+
+```text
+/home/thesnowfield/Desktop/projects/VitaArc
+```
+
+本次 `.llm` 对齐没有重新读取或验证外部 vitaGL 工作区，因此下面内容应视为“历史已读实现背景”，而不是当前仓库内源码清单。
+
+## 历史读取到的 vitaGL 版本
+
+历史记录：
 
 - 分支：`master`
 - HEAD：`666b029c19d96942105674e9023f9d0f6209c4d2`
@@ -16,8 +28,7 @@ Git：
 - commit date：2021-06-05
 - remote tracking：`origin/master`
 - 工作区只有未跟踪 `.vscode/`
-
-根目录存在预编译 `libvitaGL.a`，时间为 2021-06-06。
+- 根目录存在预编译 `libvitaGL.a`，时间为 2021-06-06
 
 ## vitaGL 职责
 
@@ -36,11 +47,11 @@ vitaGL：
 - 只用预编译 shader (`glShaderBinary`)。
 - 使用旧 legacy fixed-function pipeline 分支。
 
-VitaArc 链接 `vitaGL`、`vitashark`、`SceShaccCg_stub`。
+VitaArc 当前链接 `vitaGL`、`vitashark`、`SceShaccCg_stub`，并额外链接 `SceShaccCgExt`。
 
-## vitaGL 构建
+## vitaGL 构建背景
 
-Makefile：
+历史读取到的 Makefile：
 
 - target：`libvitaGL.a`
 - compiler prefix：`arm-vita-eabi`
@@ -75,12 +86,12 @@ Makefile：
 - `HAVE_RAZOR=1/2`
 - `HAVE_DEVKIT=1/2`
 
-`make install`：
+`make install` 历史行为：
 
 - 复制 `libvitaGL.a` 到 `$VITASDK/arm-vita-eabi/lib/`
 - 复制 `source/vitaGL.h` 到 `$VITASDK/arm-vita-eabi/include/`
 
-VitaArc 顶层 `target_link_libraries(vitaGL)` 使用的是 VitaSDK 安装目录中的 archive，除非工具链另行配置 library path。仅修改本地 vitaGL 源码不会自动影响 VitaArc 链接结果；需要重建并安装或让 VitaArc显式链接本地 archive。
+VitaArc 顶层 `target_link_libraries(vitaGL)` 使用 VitaSDK/library path 中的 archive。仅修改外部 vitaGL 源码不会自动影响 VitaArc 链接结果；需要重建并安装或让 VitaArc 显式链接本地 archive。
 
 ## 初始化接口语义
 
@@ -108,7 +119,7 @@ VitaArc 顶层 `target_link_libraries(vitaGL)` 使用的是 VitaSDK 安装目录
 
 ### `vglSetVertexPoolSize`
 
-实现受：
+历史实现受：
 
 ```c
 #ifdef HAVE_CIRCULAR_VERTEX_POOL
@@ -116,19 +127,23 @@ VitaArc 顶层 `target_link_libraries(vitaGL)` 使用的是 VitaSDK 安装目录
 
 保护。只有 vitaGL 以 `CIRCULAR_VERTEX_POOL=1` 编译时才会设置 `vertex_data_pool_size`；默认构建为空操作。
 
+当前 VitaArc `main()` 已不调用 `vglSetVertexPoolSize`。
+
 ### `vglUseVram`
 
-只执行：
+历史实现只执行：
 
 ```c
 use_vram = usage;
 ```
 
-影响后续 `vgl_malloc`/相关分配的内存类型。若要影响初始化阶段分配，应该在 `vglInitExtended` 前调用。
+影响后续 `vgl_malloc`/相关分配的内存类型。
+
+当前 VitaArc `main()` 已不调用 `vglUseVram`。
 
 ### `vglInitExtended`
 
-转调：
+历史实现转调：
 
 ```c
 vglInitWithCustomThreshold(
@@ -141,50 +156,26 @@ vglInitWithCustomThreshold(
     msaa);
 ```
 
-非 system app 模式：
-
-1. 先 `initGxm()`。
-2. 查询 `sceKernelGetFreeMemorySize`。
-3. RAM pool 使用 `free_user - ram_threshold`，不足时用全部 free_user。
-4. CDRAM pool保留 256 KiB threshold。
-5. phycont pool保留 1 MiB threshold。
-6. 调用 `vglInitWithCustomSizes`。
-
-`vglInitWithCustomSizes` 又调用一次 `initGxm()`。当前源码调用层级显示 `vglInitWithCustomThreshold` 和 `vglInitWithCustomSizes` 都含 `initGxm()` 调用，具体是否由内部状态防止重复需要结合 `initGxm` 实现。
-
-它设置：
-
-- display width/height/stride
-- viewport
-- SceGxm
-- memory heaps
-- purge lists
-- scissor
-- default texture 0
-- texture slots
-- texture matrix
-- 可选 debugger
+当前 VitaArc `main()` 中 `vglInitExtended` 调用被注释。
 
 ## Shader object
 
-`glCreateShader`：
+历史读取到的 `glCreateShader`：
 
 - 在固定 shader slot 数组找空项。
 - handle 从 1 开始。
 - 保存 `GL_FRAGMENT_SHADER` 或 `GL_VERTEX_SHADER`。
 - 标记 valid。
 
-`glGetShaderiv`：
+历史读取到的 `glGetShaderiv`：
 
 - `GL_SHADER_TYPE` → slot type。
 - `GL_COMPILE_STATUS` → `s->prog != NULL`。
 - `GL_INFO_LOG_LENGTH` → `strlen(s->log)` 或 0。
 
-它没有在可见实现中验证 handle 范围。
-
 ## `glShaderSource`
 
-签名：
+历史读取到的签名：
 
 ```c
 void glShaderSource(
@@ -209,27 +200,17 @@ void glShaderSource(
 - 提供单段 Cg source。
 - 保持 source 内存在 `glCompileShader` 完成前有效。
 
-VitaArc当前 wrapper在调用 `glShaderSource` 后立刻释放 source，不符合此生命周期。
+VitaArc 当前 `_glShaderSource` 在调用 vitaGL `glShaderSource` 后立即释放 Cg 字符串，不符合此生命周期。
 
 vitaGL 没有 `glGetShaderSource` 实现，也没有在 `vitaGL.h` 声明此函数。
 
 ## `glCompileShader`
 
+历史读取到的流程：
+
 1. 若 vitaShaRK 未在线，调用 `startShaderCompiler()`。
 2. 失败则设置 `GL_INVALID_OPERATION`。
-3. 使用：
-
-```c
-shark_compile_shader_extended(
-    source,
-    &size,
-    fragment_or_vertex,
-    compiler_opts,
-    compiler_fastmath,
-    compiler_fastprecision,
-    compiler_fastint);
-```
-
+3. 使用 `shark_compile_shader_extended(...)` 将 Cg 编译成 GXM program。
 4. 编译成功后：
    - 使用 `vgl_malloc(size, VGL_MEM_EXTERNAL)` 申请长期内存。
    - 复制 GXP/GXM program。
@@ -240,46 +221,16 @@ shark_compile_shader_extended(
 
 ## Program attach/create/link
 
-`glCreateProgram`：
+历史读取到的行为：
 
-- handle 从 1 开始。
-- 状态设 `PROG_UNLINKED`。
-- attribute/uniform/stream/shader fields 清空。
-- 每个 `attr[j].regIndex = 0xDEAD`。
-
-`glAttachShader`：
-
-- program 必须仍是 `PROG_UNLINKED`。
-- 根据 shader type 保存 `vshader` 或 `fshader` 指针。
-
-`glLinkProgram`：
-
-1. debug path 下检查 vertex/fragment shader `prog` 非空。
-2. 状态设为 linked。
-3. 扫描 fragment shader 参数：
-   - sampler → 标记 texture unit
-   - uniform → 分配本地 uniform 节点和数据
-4. 扫描 vertex shader参数：
-   - attribute → 增加 `attr_num`
-   - uniform → 分配数据；同名同尺寸 fragment uniform 可 alias
-5. 依据 stream configuration 决定立即 patch vertex/fragment program，或延后到 draw path。
-6. 检查 attribute slot 是否存在 `0xDEAD`，设置 `has_unaligned_attrs`。
-
-`glGetProgramiv` 支持：
-
-- `GL_LINK_STATUS`
-- `GL_INFO_LOG_LENGTH`
-- `GL_ATTACHED_SHADERS`
-- `GL_ACTIVE_ATTRIBUTES`
-- `GL_ACTIVE_ATTRIBUTE_MAX_LENGTH`
-- `GL_ACTIVE_UNIFORMS`
-- `GL_ACTIVE_UNIFORM_MAX_LENGTH`
-
-`glGetProgramInfoLog` 始终返回空 log。
+- `glCreateProgram` 创建未 linked program，并初始化 attribute/uniform/stream/shader fields。
+- `glAttachShader` 要求 program 仍是 `PROG_UNLINKED`。
+- `glLinkProgram` 扫描 fragment/vertex shader 参数，建立 sampler、uniform 和 attribute 信息。
+- `glGetProgramInfoLog` 始终返回空 log。
 
 ## Attribute binding
 
-`glBindAttribLocation(program, index, name)`：
+历史读取到的 `glBindAttribLocation(program, index, name)`：
 
 1. 取得 `program.vshader->prog`。
 2. `sceGxmProgramFindParameterByName`。
@@ -293,53 +244,14 @@ shark_compile_shader_extended(
 - vertex shader 已经被 vitaShaRK 编译，`vshader->prog` 已成为 GXM program。
 - Cg 编译后的 parameter name 与 Cocos传入 name 一致。
 
-`glGetAttribLocation`：
+VitaArc 当前：
 
-1. 在编译后的 vertex program 中按名字查 parameter。
-2. 若已绑定，返回对应 attribute slot。
-3. 否则在 `attr_num` 范围找第一个 `0xDEAD` slot，自动绑定并返回。
-
-VitaArc当前：
-
-- 把 `glBindAttribLocation` 替换为 no-op。
+- 把 Android `glBindAttribLocation` 替换为只记录日志的 `_glBindAttribLocation`。
 - 对 Cocos `bindPredefinedVertexAttribs` 打机器码补丁。
 - 依赖后续 `glGetAttribLocation`/draw pipeline 的自动映射。
-
-## `vglBindAttribLocation`
-
-这是 vitaGL-specific API，与 OpenGL `glBindAttribLocation` 不同。额外接收：
-
-- component count
-- GL type
-
-它直接填充 `SceGxmVertexAttribute` 和 `SceGxmVertexStream`，用于 GXM architecture 的明确 attribute layout。
-
-VitaArc未使用它。
-
-## `glVertexAttribPointer`
-
-保存：
-
-- pointer/offset
-- 当前 VBO
-- component count
-- GXM attribute format
-- stride
-
-支持：
-
-- `GL_HALF_FLOAT`
-- `GL_FLOAT`
-- `GL_SHORT`
-- `GL_UNSIGNED_SHORT`
-- `GL_BYTE`
-- `GL_UNSIGNED_BYTE`
-
-normalized 会选择相应 normalized GXM format。
 
 ## Buffer/renderbuffer/VAO兼容背景
 
 VitaArc 自己声明 `_gpubuffer` 结构并用非空指针判断 `glIsBuffer`，但该结构是对 vitaGL 内部 handle 的假设，没有从本地 vitaGL public API 保证。
 
 VitaArc renderbuffer 和 VAO OES 方法为空实现。目标 Cocos2d-x 若依赖实际 FBO depth/stencil renderbuffer 或 VAO state，将得到不完整行为。
-

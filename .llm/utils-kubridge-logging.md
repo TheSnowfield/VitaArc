@@ -44,18 +44,25 @@ if (utilFileExists(path))
 
 `utilUcharLen` 按 16-bit 字符遍历到 0，供伪 JNI `GetStringLength` 使用。
 
-## 越权 memset
+## 用户态 kuBridge 包装
 
-`kuKernelCpuUnrestrictedMemset`：
+当前仓库内的 `src/bridges/kubridge.c` 只实现：
+
+```c
+int kuKernelCpuUnrestrictedMemset(void *dst, int val, size_t len)
+```
+
+行为：
 
 1. `malloc(len)` 临时缓冲区。
 2. 用户态 `memset(temp, value, len)`。
 3. `kuKernelCpuUnrestrictedMemcpy(dst, temp, len)`。
 4. `free(temp)`。
-
-函数声明返回 `int`，但没有返回语句。
+5. 返回 `kuKernelCpuUnrestrictedMemcpy` 的结果。
 
 大段清零会额外分配相同大小的临时内存。
+
+真实内核插件来自外部 `kubridge_stub`/`kubridge.h`，当前顶层 CMake 不构建 `third-party/kubridge`。
 
 ## Debug helpers
 
@@ -98,10 +105,12 @@ ldr r0, [r0]
 ```c
 #define LOG_OVERUDP
 #define UDP_PORT 23333
-#define UDP_HOST "192.168.1.2"
+#define UDP_HOST "10.20.0.227"
 ```
 
-因此日志发送到固定局域网地址 `192.168.1.2:23333`。
+因此日志发送到固定局域网地址 `10.20.0.227:23333`。
+
+仓库提供 `tools/udp_logger.py`，默认监听 `0.0.0.0:23333`。
 
 若删除 `LOG_OVERUDP`，则使用 `logBegin` 参数指定的设备文件，当前为 `ux0:vitaarc/boot.log`。
 
@@ -118,7 +127,7 @@ ldr r0, [r0]
 9. `sceNetConnect` 到 host/port。
 10. socket handle 大于 0 时设置 `logStarted=true`。
 
-分配给 `sceNetInit` 的 65535 字节内存没有保存到可释放字段。`logUdpBuffer` 全局变量已声明但未使用。
+分配给 `sceNetInit` 的 65535 字节内存没有保存到可释放字段。
 
 没有检查大多数网络初始化返回值。
 
@@ -161,14 +170,7 @@ UDP 模式每条结构化日志后 `sceKernelDelayThread(50)`。
 - 没有自动 level/tag/newline。
 - UDP 模式直接 `sceNetSend`。
 
-当前 shader wrapper 使用：
-
-```c
-logPrintf(gl_shader);
-logPrintf(cg_shader);
-```
-
-如果 shader 文本包含 `%`，会被解释成格式占位符。
+当前 `_glShaderSource` 使用 `logPrintf("%s", shader)` 形式输出 shader 文本，已经不再把 shader 文本本身当 format string。
 
 ## `logEnd`
 
@@ -181,51 +183,4 @@ UDP 分支只关闭 socket：
 - 不释放 network init memory
 - 不卸载 sysmodule
 
-## kuBridge 导出
-
-内核模块导出 syscall：
-
-- `kuKernelAllocMemBlock`
-- `kuKernelFlushCaches`
-- `kuKernelCpuUnrestrictedMemcpy`
-
-### `module_start`
-
-通过 `module_get_export_func` 从 `SceSysmem` 解析 cache 操作函数，并针对不同 firmware 尝试两套 NID：
-
-- D-cache writeback/invalidate
-- I-cache invalidate
-- I-cache/L2 writeback/invalidate
-
-实际 `kuKernelFlushCaches` 调用：
-
-- D-cache writeback/invalidate
-- I-cache invalidate
-
-I-cache/L2 调用被注释。
-
-输入地址按 32 字节向下对齐，长度向上覆盖到 32 字节边界。
-
-### `kuKernelAllocMemBlock`
-
-1. `ENTER_SYSCALL`。
-2. 从用户态复制 32 字节 name 到内核栈。
-3. 从用户态复制完整 options。
-4. `ksceKernelAllocMemBlock`。
-5. 将内核 UID 转换为当前进程 user UID。
-6. `EXIT_SYSCALL`。
-
-调用者传 `opt=NULL` 时仍尝试 `ksceKernelMemcpyUserToKernel(&k_opt, opt, sizeof(k_opt))`。VitaArc loader始终传非空 option。
-
-### `kuKernelCpuUnrestrictedMemcpy`
-
-1. 保存 CP15 DACR。
-2. 将 DACR 写成 `0x15450FC3`。
-3. 对每个字节执行 ARM `ldrbt` 和 `strbt`。
-4. 恢复原 DACR。
-5. 返回 0。
-
-它逐字节复制，速度低，但用于绕过用户态页访问权限，向 RX 内存和固定地址写入代码/数据。
-
-函数使用 `src + i`/`dst + i` 的 void pointer arithmetic，依赖 GCC 扩展。
-
+当前 `main()` 在 `ExitProgram` 进入无限循环，正常不会执行到 `logEnd()`。

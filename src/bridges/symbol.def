@@ -7,13 +7,18 @@ __android_log_print|__android_log_print
 __android_log_write|__android_log_write
 AAssetDir_close|a_asset_dir_close
 AAssetDir_getNextFileName|a_asset_dir_get_next_file_name
+AAssetDir_rewind|a_asset_dir_rewind
 AAssetManager_fromJava|a_asset_manager_from_java
 AAssetManager_open|a_asset_manager_open
 AAssetManager_openDir|a_asset_manager_open_dir
 AAsset_close|a_asset_close
+AAsset_getBuffer|a_asset_get_buffer
 AAsset_getLength|a_asset_get_length
+AAsset_getRemainingLength|a_asset_get_remaining_length
+AAsset_isAllocated|a_asset_is_allocated
 AAsset_openFileDescriptor|a_asset_open_file_descriptor
 AAsset_read|a_asset_read
+AAsset_seek|a_asset_seek
 
 # libc / bionic / pthread
 __cxa_atexit|__cxa_atexit

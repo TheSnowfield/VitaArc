@@ -1,0 +1,44 @@
+name: Build VPK
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-vpk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: vitasdk/vitasdk:latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build base VPK with VitaSDK
+        env:
+          VITAARC_PACKAGE_APK: "OFF"
+        run: bash build.sh
+
+      - name: Verify VPK
+        run: test -s build/VitaArc.vpk
+
+      - name: Upload VPK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VitaArc-${{ github.sha }}
+          path: build/VitaArc.vpk
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,19 @@
+image: vitasdk/vitasdk:latest
+
+stages:
+  - build
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  VITAARC_PACKAGE_APK: "OFF"
+
+build-vpk:
+  stage: build
+  script:
+    - bash build.sh
+    - test -s build/VitaArc.vpk
+  artifacts:
+    name: "VitaArc-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - build/VitaArc.vpk
+    expire_in: 14 days

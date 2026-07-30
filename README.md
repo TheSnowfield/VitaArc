@@ -26,6 +26,26 @@ the APK to the memory card is required.
 
 Writable files such as logs and persistent game data remain below
 `ux0:vitaarc/`.
+
+### Continuous integration
+
+GitHub Actions and GitLab CI build a base `VitaArc.vpk` with the official
+`vitasdk/vitasdk` container and publish it as a pipeline artifact. The CI
+artifact intentionally excludes the proprietary Arcaea APK resources.
+
+To build the same base VPK locally:
+
+```sh
+VITAARC_PACKAGE_APK=OFF bash build.sh
+```
+
+Local builds package an APK by default. If multiple APK versions are present,
+select one explicitly:
+
+```sh
+bash build.sh -DARCAEA_VERSION=1.6.1c
+```
+
 ### Play & PM
  - Click VitaArc bubble.
  - Wait for the game load.

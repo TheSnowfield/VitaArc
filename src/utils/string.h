@@ -1,8 +1,8 @@
-#ifndef _UTILS_STRING_H_
-#define _UTILS_STRING_H_
+#ifndef __UTILS_STRING_H
+#define __UTILS_STRING_H
 
-const char *utilGetFileName(const char *szFilePath);
+const char *util_get_file_name(const char *file_path);
 
-size_t utilUcharLen(const uint16_t *lpcszString);
+size_t util_uchar_len(const uint16_t *string);
 
-#endif /* _UTILS_STRING_H_ */
+#endif /* __UTILS_STRING_H */

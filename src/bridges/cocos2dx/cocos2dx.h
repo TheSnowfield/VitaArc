@@ -1,11 +1,12 @@
-#ifndef _BRIDGE_COCOS2DX_H_
-#define _BRIDGE_COCOS2DX_H_
+#ifndef __BRIDGES_COCOS2DX_COCOS2DX_H
+#define __BRIDGES_COCOS2DX_COCOS2DX_H
 
-#include <loader.h>
+#include <dynalib.h>
 
-void bridgePatchCocos2DX(dynalib_t *hSoLibrary);
+void bridge_patch_cocos2dx(dynalib_t *library);
 
-void bridgeCocos2DXRendererNativeInit(dynalib_t *hSoLibrary,
-                                    uint32_t nScreenWidth, uint32_t nScreenHeight);
+void bridge_cocos2dx_renderer_native_init(dynalib_t *library,
+                                          uint32_t screen_width,
+                                          uint32_t screen_height);
 
-#endif /* _BRIDGE_COCOS2DX_H_ */
+#endif /* __BRIDGES_COCOS2DX_COCOS2DX_H */

@@ -1,10 +1,11 @@
-#ifndef _UTILS_IO_H_
-#define _UTILS_IO_H_
+#ifndef __UTILS_FS_H
+#define __UTILS_FS_H
 
 #include <types.h>
 
-bool utilFileExists(const char* szFilePath);
-uint32_t utilGetFileSize(const char* szFilePath);
-bool utilsReadFileAll(const char *szFilePath, void *lpMemory, uint32_t nBufferSize);
+bool util_file_exists(const char *file_path);
+uint32_t util_get_file_size(const char *file_path);
+bool utils_read_file_all(const char *file_path, void *memory,
+                         uint32_t buffer_size);
 
-#endif /* _UTILS_IO_H_ */
+#endif /* __UTILS_FS_H */

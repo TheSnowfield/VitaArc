@@ -30,6 +30,7 @@ project(VitaArc)
 # This line adds Vita helper macros, must go after project definition in order
 # to build Vita specific artifacts (self/vpk).
 include("${VITASDK}/share/vita.cmake" REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 ## Configuration options for this app
 # Display name (under bubble in LiveArea)
@@ -67,6 +68,29 @@ file(GLOB_RECURSE VITAARC_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
+
+set(BRIDGE_SYMBOL_DEFINITION
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/bridges/symbol.def")
+set(BRIDGE_SYMBOL_GENERATOR
+  "${CMAKE_CURRENT_SOURCE_DIR}/tools/generate_symbols.py")
+set(BRIDGE_SYMBOL_SOURCE
+  "${CMAKE_CURRENT_BINARY_DIR}/generated/bridge_symbols.c")
+
+add_custom_command(
+  OUTPUT "${BRIDGE_SYMBOL_SOURCE}"
+  COMMAND "${Python3_EXECUTABLE}"
+    "${BRIDGE_SYMBOL_GENERATOR}"
+    "${BRIDGE_SYMBOL_DEFINITION}"
+    "${BRIDGE_SYMBOL_SOURCE}"
+  DEPENDS
+    "${BRIDGE_SYMBOL_DEFINITION}"
+    "${BRIDGE_SYMBOL_GENERATOR}"
+  COMMENT "Generating unified bridge symbol table"
+  VERBATIM
+)
+
+set_source_files_properties("${BRIDGE_SYMBOL_SOURCE}" PROPERTIES GENERATED TRUE)
+list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_SOURCE}")
 
 ## Build and link
 add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})

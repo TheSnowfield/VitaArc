@@ -1,5 +1,5 @@
-#ifndef _LOGCAT_LOGCAT_H_
-#define _LOGCAT_LOGCAT_H_
+#ifndef __LOGCAT_LOGCAT_H
+#define __LOGCAT_LOGCAT_H
 
 #include <stdarg.h>
 
@@ -20,23 +20,23 @@ typedef enum LOGLEVEL
 
 #define TAG ((__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__))
 
-void logEnd();
+void log_end(void);
 
-void logBegin(const char *logFilePath);
+void log_begin(const char *log_file_path);
 
-void logBase(LOGLEVEL level, const char *tag,
-             const char *format, va_list args);
+void log_base(LOGLEVEL level, const char *tag,
+              const char *format, va_list args);
 
-void logPrintf(const char *format, ...);
+void log_printf(const char *format, ...);
 
-void logV(const char *tag, const char *format, ...);
+void log_v(const char *tag, const char *format, ...);
 
-void logI(const char *tag, const char *format, ...);
+void log_i(const char *tag, const char *format, ...);
 
-void logW(const char *tag, const char *format, ...);
+void log_w(const char *tag, const char *format, ...);
 
-void logE(const char *tag, const char *format, ...);
+void log_e(const char *tag, const char *format, ...);
 
-void logF(const char *tag, const char *format, ...);
+void log_f(const char *tag, const char *format, ...);
 
-#endif /* _LOGCAT_LOGCAT_H_ */
+#endif /* __LOGCAT_LOGCAT_H */

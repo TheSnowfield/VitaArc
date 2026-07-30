@@ -3,40 +3,41 @@
 #include <psp2/io/stat.h>
 #include "fs.h"
 
-bool utilFileExists(const char *szFilePath)
+bool util_file_exists(const char *file_path)
 {
   SceIoStat status;
-  return sceIoGetstat(szFilePath, &status) >= 0;
+  return sceIoGetstat(file_path, &status) >= 0;
 }
 
-uint32_t utilGetFileSize(const char *szFilePath)
+uint32_t util_get_file_size(const char *file_path)
 {
-  SceUID fileId;
-  uint32_t fileSize;
+  SceUID file_id;
+  uint32_t file_size;
 
-  fileId = sceIoOpen(szFilePath, SCE_O_RDONLY, 0777);
-  fileSize = sceIoLseek(fileId, 0, SCE_SEEK_END);
+  file_id = sceIoOpen(file_path, SCE_O_RDONLY, 0777);
+  file_size = sceIoLseek(file_id, 0, SCE_SEEK_END);
 
-  sceIoClose(fileId);
-  return fileSize;
+  sceIoClose(file_id);
+  return file_size;
 }
 
-bool utilsReadFileAll(const char *szFilePath, void *lpMemory, uint32_t nBufferSize)
+bool utils_read_file_all(const char *file_path, void *memory,
+                         uint32_t buffer_size)
 {
-  if (utilFileExists(szFilePath))
+  if (util_file_exists(file_path))
     return false;
 
-  if (!lpMemory)
+  if (!memory)
     return false;
 
-  SceUID fileId;
+  SceUID file_id;
 
-  fileId = sceIoOpen(szFilePath, SCE_O_RDONLY, 0777);
+  file_id = sceIoOpen(file_path, SCE_O_RDONLY, 0777);
   {
-    sceIoLseek(fileId, 0, SCE_SEEK_SET);
-    sceIoRead(fileId, lpMemory, nBufferSize);
+    sceIoLseek(file_id, 0, SCE_SEEK_SET);
+    sceIoRead(file_id, memory, buffer_size);
   }
-  sceIoClose(fileId);
+  sceIoClose(file_id);
 
   return true;
 }

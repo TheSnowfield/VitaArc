@@ -1,16 +1,19 @@
-#ifndef _BRIDGE_JNI_H_
-#define _BRIDGE_JNI_H_
+#ifndef __BRIDGES_JNI_JNI_H
+#define __BRIDGES_JNI_JNI_H
 
 #include <stddef.h>
-#include <loader.h>
+#include <dynalib.h>
 
-void bridgeCallJNIMain(dynalib_t *hSoLibrary);
+void bridge_call_jni_main(dynalib_t *library);
 
-void bridgeJNICocosNativeInit(dynalib_t *hSoLibrary,
-                                      uint32_t nScreenWidth, uint32_t nScreenHeight);
+void bridge_jni_cocos_native_init(dynalib_t *library,
+                                  uint32_t screen_width,
+                                  uint32_t screen_height);
 
-void bridgeJNICocosInitApp(dynalib_t *hSoLibrary);
+void bridge_jni_cocos_init_app(dynalib_t *library);
 
-void bridgeJNICocosSetDeviceId(dynalib_t *hSoLibrary);
+void bridge_jni_cocos_set_app_version(dynalib_t *library);
 
-#endif /* _BRIDGE_JNI_H_ */
+void bridge_jni_cocos_set_device_id(dynalib_t *library);
+
+#endif /* __BRIDGES_JNI_JNI_H */

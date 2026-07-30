@@ -4,28 +4,29 @@
 
 #include "string.h"
 
-const char *utilGetFileName(const char *szFilePath)
+const char *util_get_file_name(const char *file_path)
 {
-  uint32_t strLength = strlen(szFilePath);
+  uint32_t string_length = strlen(file_path);
 
-  for (int i = strLength; i > 0; --i)
+  for (int i = string_length; i > 0; --i)
   {
-    if (szFilePath[i] == '/' && i < strLength)
+    if (file_path[i] == '/' && i < string_length)
     {
-      return &szFilePath[i + 1];
+      return &file_path[i + 1];
     }
   }
 
   return NULL;
 }
 
-size_t utilUcharLen(const uint16_t *lpcszString)
+size_t util_uchar_len(const uint16_t *string)
 {
-  if (!lpcszString)
+  if (!string)
     return -1;
 
-  for (uint16_t *i = lpcszString;; ++i)
-    if (*(i) == 0) return i - lpcszString;
+  for (const uint16_t *i = string;; ++i)
+    if (*i == 0)
+      return i - string;
 
   return -1;
 }

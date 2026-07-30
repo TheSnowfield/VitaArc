@@ -1,8 +1,8 @@
-#ifndef _BRIDGE_OPENGL_H_
-#define _BRIDGE_OPENGL_H_
+#ifndef __BRIDGES_OPENGL_OPENGL_H
+#define __BRIDGES_OPENGL_OPENGL_H
 
-#include <loader.h>
+#include <dynalib.h>
 
-void bridgePatchGL(dynalib_t *lpSoLibrary);
+void bridge_patch_gl(dynalib_t *library);
 
-#endif /* _BRIDGE_OPENGL_H_ */
+#endif /* __BRIDGES_OPENGL_OPENGL_H */

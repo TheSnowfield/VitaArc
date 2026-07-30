@@ -3,42 +3,59 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <define.h>
+#include <config.h>
 #include "../../../logcat/logcat.h"
 #include "../../../utils/fs.h"
 #include "opengl.h"
 #include "glsl2cg.h"
 
-void bridgeGlBindRenderbuffer(GLenum target, GLuint renderbuffer)
+void bridge_gl_bind_renderbuffer(GLenum target, GLuint renderbuffer)
 {
-  logV(TAG, "Unsupported 'glBindRenderbuffer' called.");
+  (void)target;
+  (void)renderbuffer;
+  log_v(TAG, "Unsupported 'glBindRenderbuffer' called.");
 }
 
-void bridgeGlDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
+void bridge_gl_delete_renderbuffers(GLsizei n, const GLuint *renderbuffers)
 {
-  logV(TAG, "Unsupported 'glDeleteRenderbuffers' called.");
+  (void)n;
+  (void)renderbuffers;
+  log_v(TAG, "Unsupported 'glDeleteRenderbuffers' called.");
 }
 
-void bridgeGlGenRenderbuffers(GLsizei n, GLuint *renderbuffers)
+void bridge_gl_gen_renderbuffers(GLsizei n, GLuint *renderbuffers)
 {
-  logV(TAG, "Unsupported 'glGenRenderbuffers' called.");
+  (void)n;
+  (void)renderbuffers;
+  log_v(TAG, "Unsupported 'glGenRenderbuffers' called.");
 }
 
-void bridgeGlFramebufferRenderbuffer(GLenum target, GLenum attachment,
-                                     GLenum renderbuffertarget, GLuint renderbuffer)
+void bridge_gl_framebuffer_renderbuffer(GLenum target, GLenum attachment,
+                                        GLenum renderbuffer_target,
+                                        GLuint renderbuffer)
 {
-  logV(TAG, "Unsupported 'glFramebufferRenderbuffer' called.");
+  (void)target;
+  (void)attachment;
+  (void)renderbuffer_target;
+  (void)renderbuffer;
+  log_v(TAG, "Unsupported 'glFramebufferRenderbuffer' called.");
 }
 
-void bridgeGlRenderbufferStorage(GLenum target, GLenum internalformat,
-                                 GLsizei width, GLsizei height)
+void bridge_gl_renderbuffer_storage(GLenum target, GLenum internalformat,
+                                    GLsizei width, GLsizei height)
 {
-  logV(TAG, "Unsupported 'glRenderbufferStorage' called.");
+  (void)target;
+  (void)internalformat;
+  (void)width;
+  (void)height;
+  log_v(TAG, "Unsupported 'glRenderbufferStorage' called.");
 }
 
-void bridgeGlPixelStorei(GLenum pname, GLint param)
+void bridge_gl_pixel_store_i(GLenum pname, GLint param)
 {
-  logV(TAG, "Unsupported 'glPixelStorei' called.");
+  (void)pname;
+  (void)param;
+  log_v(TAG, "Unsupported 'glPixelStorei' called.");
 }
 
 typedef struct
@@ -49,64 +66,72 @@ typedef struct
   GLboolean used;
 } _gpubuffer;
 
-GLboolean bridgeGlIsBuffer(GLuint buffer)
+GLboolean bridge_gl_is_buffer(GLuint buffer)
 {
-  logV(TAG, "Called glIsBuffer(%d)", buffer);
+  log_v(TAG, "Called glIsBuffer(%d)", buffer);
   _gpubuffer *p = (_gpubuffer *)buffer;
   return (p != NULL);
 }
 
-GLboolean bridgeGlIsRenderbuffer(GLuint renderbuffer)
+GLboolean bridge_gl_is_renderbuffer(GLuint renderbuffer)
 {
-  logV(TAG, "Called glIsRenderbuffer(%d)", renderbuffer);
+  log_v(TAG, "Called glIsRenderbuffer(%d)", renderbuffer);
   void *p = (void *)renderbuffer;
   return (p != NULL);
 }
 
-void *bridgeGlMapBuffer(GLenum target, GLenum access)
+void *bridge_gl_map_buffer(GLenum target, GLenum access)
 {
-  logV(TAG, "Unsupported 'glMapBuffer' called.");
+  (void)target;
+  (void)access;
+  log_v(TAG, "Unsupported 'glMapBuffer' called.");
   return NULL;
 }
 
-GLboolean bridgeGlUnmapBuffer(GLenum target)
+GLboolean bridge_gl_unmap_buffer(GLenum target)
 {
-  logV(TAG, "Unsupported 'glUnmapBuffer' called.");
+  (void)target;
+  log_v(TAG, "Unsupported 'glUnmapBuffer' called.");
   return GL_FALSE;
 }
 
-void bridgeGlGenVertexArrays(GLsizei n, GLuint *arrays)
+void bridge_gl_gen_vertex_arrays(GLsizei n, GLuint *arrays)
 {
-  logV(TAG, "Unsupported 'glGenVertexArrays' called.");
+  (void)n;
+  (void)arrays;
+  log_v(TAG, "Unsupported 'glGenVertexArrays' called.");
 }
 
-void bridgeGlDeleteVertexArrays(GLsizei n, const GLuint *arrays)
+void bridge_gl_delete_vertex_arrays(GLsizei n, const GLuint *arrays)
 {
-  logV(TAG, "Unsupported 'glDeleteVertexArrays' called.");
+  (void)n;
+  (void)arrays;
+  log_v(TAG, "Unsupported 'glDeleteVertexArrays' called.");
 }
 
-void bridgeGlBindVertexArray(GLuint array)
+void bridge_gl_bind_vertex_array(GLuint array)
 {
-  logV(TAG, "Unsupported 'glBindVertexArray' called.");
+  log_v(TAG, "Unsupported 'glBindVertexArray' called.");
 }
 
-void (*bridgeEglGetProcAddress(char const *procname))(void)
+void (*bridge_egl_get_proc_address(char const *proc_name))(void)
 {
-  logV(TAG, "eglGetProcAddress(\"%s\")", procname);
+  log_v(TAG, "eglGetProcAddress(\"%s\")", proc_name);
 
-  if (strcmp("glGenVertexArraysOES", procname) == 0)
-    return (void (*)(void))bridgeGlGenVertexArrays;
-  if (strcmp("glDeleteVertexArraysOES", procname) == 0)
-    return (void (*)(void))bridgeGlDeleteVertexArrays;
-  if (strcmp("glBindVertexArrayOES", procname) == 0)
-    return (void (*)(void))bridgeGlBindVertexArray;
+  if (strcmp("glGenVertexArraysOES", proc_name) == 0)
+    return (void (*)(void))bridge_gl_gen_vertex_arrays;
+  if (strcmp("glDeleteVertexArraysOES", proc_name) == 0)
+    return (void (*)(void))bridge_gl_delete_vertex_arrays;
+  if (strcmp("glBindVertexArrayOES", proc_name) == 0)
+    return (void (*)(void))bridge_gl_bind_vertex_array;
 
   return NULL;
 }
 
-void _glShaderSource(GLuint handle, GLsizei count,
-                     const GLchar *const *string, const GLint *length)
+void _gl_shader_source(GLuint handle, GLsizei count,
+                      const GLchar *const *string, const GLint *length)
 {
+  (void)length;
 
   int type;
   char *cg_shader;
@@ -118,7 +143,7 @@ void _glShaderSource(GLuint handle, GLsizei count,
     size += strlen(string[i]);
   }
 
-  logI("opengl.c", "Accepted shader source: %d shaders, totoal size %d", count, size);
+  log_i("opengl.c", "Accepted shader source: %d shaders, totoal size %d", count, size);
 
   // combine the string array
   gl_shader = malloc(size + 1);
@@ -131,13 +156,13 @@ void _glShaderSource(GLuint handle, GLsizei count,
   // sealed the string
   gl_shader[size] = '\0';
 
-  logPrintf("====\n");
-  logPrintf("%s", gl_shader);
-  logPrintf("\n====\n");
+  log_printf("====\n");
+  log_printf("%s", gl_shader);
+  log_printf("\n====\n");
 
-  FILE *fd = fopen("ux0:vitaarc/shader/1.glsl", "w+");
-  fwrite(gl_shader, size, 1, fd);
-  fclose(fd);
+  FILE *shader_file = fopen("ux0:vitaarc/shader/1.glsl", "w+");
+  fwrite(gl_shader, size, 1, shader_file);
+  fclose(shader_file);
 
   // convert glsl shader to cg
   glGetShaderiv(handle, GL_SHADER_TYPE, &type); {
@@ -147,9 +172,9 @@ void _glShaderSource(GLuint handle, GLsizei count,
       cg_shader = translate_vert_shader(gl_shader, size);
     }
   }
-  logPrintf("====\n");
-  logPrintf("%s", cg_shader);
-  logPrintf("====\n");
+  log_printf("====\n");
+  log_printf("%s", cg_shader);
+  log_printf("====\n");
 
   // create shader source
   const GLchar *cg_shader_source = cg_shader;
@@ -158,21 +183,26 @@ void _glShaderSource(GLuint handle, GLsizei count,
   free(gl_shader);
 }
 
-// void _glGetShaderiv(GLuint handle, GLenum pname, GLint *params)
+// void _gl_get_shader_iv(GLuint handle, GLenum pname, GLint *params)
 // {
-//   logV(TAG, "called _glGetShaderiv(%d, %d, %08X), *params = %d", handle, pname, params, *params);
+//   log_v(TAG, "called _gl_get_shader_iv(%d, %d, %08X), *params = %d", handle, pname, params, *params);
 
 //   glGetShaderiv(handle, pname, params);
   
 //   if(pname == GL_COMPILE_STATUS)
-//     logV(TAG, "compile result %d", *params);
+//     log_v(TAG, "compile result %d", *params);
 // }
 
 
-void _glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) {
+void _gl_get_shader_source(GLuint shader, GLsizei buffer_size,
+                           GLsizei *length, GLchar *source) {
+  (void)shader;
+  (void)buffer_size;
+  (void)length;
+  (void)source;
 
 }
 
-void _glBindAttribLocation(GLuint program, GLuint index, const GLchar *name) {
-  logI(TAG, "_glBindAttribLocation(%d, %d, %s)", program, index, name);
+void _gl_bind_attrib_location(GLuint program, GLuint index, const GLchar *name) {
+  log_i(TAG, "_gl_bind_attrib_location(%d, %d, %s)", program, index, name);
 }

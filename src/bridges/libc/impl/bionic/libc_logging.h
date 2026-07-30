@@ -1,5 +1,5 @@
-#ifndef _LIBC_LOGGINGX_H_
-#define _LIBC_LOGGINGX_H_
+#ifndef __BRIDGES_LIBC_IMPL_BIONIC_LIBC_LOGGING_H
+#define __BRIDGES_LIBC_IMPL_BIONIC_LIBC_LOGGING_H
 
 #include <stdint.h>
 #include <logcat/logcat.h>
@@ -22,4 +22,4 @@ enum
 
 extern "C" void __fortify_chk_fail(const char *msg, uint32_t event_tag);
 
-#endif /* _LIBC_LOGGINGX_H_ */
+#endif /* __BRIDGES_LIBC_IMPL_BIONIC_LIBC_LOGGING_H */

@@ -1,5 +1,5 @@
-#ifndef _BIONIC_H_
-#define _BIONIC_H_
+#ifndef __BRIDGES_LIBC_IMPL_BIONIC_BIONIC_H
+#define __BRIDGES_LIBC_IMPL_BIONIC_BIONIC_H
 
 #include <stddef.h>
 
@@ -32,4 +32,4 @@ int __vsprintf_chk(
 
 #define O_LARGEFILE 0
 
-#endif /* _BIONIC_H_ */
+#endif /* __BRIDGES_LIBC_IMPL_BIONIC_BIONIC_H */

@@ -27,6 +27,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stddef.h>
+/* Android ARM uses the base PCS even when VitaArc is built with hard-float.
+ * Keep floating-point arguments and returns consistent in both C and C++. */
+#include "../../abi/calling.h"
 
 /* Primitive types that match up with Java equivalents. */
 typedef uint8_t  jboolean; /* unsigned 8 bits */
@@ -154,332 +157,332 @@ struct JNINativeInterface {
     void*       reserved2;
     void*       reserved3;
 
-    jint        (*GetVersion)(JNIEnv *);
+    jint        VITAARC_SOFTFP (*GetVersion)(JNIEnv *);
 
-    jclass      (*DefineClass)(JNIEnv*, const char*, jobject, const jbyte*,
+    jclass      VITAARC_SOFTFP (*DefineClass)(JNIEnv*, const char*, jobject, const jbyte*,
                         jsize);
-    jclass      (*FindClass)(JNIEnv*, const char*);
+    jclass      VITAARC_SOFTFP (*FindClass)(JNIEnv*, const char*);
 
-    jmethodID   (*FromReflectedMethod)(JNIEnv*, jobject);
-    jfieldID    (*FromReflectedField)(JNIEnv*, jobject);
+    jmethodID   VITAARC_SOFTFP (*FromReflectedMethod)(JNIEnv*, jobject);
+    jfieldID    VITAARC_SOFTFP (*FromReflectedField)(JNIEnv*, jobject);
     /* spec doesn't show jboolean parameter */
-    jobject     (*ToReflectedMethod)(JNIEnv*, jclass, jmethodID, jboolean);
+    jobject     VITAARC_SOFTFP (*ToReflectedMethod)(JNIEnv*, jclass, jmethodID, jboolean);
 
-    jclass      (*GetSuperclass)(JNIEnv*, jclass);
-    jboolean    (*IsAssignableFrom)(JNIEnv*, jclass, jclass);
+    jclass      VITAARC_SOFTFP (*GetSuperclass)(JNIEnv*, jclass);
+    jboolean    VITAARC_SOFTFP (*IsAssignableFrom)(JNIEnv*, jclass, jclass);
 
     /* spec doesn't show jboolean parameter */
-    jobject     (*ToReflectedField)(JNIEnv*, jclass, jfieldID, jboolean);
+    jobject     VITAARC_SOFTFP (*ToReflectedField)(JNIEnv*, jclass, jfieldID, jboolean);
 
-    jint        (*Throw)(JNIEnv*, jthrowable);
-    jint        (*ThrowNew)(JNIEnv *, jclass, const char *);
-    jthrowable  (*ExceptionOccurred)(JNIEnv*);
-    void        (*ExceptionDescribe)(JNIEnv*);
-    void        (*ExceptionClear)(JNIEnv*);
-    void        (*FatalError)(JNIEnv*, const char*);
+    jint        VITAARC_SOFTFP (*Throw)(JNIEnv*, jthrowable);
+    jint        VITAARC_SOFTFP (*ThrowNew)(JNIEnv *, jclass, const char *);
+    jthrowable  VITAARC_SOFTFP (*ExceptionOccurred)(JNIEnv*);
+    void        VITAARC_SOFTFP (*ExceptionDescribe)(JNIEnv*);
+    void        VITAARC_SOFTFP (*ExceptionClear)(JNIEnv*);
+    void        VITAARC_SOFTFP (*FatalError)(JNIEnv*, const char*);
 
-    jint        (*PushLocalFrame)(JNIEnv*, jint);
-    jobject     (*PopLocalFrame)(JNIEnv*, jobject);
+    jint        VITAARC_SOFTFP (*PushLocalFrame)(JNIEnv*, jint);
+    jobject     VITAARC_SOFTFP (*PopLocalFrame)(JNIEnv*, jobject);
 
-    jobject     (*NewGlobalRef)(JNIEnv*, jobject);
-    void        (*DeleteGlobalRef)(JNIEnv*, jobject);
-    void        (*DeleteLocalRef)(JNIEnv*, jobject);
-    jboolean    (*IsSameObject)(JNIEnv*, jobject, jobject);
+    jobject     VITAARC_SOFTFP (*NewGlobalRef)(JNIEnv*, jobject);
+    void        VITAARC_SOFTFP (*DeleteGlobalRef)(JNIEnv*, jobject);
+    void        VITAARC_SOFTFP (*DeleteLocalRef)(JNIEnv*, jobject);
+    jboolean    VITAARC_SOFTFP (*IsSameObject)(JNIEnv*, jobject, jobject);
 
-    jobject     (*NewLocalRef)(JNIEnv*, jobject);
-    jint        (*EnsureLocalCapacity)(JNIEnv*, jint);
+    jobject     VITAARC_SOFTFP (*NewLocalRef)(JNIEnv*, jobject);
+    jint        VITAARC_SOFTFP (*EnsureLocalCapacity)(JNIEnv*, jint);
 
-    jobject     (*AllocObject)(JNIEnv*, jclass);
-    jobject     (*NewObject)(JNIEnv*, jclass, jmethodID, ...);
-    jobject     (*NewObjectV)(JNIEnv*, jclass, jmethodID, va_list);
-    jobject     (*NewObjectA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jobject     VITAARC_SOFTFP (*AllocObject)(JNIEnv*, jclass);
+    jobject     VITAARC_SOFTFP (*NewObject)(JNIEnv*, jclass, jmethodID, ...);
+    jobject     VITAARC_SOFTFP (*NewObjectV)(JNIEnv*, jclass, jmethodID, va_list);
+    jobject     VITAARC_SOFTFP (*NewObjectA)(JNIEnv*, jclass, jmethodID, const jvalue*);
 
-    jclass      (*GetObjectClass)(JNIEnv*, jobject);
-    jboolean    (*IsInstanceOf)(JNIEnv*, jobject, jclass);
-    jmethodID   (*GetMethodID)(JNIEnv*, jclass, const char*, const char*);
+    jclass      VITAARC_SOFTFP (*GetObjectClass)(JNIEnv*, jobject);
+    jboolean    VITAARC_SOFTFP (*IsInstanceOf)(JNIEnv*, jobject, jclass);
+    jmethodID   VITAARC_SOFTFP (*GetMethodID)(JNIEnv*, jclass, const char*, const char*);
 
-    jobject     (*CallObjectMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jobject     (*CallObjectMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jobject     (*CallObjectMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jboolean    (*CallBooleanMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jboolean    (*CallBooleanMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jboolean    (*CallBooleanMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jbyte       (*CallByteMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jbyte       (*CallByteMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jbyte       (*CallByteMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jchar       (*CallCharMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jchar       (*CallCharMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jchar       (*CallCharMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jshort      (*CallShortMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jshort      (*CallShortMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jshort      (*CallShortMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jint        (*CallIntMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jint        (*CallIntMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jint        (*CallIntMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jlong       (*CallLongMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jlong       (*CallLongMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jlong       (*CallLongMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jfloat      (*CallFloatMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jfloat      (*CallFloatMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jfloat      (*CallFloatMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    jdouble     (*CallDoubleMethod)(JNIEnv*, jobject, jmethodID, ...);
-    jdouble     (*CallDoubleMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    jdouble     (*CallDoubleMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
-    void        (*CallVoidMethod)(JNIEnv*, jobject, jmethodID, ...);
-    void        (*CallVoidMethodV)(JNIEnv*, jobject, jmethodID, va_list);
-    void        (*CallVoidMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jobject     VITAARC_SOFTFP (*CallObjectMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jobject     VITAARC_SOFTFP (*CallObjectMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jobject     VITAARC_SOFTFP (*CallObjectMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jboolean    VITAARC_SOFTFP (*CallBooleanMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jboolean    VITAARC_SOFTFP (*CallBooleanMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jboolean    VITAARC_SOFTFP (*CallBooleanMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jbyte       VITAARC_SOFTFP (*CallByteMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jbyte       VITAARC_SOFTFP (*CallByteMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jbyte       VITAARC_SOFTFP (*CallByteMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jchar       VITAARC_SOFTFP (*CallCharMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jchar       VITAARC_SOFTFP (*CallCharMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jchar       VITAARC_SOFTFP (*CallCharMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jshort      VITAARC_SOFTFP (*CallShortMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jshort      VITAARC_SOFTFP (*CallShortMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jshort      VITAARC_SOFTFP (*CallShortMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jint        VITAARC_SOFTFP (*CallIntMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jint        VITAARC_SOFTFP (*CallIntMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jint        VITAARC_SOFTFP (*CallIntMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jlong       VITAARC_SOFTFP (*CallLongMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jlong       VITAARC_SOFTFP (*CallLongMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jlong       VITAARC_SOFTFP (*CallLongMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jfloat      VITAARC_SOFTFP (*CallFloatMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jfloat      VITAARC_SOFTFP (*CallFloatMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jfloat      VITAARC_SOFTFP (*CallFloatMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    jdouble     VITAARC_SOFTFP (*CallDoubleMethod)(JNIEnv*, jobject, jmethodID, ...);
+    jdouble     VITAARC_SOFTFP (*CallDoubleMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    jdouble     VITAARC_SOFTFP (*CallDoubleMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
+    void        VITAARC_SOFTFP (*CallVoidMethod)(JNIEnv*, jobject, jmethodID, ...);
+    void        VITAARC_SOFTFP (*CallVoidMethodV)(JNIEnv*, jobject, jmethodID, va_list);
+    void        VITAARC_SOFTFP (*CallVoidMethodA)(JNIEnv*, jobject, jmethodID, const jvalue*);
 
-    jobject     (*CallNonvirtualObjectMethod)(JNIEnv*, jobject, jclass,
+    jobject     VITAARC_SOFTFP (*CallNonvirtualObjectMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jobject     (*CallNonvirtualObjectMethodV)(JNIEnv*, jobject, jclass,
+    jobject     VITAARC_SOFTFP (*CallNonvirtualObjectMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jobject     (*CallNonvirtualObjectMethodA)(JNIEnv*, jobject, jclass,
+    jobject     VITAARC_SOFTFP (*CallNonvirtualObjectMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jboolean    (*CallNonvirtualBooleanMethod)(JNIEnv*, jobject, jclass,
+    jboolean    VITAARC_SOFTFP (*CallNonvirtualBooleanMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jboolean    (*CallNonvirtualBooleanMethodV)(JNIEnv*, jobject, jclass,
+    jboolean    VITAARC_SOFTFP (*CallNonvirtualBooleanMethodV)(JNIEnv*, jobject, jclass,
                          jmethodID, va_list);
-    jboolean    (*CallNonvirtualBooleanMethodA)(JNIEnv*, jobject, jclass,
+    jboolean    VITAARC_SOFTFP (*CallNonvirtualBooleanMethodA)(JNIEnv*, jobject, jclass,
                          jmethodID, const jvalue*);
-    jbyte       (*CallNonvirtualByteMethod)(JNIEnv*, jobject, jclass,
+    jbyte       VITAARC_SOFTFP (*CallNonvirtualByteMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jbyte       (*CallNonvirtualByteMethodV)(JNIEnv*, jobject, jclass,
+    jbyte       VITAARC_SOFTFP (*CallNonvirtualByteMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jbyte       (*CallNonvirtualByteMethodA)(JNIEnv*, jobject, jclass,
+    jbyte       VITAARC_SOFTFP (*CallNonvirtualByteMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jchar       (*CallNonvirtualCharMethod)(JNIEnv*, jobject, jclass,
+    jchar       VITAARC_SOFTFP (*CallNonvirtualCharMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jchar       (*CallNonvirtualCharMethodV)(JNIEnv*, jobject, jclass,
+    jchar       VITAARC_SOFTFP (*CallNonvirtualCharMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jchar       (*CallNonvirtualCharMethodA)(JNIEnv*, jobject, jclass,
+    jchar       VITAARC_SOFTFP (*CallNonvirtualCharMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jshort      (*CallNonvirtualShortMethod)(JNIEnv*, jobject, jclass,
+    jshort      VITAARC_SOFTFP (*CallNonvirtualShortMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jshort      (*CallNonvirtualShortMethodV)(JNIEnv*, jobject, jclass,
+    jshort      VITAARC_SOFTFP (*CallNonvirtualShortMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jshort      (*CallNonvirtualShortMethodA)(JNIEnv*, jobject, jclass,
+    jshort      VITAARC_SOFTFP (*CallNonvirtualShortMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jint        (*CallNonvirtualIntMethod)(JNIEnv*, jobject, jclass,
+    jint        VITAARC_SOFTFP (*CallNonvirtualIntMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jint        (*CallNonvirtualIntMethodV)(JNIEnv*, jobject, jclass,
+    jint        VITAARC_SOFTFP (*CallNonvirtualIntMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jint        (*CallNonvirtualIntMethodA)(JNIEnv*, jobject, jclass,
+    jint        VITAARC_SOFTFP (*CallNonvirtualIntMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jlong       (*CallNonvirtualLongMethod)(JNIEnv*, jobject, jclass,
+    jlong       VITAARC_SOFTFP (*CallNonvirtualLongMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jlong       (*CallNonvirtualLongMethodV)(JNIEnv*, jobject, jclass,
+    jlong       VITAARC_SOFTFP (*CallNonvirtualLongMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jlong       (*CallNonvirtualLongMethodA)(JNIEnv*, jobject, jclass,
+    jlong       VITAARC_SOFTFP (*CallNonvirtualLongMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jfloat      (*CallNonvirtualFloatMethod)(JNIEnv*, jobject, jclass,
+    jfloat      VITAARC_SOFTFP (*CallNonvirtualFloatMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jfloat      (*CallNonvirtualFloatMethodV)(JNIEnv*, jobject, jclass,
+    jfloat      VITAARC_SOFTFP (*CallNonvirtualFloatMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jfloat      (*CallNonvirtualFloatMethodA)(JNIEnv*, jobject, jclass,
+    jfloat      VITAARC_SOFTFP (*CallNonvirtualFloatMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    jdouble     (*CallNonvirtualDoubleMethod)(JNIEnv*, jobject, jclass,
+    jdouble     VITAARC_SOFTFP (*CallNonvirtualDoubleMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    jdouble     (*CallNonvirtualDoubleMethodV)(JNIEnv*, jobject, jclass,
+    jdouble     VITAARC_SOFTFP (*CallNonvirtualDoubleMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    jdouble     (*CallNonvirtualDoubleMethodA)(JNIEnv*, jobject, jclass,
+    jdouble     VITAARC_SOFTFP (*CallNonvirtualDoubleMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
-    void        (*CallNonvirtualVoidMethod)(JNIEnv*, jobject, jclass,
+    void        VITAARC_SOFTFP (*CallNonvirtualVoidMethod)(JNIEnv*, jobject, jclass,
                         jmethodID, ...);
-    void        (*CallNonvirtualVoidMethodV)(JNIEnv*, jobject, jclass,
+    void        VITAARC_SOFTFP (*CallNonvirtualVoidMethodV)(JNIEnv*, jobject, jclass,
                         jmethodID, va_list);
-    void        (*CallNonvirtualVoidMethodA)(JNIEnv*, jobject, jclass,
+    void        VITAARC_SOFTFP (*CallNonvirtualVoidMethodA)(JNIEnv*, jobject, jclass,
                         jmethodID, const jvalue*);
 
-    jfieldID    (*GetFieldID)(JNIEnv*, jclass, const char*, const char*);
+    jfieldID    VITAARC_SOFTFP (*GetFieldID)(JNIEnv*, jclass, const char*, const char*);
 
-    jobject     (*GetObjectField)(JNIEnv*, jobject, jfieldID);
-    jboolean    (*GetBooleanField)(JNIEnv*, jobject, jfieldID);
-    jbyte       (*GetByteField)(JNIEnv*, jobject, jfieldID);
-    jchar       (*GetCharField)(JNIEnv*, jobject, jfieldID);
-    jshort      (*GetShortField)(JNIEnv*, jobject, jfieldID);
-    jint        (*GetIntField)(JNIEnv*, jobject, jfieldID);
-    jlong       (*GetLongField)(JNIEnv*, jobject, jfieldID);
-    jfloat      (*GetFloatField)(JNIEnv*, jobject, jfieldID);
-    jdouble     (*GetDoubleField)(JNIEnv*, jobject, jfieldID);
+    jobject     VITAARC_SOFTFP (*GetObjectField)(JNIEnv*, jobject, jfieldID);
+    jboolean    VITAARC_SOFTFP (*GetBooleanField)(JNIEnv*, jobject, jfieldID);
+    jbyte       VITAARC_SOFTFP (*GetByteField)(JNIEnv*, jobject, jfieldID);
+    jchar       VITAARC_SOFTFP (*GetCharField)(JNIEnv*, jobject, jfieldID);
+    jshort      VITAARC_SOFTFP (*GetShortField)(JNIEnv*, jobject, jfieldID);
+    jint        VITAARC_SOFTFP (*GetIntField)(JNIEnv*, jobject, jfieldID);
+    jlong       VITAARC_SOFTFP (*GetLongField)(JNIEnv*, jobject, jfieldID);
+    jfloat      VITAARC_SOFTFP (*GetFloatField)(JNIEnv*, jobject, jfieldID);
+    jdouble     VITAARC_SOFTFP (*GetDoubleField)(JNIEnv*, jobject, jfieldID);
 
-    void        (*SetObjectField)(JNIEnv*, jobject, jfieldID, jobject);
-    void        (*SetBooleanField)(JNIEnv*, jobject, jfieldID, jboolean);
-    void        (*SetByteField)(JNIEnv*, jobject, jfieldID, jbyte);
-    void        (*SetCharField)(JNIEnv*, jobject, jfieldID, jchar);
-    void        (*SetShortField)(JNIEnv*, jobject, jfieldID, jshort);
-    void        (*SetIntField)(JNIEnv*, jobject, jfieldID, jint);
-    void        (*SetLongField)(JNIEnv*, jobject, jfieldID, jlong);
-    void        (*SetFloatField)(JNIEnv*, jobject, jfieldID, jfloat);
-    void        (*SetDoubleField)(JNIEnv*, jobject, jfieldID, jdouble);
+    void        VITAARC_SOFTFP (*SetObjectField)(JNIEnv*, jobject, jfieldID, jobject);
+    void        VITAARC_SOFTFP (*SetBooleanField)(JNIEnv*, jobject, jfieldID, jboolean);
+    void        VITAARC_SOFTFP (*SetByteField)(JNIEnv*, jobject, jfieldID, jbyte);
+    void        VITAARC_SOFTFP (*SetCharField)(JNIEnv*, jobject, jfieldID, jchar);
+    void        VITAARC_SOFTFP (*SetShortField)(JNIEnv*, jobject, jfieldID, jshort);
+    void        VITAARC_SOFTFP (*SetIntField)(JNIEnv*, jobject, jfieldID, jint);
+    void        VITAARC_SOFTFP (*SetLongField)(JNIEnv*, jobject, jfieldID, jlong);
+    void        VITAARC_SOFTFP (*SetFloatField)(JNIEnv*, jobject, jfieldID, jfloat);
+    void        VITAARC_SOFTFP (*SetDoubleField)(JNIEnv*, jobject, jfieldID, jdouble);
 
-    jmethodID   (*GetStaticMethodID)(JNIEnv*, jclass, const char*, const char*);
+    jmethodID   VITAARC_SOFTFP (*GetStaticMethodID)(JNIEnv*, jclass, const char*, const char*);
 
-    jobject     (*CallStaticObjectMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jobject     (*CallStaticObjectMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jobject     (*CallStaticObjectMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jboolean    (*CallStaticBooleanMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jboolean    (*CallStaticBooleanMethodV)(JNIEnv*, jclass, jmethodID,
+    jobject     VITAARC_SOFTFP (*CallStaticObjectMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jobject     VITAARC_SOFTFP (*CallStaticObjectMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jobject     VITAARC_SOFTFP (*CallStaticObjectMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jboolean    VITAARC_SOFTFP (*CallStaticBooleanMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jboolean    VITAARC_SOFTFP (*CallStaticBooleanMethodV)(JNIEnv*, jclass, jmethodID,
                         va_list);
-    jboolean    (*CallStaticBooleanMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jbyte       (*CallStaticByteMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jbyte       (*CallStaticByteMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jbyte       (*CallStaticByteMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jchar       (*CallStaticCharMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jchar       (*CallStaticCharMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jchar       (*CallStaticCharMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jshort      (*CallStaticShortMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jshort      (*CallStaticShortMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jshort      (*CallStaticShortMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jint        (*CallStaticIntMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jint        (*CallStaticIntMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jint        (*CallStaticIntMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jlong       (*CallStaticLongMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jlong       (*CallStaticLongMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jlong       (*CallStaticLongMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jfloat      (*CallStaticFloatMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jfloat      (*CallStaticFloatMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jfloat      (*CallStaticFloatMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    jdouble     (*CallStaticDoubleMethod)(JNIEnv*, jclass, jmethodID, ...);
-    jdouble     (*CallStaticDoubleMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    jdouble     (*CallStaticDoubleMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
-    void        (*CallStaticVoidMethod)(JNIEnv*, jclass, jmethodID, ...);
-    void        (*CallStaticVoidMethodV)(JNIEnv*, jclass, jmethodID, va_list);
-    void        (*CallStaticVoidMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jboolean    VITAARC_SOFTFP (*CallStaticBooleanMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jbyte       VITAARC_SOFTFP (*CallStaticByteMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jbyte       VITAARC_SOFTFP (*CallStaticByteMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jbyte       VITAARC_SOFTFP (*CallStaticByteMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jchar       VITAARC_SOFTFP (*CallStaticCharMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jchar       VITAARC_SOFTFP (*CallStaticCharMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jchar       VITAARC_SOFTFP (*CallStaticCharMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jshort      VITAARC_SOFTFP (*CallStaticShortMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jshort      VITAARC_SOFTFP (*CallStaticShortMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jshort      VITAARC_SOFTFP (*CallStaticShortMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jint        VITAARC_SOFTFP (*CallStaticIntMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jint        VITAARC_SOFTFP (*CallStaticIntMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jint        VITAARC_SOFTFP (*CallStaticIntMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jlong       VITAARC_SOFTFP (*CallStaticLongMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jlong       VITAARC_SOFTFP (*CallStaticLongMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jlong       VITAARC_SOFTFP (*CallStaticLongMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jfloat      VITAARC_SOFTFP (*CallStaticFloatMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jfloat      VITAARC_SOFTFP (*CallStaticFloatMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jfloat      VITAARC_SOFTFP (*CallStaticFloatMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    jdouble     VITAARC_SOFTFP (*CallStaticDoubleMethod)(JNIEnv*, jclass, jmethodID, ...);
+    jdouble     VITAARC_SOFTFP (*CallStaticDoubleMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    jdouble     VITAARC_SOFTFP (*CallStaticDoubleMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
+    void        VITAARC_SOFTFP (*CallStaticVoidMethod)(JNIEnv*, jclass, jmethodID, ...);
+    void        VITAARC_SOFTFP (*CallStaticVoidMethodV)(JNIEnv*, jclass, jmethodID, va_list);
+    void        VITAARC_SOFTFP (*CallStaticVoidMethodA)(JNIEnv*, jclass, jmethodID, const jvalue*);
 
-    jfieldID    (*GetStaticFieldID)(JNIEnv*, jclass, const char*,
+    jfieldID    VITAARC_SOFTFP (*GetStaticFieldID)(JNIEnv*, jclass, const char*,
                         const char*);
 
-    jobject     (*GetStaticObjectField)(JNIEnv*, jclass, jfieldID);
-    jboolean    (*GetStaticBooleanField)(JNIEnv*, jclass, jfieldID);
-    jbyte       (*GetStaticByteField)(JNIEnv*, jclass, jfieldID);
-    jchar       (*GetStaticCharField)(JNIEnv*, jclass, jfieldID);
-    jshort      (*GetStaticShortField)(JNIEnv*, jclass, jfieldID);
-    jint        (*GetStaticIntField)(JNIEnv*, jclass, jfieldID);
-    jlong       (*GetStaticLongField)(JNIEnv*, jclass, jfieldID);
-    jfloat      (*GetStaticFloatField)(JNIEnv*, jclass, jfieldID);
-    jdouble     (*GetStaticDoubleField)(JNIEnv*, jclass, jfieldID);
+    jobject     VITAARC_SOFTFP (*GetStaticObjectField)(JNIEnv*, jclass, jfieldID);
+    jboolean    VITAARC_SOFTFP (*GetStaticBooleanField)(JNIEnv*, jclass, jfieldID);
+    jbyte       VITAARC_SOFTFP (*GetStaticByteField)(JNIEnv*, jclass, jfieldID);
+    jchar       VITAARC_SOFTFP (*GetStaticCharField)(JNIEnv*, jclass, jfieldID);
+    jshort      VITAARC_SOFTFP (*GetStaticShortField)(JNIEnv*, jclass, jfieldID);
+    jint        VITAARC_SOFTFP (*GetStaticIntField)(JNIEnv*, jclass, jfieldID);
+    jlong       VITAARC_SOFTFP (*GetStaticLongField)(JNIEnv*, jclass, jfieldID);
+    jfloat      VITAARC_SOFTFP (*GetStaticFloatField)(JNIEnv*, jclass, jfieldID);
+    jdouble     VITAARC_SOFTFP (*GetStaticDoubleField)(JNIEnv*, jclass, jfieldID);
 
-    void        (*SetStaticObjectField)(JNIEnv*, jclass, jfieldID, jobject);
-    void        (*SetStaticBooleanField)(JNIEnv*, jclass, jfieldID, jboolean);
-    void        (*SetStaticByteField)(JNIEnv*, jclass, jfieldID, jbyte);
-    void        (*SetStaticCharField)(JNIEnv*, jclass, jfieldID, jchar);
-    void        (*SetStaticShortField)(JNIEnv*, jclass, jfieldID, jshort);
-    void        (*SetStaticIntField)(JNIEnv*, jclass, jfieldID, jint);
-    void        (*SetStaticLongField)(JNIEnv*, jclass, jfieldID, jlong);
-    void        (*SetStaticFloatField)(JNIEnv*, jclass, jfieldID, jfloat);
-    void        (*SetStaticDoubleField)(JNIEnv*, jclass, jfieldID, jdouble);
+    void        VITAARC_SOFTFP (*SetStaticObjectField)(JNIEnv*, jclass, jfieldID, jobject);
+    void        VITAARC_SOFTFP (*SetStaticBooleanField)(JNIEnv*, jclass, jfieldID, jboolean);
+    void        VITAARC_SOFTFP (*SetStaticByteField)(JNIEnv*, jclass, jfieldID, jbyte);
+    void        VITAARC_SOFTFP (*SetStaticCharField)(JNIEnv*, jclass, jfieldID, jchar);
+    void        VITAARC_SOFTFP (*SetStaticShortField)(JNIEnv*, jclass, jfieldID, jshort);
+    void        VITAARC_SOFTFP (*SetStaticIntField)(JNIEnv*, jclass, jfieldID, jint);
+    void        VITAARC_SOFTFP (*SetStaticLongField)(JNIEnv*, jclass, jfieldID, jlong);
+    void        VITAARC_SOFTFP (*SetStaticFloatField)(JNIEnv*, jclass, jfieldID, jfloat);
+    void        VITAARC_SOFTFP (*SetStaticDoubleField)(JNIEnv*, jclass, jfieldID, jdouble);
 
-    jstring     (*NewString)(JNIEnv*, const jchar*, jsize);
-    jsize       (*GetStringLength)(JNIEnv*, jstring);
-    const jchar* (*GetStringChars)(JNIEnv*, jstring, jboolean*);
-    void        (*ReleaseStringChars)(JNIEnv*, jstring, const jchar*);
-    jstring     (*NewStringUTF)(JNIEnv*, const char*);
-    jsize       (*GetStringUTFLength)(JNIEnv*, jstring);
+    jstring     VITAARC_SOFTFP (*NewString)(JNIEnv*, const jchar*, jsize);
+    jsize       VITAARC_SOFTFP (*GetStringLength)(JNIEnv*, jstring);
+    const jchar* VITAARC_SOFTFP (*GetStringChars)(JNIEnv*, jstring, jboolean*);
+    void        VITAARC_SOFTFP (*ReleaseStringChars)(JNIEnv*, jstring, const jchar*);
+    jstring     VITAARC_SOFTFP (*NewStringUTF)(JNIEnv*, const char*);
+    jsize       VITAARC_SOFTFP (*GetStringUTFLength)(JNIEnv*, jstring);
     /* JNI spec says this returns const jbyte*, but that's inconsistent */
-    const char* (*GetStringUTFChars)(JNIEnv*, jstring, jboolean*);
-    void        (*ReleaseStringUTFChars)(JNIEnv*, jstring, const char*);
-    jsize       (*GetArrayLength)(JNIEnv*, jarray);
-    jobjectArray (*NewObjectArray)(JNIEnv*, jsize, jclass, jobject);
-    jobject     (*GetObjectArrayElement)(JNIEnv*, jobjectArray, jsize);
-    void        (*SetObjectArrayElement)(JNIEnv*, jobjectArray, jsize, jobject);
+    const char* VITAARC_SOFTFP (*GetStringUTFChars)(JNIEnv*, jstring, jboolean*);
+    void        VITAARC_SOFTFP (*ReleaseStringUTFChars)(JNIEnv*, jstring, const char*);
+    jsize       VITAARC_SOFTFP (*GetArrayLength)(JNIEnv*, jarray);
+    jobjectArray VITAARC_SOFTFP (*NewObjectArray)(JNIEnv*, jsize, jclass, jobject);
+    jobject     VITAARC_SOFTFP (*GetObjectArrayElement)(JNIEnv*, jobjectArray, jsize);
+    void        VITAARC_SOFTFP (*SetObjectArrayElement)(JNIEnv*, jobjectArray, jsize, jobject);
 
-    jbooleanArray (*NewBooleanArray)(JNIEnv*, jsize);
-    jbyteArray    (*NewByteArray)(JNIEnv*, jsize);
-    jcharArray    (*NewCharArray)(JNIEnv*, jsize);
-    jshortArray   (*NewShortArray)(JNIEnv*, jsize);
-    jintArray     (*NewIntArray)(JNIEnv*, jsize);
-    jlongArray    (*NewLongArray)(JNIEnv*, jsize);
-    jfloatArray   (*NewFloatArray)(JNIEnv*, jsize);
-    jdoubleArray  (*NewDoubleArray)(JNIEnv*, jsize);
+    jbooleanArray VITAARC_SOFTFP (*NewBooleanArray)(JNIEnv*, jsize);
+    jbyteArray    VITAARC_SOFTFP (*NewByteArray)(JNIEnv*, jsize);
+    jcharArray    VITAARC_SOFTFP (*NewCharArray)(JNIEnv*, jsize);
+    jshortArray   VITAARC_SOFTFP (*NewShortArray)(JNIEnv*, jsize);
+    jintArray     VITAARC_SOFTFP (*NewIntArray)(JNIEnv*, jsize);
+    jlongArray    VITAARC_SOFTFP (*NewLongArray)(JNIEnv*, jsize);
+    jfloatArray   VITAARC_SOFTFP (*NewFloatArray)(JNIEnv*, jsize);
+    jdoubleArray  VITAARC_SOFTFP (*NewDoubleArray)(JNIEnv*, jsize);
 
-    jboolean*   (*GetBooleanArrayElements)(JNIEnv*, jbooleanArray, jboolean*);
-    jbyte*      (*GetByteArrayElements)(JNIEnv*, jbyteArray, jboolean*);
-    jchar*      (*GetCharArrayElements)(JNIEnv*, jcharArray, jboolean*);
-    jshort*     (*GetShortArrayElements)(JNIEnv*, jshortArray, jboolean*);
-    jint*       (*GetIntArrayElements)(JNIEnv*, jintArray, jboolean*);
-    jlong*      (*GetLongArrayElements)(JNIEnv*, jlongArray, jboolean*);
-    jfloat*     (*GetFloatArrayElements)(JNIEnv*, jfloatArray, jboolean*);
-    jdouble*    (*GetDoubleArrayElements)(JNIEnv*, jdoubleArray, jboolean*);
+    jboolean*   VITAARC_SOFTFP (*GetBooleanArrayElements)(JNIEnv*, jbooleanArray, jboolean*);
+    jbyte*      VITAARC_SOFTFP (*GetByteArrayElements)(JNIEnv*, jbyteArray, jboolean*);
+    jchar*      VITAARC_SOFTFP (*GetCharArrayElements)(JNIEnv*, jcharArray, jboolean*);
+    jshort*     VITAARC_SOFTFP (*GetShortArrayElements)(JNIEnv*, jshortArray, jboolean*);
+    jint*       VITAARC_SOFTFP (*GetIntArrayElements)(JNIEnv*, jintArray, jboolean*);
+    jlong*      VITAARC_SOFTFP (*GetLongArrayElements)(JNIEnv*, jlongArray, jboolean*);
+    jfloat*     VITAARC_SOFTFP (*GetFloatArrayElements)(JNIEnv*, jfloatArray, jboolean*);
+    jdouble*    VITAARC_SOFTFP (*GetDoubleArrayElements)(JNIEnv*, jdoubleArray, jboolean*);
 
-    void        (*ReleaseBooleanArrayElements)(JNIEnv*, jbooleanArray,
+    void        VITAARC_SOFTFP (*ReleaseBooleanArrayElements)(JNIEnv*, jbooleanArray,
                         jboolean*, jint);
-    void        (*ReleaseByteArrayElements)(JNIEnv*, jbyteArray,
+    void        VITAARC_SOFTFP (*ReleaseByteArrayElements)(JNIEnv*, jbyteArray,
                         jbyte*, jint);
-    void        (*ReleaseCharArrayElements)(JNIEnv*, jcharArray,
+    void        VITAARC_SOFTFP (*ReleaseCharArrayElements)(JNIEnv*, jcharArray,
                         jchar*, jint);
-    void        (*ReleaseShortArrayElements)(JNIEnv*, jshortArray,
+    void        VITAARC_SOFTFP (*ReleaseShortArrayElements)(JNIEnv*, jshortArray,
                         jshort*, jint);
-    void        (*ReleaseIntArrayElements)(JNIEnv*, jintArray,
+    void        VITAARC_SOFTFP (*ReleaseIntArrayElements)(JNIEnv*, jintArray,
                         jint*, jint);
-    void        (*ReleaseLongArrayElements)(JNIEnv*, jlongArray,
+    void        VITAARC_SOFTFP (*ReleaseLongArrayElements)(JNIEnv*, jlongArray,
                         jlong*, jint);
-    void        (*ReleaseFloatArrayElements)(JNIEnv*, jfloatArray,
+    void        VITAARC_SOFTFP (*ReleaseFloatArrayElements)(JNIEnv*, jfloatArray,
                         jfloat*, jint);
-    void        (*ReleaseDoubleArrayElements)(JNIEnv*, jdoubleArray,
+    void        VITAARC_SOFTFP (*ReleaseDoubleArrayElements)(JNIEnv*, jdoubleArray,
                         jdouble*, jint);
 
-    void        (*GetBooleanArrayRegion)(JNIEnv*, jbooleanArray,
+    void        VITAARC_SOFTFP (*GetBooleanArrayRegion)(JNIEnv*, jbooleanArray,
                         jsize, jsize, jboolean*);
-    void        (*GetByteArrayRegion)(JNIEnv*, jbyteArray,
+    void        VITAARC_SOFTFP (*GetByteArrayRegion)(JNIEnv*, jbyteArray,
                         jsize, jsize, jbyte*);
-    void        (*GetCharArrayRegion)(JNIEnv*, jcharArray,
+    void        VITAARC_SOFTFP (*GetCharArrayRegion)(JNIEnv*, jcharArray,
                         jsize, jsize, jchar*);
-    void        (*GetShortArrayRegion)(JNIEnv*, jshortArray,
+    void        VITAARC_SOFTFP (*GetShortArrayRegion)(JNIEnv*, jshortArray,
                         jsize, jsize, jshort*);
-    void        (*GetIntArrayRegion)(JNIEnv*, jintArray,
+    void        VITAARC_SOFTFP (*GetIntArrayRegion)(JNIEnv*, jintArray,
                         jsize, jsize, jint*);
-    void        (*GetLongArrayRegion)(JNIEnv*, jlongArray,
+    void        VITAARC_SOFTFP (*GetLongArrayRegion)(JNIEnv*, jlongArray,
                         jsize, jsize, jlong*);
-    void        (*GetFloatArrayRegion)(JNIEnv*, jfloatArray,
+    void        VITAARC_SOFTFP (*GetFloatArrayRegion)(JNIEnv*, jfloatArray,
                         jsize, jsize, jfloat*);
-    void        (*GetDoubleArrayRegion)(JNIEnv*, jdoubleArray,
+    void        VITAARC_SOFTFP (*GetDoubleArrayRegion)(JNIEnv*, jdoubleArray,
                         jsize, jsize, jdouble*);
 
     /* spec shows these without const; some jni.h do, some don't */
-    void        (*SetBooleanArrayRegion)(JNIEnv*, jbooleanArray,
+    void        VITAARC_SOFTFP (*SetBooleanArrayRegion)(JNIEnv*, jbooleanArray,
                         jsize, jsize, const jboolean*);
-    void        (*SetByteArrayRegion)(JNIEnv*, jbyteArray,
+    void        VITAARC_SOFTFP (*SetByteArrayRegion)(JNIEnv*, jbyteArray,
                         jsize, jsize, const jbyte*);
-    void        (*SetCharArrayRegion)(JNIEnv*, jcharArray,
+    void        VITAARC_SOFTFP (*SetCharArrayRegion)(JNIEnv*, jcharArray,
                         jsize, jsize, const jchar*);
-    void        (*SetShortArrayRegion)(JNIEnv*, jshortArray,
+    void        VITAARC_SOFTFP (*SetShortArrayRegion)(JNIEnv*, jshortArray,
                         jsize, jsize, const jshort*);
-    void        (*SetIntArrayRegion)(JNIEnv*, jintArray,
+    void        VITAARC_SOFTFP (*SetIntArrayRegion)(JNIEnv*, jintArray,
                         jsize, jsize, const jint*);
-    void        (*SetLongArrayRegion)(JNIEnv*, jlongArray,
+    void        VITAARC_SOFTFP (*SetLongArrayRegion)(JNIEnv*, jlongArray,
                         jsize, jsize, const jlong*);
-    void        (*SetFloatArrayRegion)(JNIEnv*, jfloatArray,
+    void        VITAARC_SOFTFP (*SetFloatArrayRegion)(JNIEnv*, jfloatArray,
                         jsize, jsize, const jfloat*);
-    void        (*SetDoubleArrayRegion)(JNIEnv*, jdoubleArray,
+    void        VITAARC_SOFTFP (*SetDoubleArrayRegion)(JNIEnv*, jdoubleArray,
                         jsize, jsize, const jdouble*);
 
-    jint        (*RegisterNatives)(JNIEnv*, jclass, const JNINativeMethod*,
+    jint        VITAARC_SOFTFP (*RegisterNatives)(JNIEnv*, jclass, const JNINativeMethod*,
                         jint);
-    jint        (*UnregisterNatives)(JNIEnv*, jclass);
-    jint        (*MonitorEnter)(JNIEnv*, jobject);
-    jint        (*MonitorExit)(JNIEnv*, jobject);
-    jint        (*GetJavaVM)(JNIEnv*, JavaVM**);
+    jint        VITAARC_SOFTFP (*UnregisterNatives)(JNIEnv*, jclass);
+    jint        VITAARC_SOFTFP (*MonitorEnter)(JNIEnv*, jobject);
+    jint        VITAARC_SOFTFP (*MonitorExit)(JNIEnv*, jobject);
+    jint        VITAARC_SOFTFP (*GetJavaVM)(JNIEnv*, JavaVM**);
 
-    void        (*GetStringRegion)(JNIEnv*, jstring, jsize, jsize, jchar*);
-    void        (*GetStringUTFRegion)(JNIEnv*, jstring, jsize, jsize, char*);
+    void        VITAARC_SOFTFP (*GetStringRegion)(JNIEnv*, jstring, jsize, jsize, jchar*);
+    void        VITAARC_SOFTFP (*GetStringUTFRegion)(JNIEnv*, jstring, jsize, jsize, char*);
 
-    void*       (*GetPrimitiveArrayCritical)(JNIEnv*, jarray, jboolean*);
-    void        (*ReleasePrimitiveArrayCritical)(JNIEnv*, jarray, void*, jint);
+    void*       VITAARC_SOFTFP (*GetPrimitiveArrayCritical)(JNIEnv*, jarray, jboolean*);
+    void        VITAARC_SOFTFP (*ReleasePrimitiveArrayCritical)(JNIEnv*, jarray, void*, jint);
 
-    const jchar* (*GetStringCritical)(JNIEnv*, jstring, jboolean*);
-    void        (*ReleaseStringCritical)(JNIEnv*, jstring, const jchar*);
+    const jchar* VITAARC_SOFTFP (*GetStringCritical)(JNIEnv*, jstring, jboolean*);
+    void        VITAARC_SOFTFP (*ReleaseStringCritical)(JNIEnv*, jstring, const jchar*);
 
-    jweak       (*NewWeakGlobalRef)(JNIEnv*, jobject);
-    void        (*DeleteWeakGlobalRef)(JNIEnv*, jweak);
+    jweak       VITAARC_SOFTFP (*NewWeakGlobalRef)(JNIEnv*, jobject);
+    void        VITAARC_SOFTFP (*DeleteWeakGlobalRef)(JNIEnv*, jweak);
 
-    jboolean    (*ExceptionCheck)(JNIEnv*);
+    jboolean    VITAARC_SOFTFP (*ExceptionCheck)(JNIEnv*);
 
-    jobject     (*NewDirectByteBuffer)(JNIEnv*, void*, jlong);
-    void*       (*GetDirectBufferAddress)(JNIEnv*, jobject);
-    jlong       (*GetDirectBufferCapacity)(JNIEnv*, jobject);
+    jobject     VITAARC_SOFTFP (*NewDirectByteBuffer)(JNIEnv*, void*, jlong);
+    void*       VITAARC_SOFTFP (*GetDirectBufferAddress)(JNIEnv*, jobject);
+    jlong       VITAARC_SOFTFP (*GetDirectBufferCapacity)(JNIEnv*, jobject);
 
     /* added in JNI 1.6 */
-    jobjectRefType (*GetObjectRefType)(JNIEnv*, jobject);
+    jobjectRefType VITAARC_SOFTFP (*GetObjectRefType)(JNIEnv*, jobject);
 };
 
 /*
@@ -1040,11 +1043,11 @@ struct JNIInvokeInterface {
     void*       reserved1;
     void*       reserved2;
 
-    jint        (*DestroyJavaVM)(JavaVM*);
-    jint        (*AttachCurrentThread)(JavaVM*, JNIEnv**, void*);
-    jint        (*DetachCurrentThread)(JavaVM*);
-    jint        (*GetEnv)(JavaVM*, void**, jint);
-    jint        (*AttachCurrentThreadAsDaemon)(JavaVM*, JNIEnv**, void*);
+    jint        VITAARC_SOFTFP (*DestroyJavaVM)(JavaVM*);
+    jint        VITAARC_SOFTFP (*AttachCurrentThread)(JavaVM*, JNIEnv**, void*);
+    jint        VITAARC_SOFTFP (*DetachCurrentThread)(JavaVM*);
+    jint        VITAARC_SOFTFP (*GetEnv)(JavaVM*, void**, jint);
+    jint        VITAARC_SOFTFP (*AttachCurrentThreadAsDaemon)(JavaVM*, JNIEnv**, void*);
 };
 
 /*

@@ -1,0 +1,8 @@
+void main(float3 a_position : POSITION,
+          uniform float4x4 u_cameraRot,
+          out float4 position : POSITION,
+          out float3 reflection : TEXCOORD0)
+{
+  reflection = mul(float4(a_position, 1.0), u_cameraRot).xyz;
+  position = float4(a_position.xy, 1.0, 1.0);
+}

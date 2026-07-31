@@ -1,0 +1,61 @@
+#ifndef VITAARC_TEXTURED
+#define VITAARC_TEXTURED 1
+#endif
+#ifndef VITAARC_NORMAL_MAP
+#define VITAARC_NORMAL_MAP 0
+#endif
+float3 diffuse(float3 normal, float3 direction, float3 color, float attenuation)
+{
+  return color * max(dot(normal, direction), 0.0) * attenuation;
+}
+float4 main(float2 texCoord : TEXCOORD0,
+            float3 pointDirection : TEXCOORD1,
+            float3 spotDirection : TEXCOORD2,
+#if VITAARC_NORMAL_MAP
+            float3 dirDirection : TEXCOORD4,
+            float3 spotAxis : TEXCOORD5,
+            uniform sampler2D u_normalTex : TEXUNIT1,
+#else
+            float3 normal : TEXCOORD3,
+#endif
+            uniform sampler2D CC_Texture0 : TEXUNIT0,
+            uniform float4 u_color,
+            uniform float3 u_AmbientLightSourceColor,
+            uniform float3 u_DirLightSourceColor[1],
+            uniform float3 u_DirLightSourceDirection[1],
+            uniform float3 u_PointLightSourceColor[1],
+            uniform float u_PointLightSourceRangeInverse[1],
+            uniform float3 u_SpotLightSourceColor[1],
+            uniform float3 u_SpotLightSourceDirection[1],
+            uniform float u_SpotLightSourceInnerAngleCos[1],
+            uniform float u_SpotLightSourceOuterAngleCos[1],
+            uniform float u_SpotLightSourceRangeInverse[1]) : COLOR0
+{
+#if VITAARC_NORMAL_MAP
+  float3 n = normalize(2.0 * tex2D(u_normalTex, texCoord).xyz - 1.0);
+  float3 dir = normalize(dirDirection * 2.0);
+  float3 axis = normalize(spotAxis * 2.0);
+#else
+  float3 n = normalize(normal);
+  float3 dir = normalize(u_DirLightSourceDirection[0] * 2.0);
+  float3 axis = normalize(u_SpotLightSourceDirection[0] * 2.0);
+#endif
+  float3 combined = u_AmbientLightSourceColor;
+  combined += diffuse(n, -dir, u_DirLightSourceColor[0], 1.0);
+  float3 scaled = pointDirection * u_PointLightSourceRangeInverse[0];
+  float attenuation = clamp(1.0 - dot(scaled, scaled), 0.0, 1.0);
+  combined += diffuse(n, normalize(pointDirection), u_PointLightSourceColor[0], attenuation);
+  scaled = spotDirection * u_SpotLightSourceRangeInverse[0];
+  attenuation = clamp(1.0 - dot(scaled, scaled), 0.0, 1.0);
+  float3 spot = normalize(spotDirection);
+  float angle = dot(axis, -spot);
+  attenuation *= smoothstep(u_SpotLightSourceOuterAngleCos[0],
+                            u_SpotLightSourceInnerAngleCos[0], angle);
+  attenuation = clamp(attenuation, 0.0, 1.0);
+  combined += diffuse(n, spot, u_SpotLightSourceColor[0], attenuation);
+  float4 result = u_color * float4(combined, 1.0);
+#if VITAARC_TEXTURED
+  result *= tex2D(CC_Texture0, texCoord);
+#endif
+  return result;
+}

@@ -1,0 +1,64 @@
+// Explicit Cocos 2D fragment variants; selected by hashes in manifest.json.
+#ifndef VITAARC_FRAGMENT_MODE
+#define VITAARC_FRAGMENT_MODE 0
+#endif
+float4 main(float4 color : COLOR0,
+            float2 texCoord : TEXCOORD0,
+            uniform sampler2D CC_Texture0 : TEXUNIT0,
+            uniform float4 u_color,
+            uniform float4 u_textColor,
+            uniform float4 u_effectColor,
+            uniform float CC_alpha_value) : COLOR0
+{
+#if VITAARC_FRAGMENT_MODE == 0
+  return color * tex2D(CC_Texture0, texCoord);
+#elif VITAARC_FRAGMENT_MODE == 1
+  return float4(color.rgb, color.a * tex2D(CC_Texture0, texCoord).a);
+#elif VITAARC_FRAGMENT_MODE == 2
+  return tex2D(CC_Texture0, texCoord);
+#elif VITAARC_FRAGMENT_MODE == 3
+  return tex2D(CC_Texture0, texCoord) * u_color;
+#elif VITAARC_FRAGMENT_MODE == 4
+  float4 texColor = tex2D(CC_Texture0, texCoord);
+  if(texColor.a <= CC_alpha_value) discard;
+  return texColor * color;
+#elif VITAARC_FRAGMENT_MODE == 5
+  float4 c = color * tex2D(CC_Texture0, texCoord);
+  float gray = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+  return float4(gray, gray, gray, c.a);
+#elif VITAARC_FRAGMENT_MODE == 6
+  return color;
+#elif VITAARC_FRAGMENT_MODE == 7
+  return color * float4(u_textColor.rgb,
+                        u_textColor.a * tex2D(CC_Texture0, texCoord).a);
+#elif VITAARC_FRAGMENT_MODE == 8
+  float dist = tex2D(CC_Texture0, texCoord).a;
+  float alpha = smoothstep(0.46, 0.54, dist) * u_textColor.a;
+  return color * float4(u_textColor.rgb, alpha);
+#elif VITAARC_FRAGMENT_MODE == 9
+  float dist = tex2D(CC_Texture0, texCoord).a;
+  float alpha = smoothstep(0.46, 0.54, dist);
+  float mu = smoothstep(0.5, 1.0, sqrt(dist));
+  float4 text = u_effectColor * (1.0 - alpha) + u_textColor * alpha;
+  return color * float4(text.rgb, max(alpha, mu) * text.a);
+#elif VITAARC_FRAGMENT_MODE == 10
+  float4 sampled = tex2D(CC_Texture0, texCoord);
+  float fontAlpha = sampled.a;
+  float outlineAlpha = sampled.r;
+  if(fontAlpha + outlineAlpha <= 0.0) discard;
+  float4 text = u_textColor * fontAlpha + u_effectColor * (1.0 - fontAlpha);
+  return color * float4(text.rgb, max(fontAlpha, outlineAlpha) * text.a);
+#elif VITAARC_FRAGMENT_MODE == 11
+  return color * step(0.0, 1.0 - length(texCoord));
+#elif VITAARC_FRAGMENT_MODE == 12
+  return u_color;
+#elif VITAARC_FRAGMENT_MODE == 13
+  return color * u_color;
+#elif VITAARC_FRAGMENT_MODE == 14
+  return tex2D(CC_Texture0, texCoord) * color * u_color;
+#elif VITAARC_FRAGMENT_MODE == 15
+  return float4(color.xyz, 1.0);
+#else
+#error Unknown fragment mode
+#endif
+}

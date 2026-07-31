@@ -1,0 +1,6 @@
+float4 main(float3 reflection : TEXCOORD0,
+            uniform samplerCUBE u_Env : TEXUNIT0,
+            uniform float4 u_color) : COLOR0
+{
+  return texCUBE(u_Env, reflection) * u_color;
+}

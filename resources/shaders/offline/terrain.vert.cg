@@ -1,0 +1,12 @@
+void main(float4 a_position : POSITION,
+          float2 a_texCoord : TEXCOORD0,
+          float3 a_normal : NORMAL,
+          uniform float4x4 CC_MVPMatrix,
+          out float4 position : POSITION,
+          out float2 texCoord : TEXCOORD0,
+          out float3 normal : TEXCOORD1)
+{
+  position = mul(a_position, CC_MVPMatrix);
+  texCoord = a_texCoord;
+  normal = a_normal;
+}

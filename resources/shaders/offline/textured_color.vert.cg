@@ -1,0 +1,18 @@
+// 1.6.1c vertex shader ec98300789fd9176: matrix/texture/color transform.
+#ifndef VITAARC_MATRIX
+#define VITAARC_MATRIX CC_MVPMatrix
+#endif
+void main(float4 a_position : POSITION,
+          float4 a_color : COLOR0,
+          float2 a_texCoord : TEXCOORD0,
+          uniform float4x4 VITAARC_MATRIX,
+          out float4 position : POSITION,
+          out float4 v_fragmentColor : COLOR0,
+          out float2 v_texCoord : TEXCOORD0)
+{
+  // glUniformMatrix4fv(GL_FALSE) supplies column-major GLSL storage. The Cg
+  // interface consumes that storage as transposed rows, so reverse mul operands.
+  position = mul(a_position, VITAARC_MATRIX);
+  v_fragmentColor = a_color;
+  v_texCoord = a_texCoord;
+}

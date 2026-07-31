@@ -1,0 +1,28 @@
+float4 main(float2 texCoord : TEXCOORD0,
+            float3 normal : TEXCOORD1,
+            uniform int u_has_alpha,
+            uniform int u_has_light_map,
+            uniform sampler2D u_alphaMap : TEXUNIT0,
+            uniform sampler2D u_texture0 : TEXUNIT1,
+            uniform sampler2D u_texture1 : TEXUNIT2,
+            uniform sampler2D u_texture2 : TEXUNIT3,
+            uniform sampler2D u_texture3 : TEXUNIT4,
+            uniform sampler2D u_lightMap : TEXUNIT5,
+            uniform float u_detailSize[4],
+            uniform float3 u_lightDir) : COLOR0
+{
+  float4 lightColor = float4(1, 1, 1, 1);
+  if(u_has_light_map > 0) {
+    lightColor = tex2D(u_lightMap, texCoord);
+  }
+  float lightFactor = dot(-u_lightDir, normal);
+  if(u_has_alpha <= 0) {
+    return tex2D(u_texture0, texCoord) * lightColor * lightFactor;
+  }
+  float4 blend = tex2D(u_alphaMap, texCoord);
+  float4 color = tex2D(u_texture0, texCoord * u_detailSize[0]) * blend.r
+                + tex2D(u_texture1, texCoord * u_detailSize[1]) * blend.g
+                + tex2D(u_texture2, texCoord * u_detailSize[2]) * blend.b
+                + tex2D(u_texture3, texCoord * u_detailSize[3]) * (1.0 - blend.a);
+  return float4(color.rgb * lightColor.rgb * lightFactor, 1.0);
+}

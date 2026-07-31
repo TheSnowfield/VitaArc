@@ -1,0 +1,71 @@
+// One directional, point and spot light, matching the manifest's exact hashes.
+#include "skin_rows.cginc"
+#ifndef VITAARC_SKINNED
+#define VITAARC_SKINNED 0
+#endif
+#ifndef VITAARC_NORMAL_MAP
+#define VITAARC_NORMAL_MAP 0
+#endif
+void main(float4 a_position : POSITION,
+          float3 a_normal : NORMAL,
+          float3 a_tangent : TANGENT,
+          float3 a_binormal : BINORMAL,
+          float4 a_blendWeight : BLENDWEIGHT,
+          float4 a_blendIndex : BLENDINDICES,
+          float2 a_texCoord : TEXCOORD0,
+          uniform float4 u_matrixPalette[180],
+          uniform float4x4 CC_MVMatrix,
+          uniform float4x4 CC_PMatrix,
+          uniform float3x3 CC_NormalMatrix,
+          uniform float3 u_PointLightSourcePosition[1],
+          uniform float3 u_SpotLightSourcePosition[1],
+#if VITAARC_NORMAL_MAP
+          uniform float3 u_DirLightSourceDirection[1],
+          uniform float3 u_SpotLightSourceDirection[1],
+#endif
+          out float4 position : POSITION,
+          out float2 texCoord : TEXCOORD0,
+          out float3 pointDirection : TEXCOORD1,
+          out float3 spotDirection : TEXCOORD2,
+#if VITAARC_NORMAL_MAP
+          out float3 dirDirection : TEXCOORD4,
+          out float3 spotAxis : TEXCOORD5
+#else
+          out float3 normal : TEXCOORD3
+#endif
+          )
+{
+  float4 p = a_position;
+  float3 n = a_normal;
+  float3 t = a_tangent;
+  float3 b = a_binormal;
+#if VITAARC_SKINNED
+  float4 row0, row1, row2;
+  skinRows(a_blendWeight, a_blendIndex, u_matrixPalette, row0, row1, row2);
+  float4 original = float4(a_position.xyz, 1.0);
+  p = float4(dot(original, row0), dot(original, row1), dot(original, row2), 1.0);
+  n = float3(dot(a_normal, row0.xyz), dot(a_normal, row1.xyz), dot(a_normal, row2.xyz));
+  t = float3(dot(a_tangent, row0.xyz), dot(a_tangent, row1.xyz), dot(a_tangent, row2.xyz));
+  b = float3(dot(a_binormal, row0.xyz), dot(a_binormal, row1.xyz), dot(a_binormal, row2.xyz));
+#endif
+  float4 eye = mul(p, CC_MVMatrix);
+  pointDirection = u_PointLightSourcePosition[0] - eye.xyz;
+  spotDirection = u_SpotLightSourcePosition[0] - eye.xyz;
+#if VITAARC_NORMAL_MAP
+  float3 eT = normalize(mul(t, CC_NormalMatrix));
+  float3 eB = normalize(mul(b, CC_NormalMatrix));
+  float3 eN = normalize(mul(n, CC_NormalMatrix));
+  dirDirection = float3(dot(eT, u_DirLightSourceDirection[0]),
+                        dot(eB, u_DirLightSourceDirection[0]),
+                        dot(eN, u_DirLightSourceDirection[0]));
+  pointDirection = float3(dot(eT, pointDirection), dot(eB, pointDirection), dot(eN, pointDirection));
+  spotDirection = float3(dot(eT, spotDirection), dot(eB, spotDirection), dot(eN, spotDirection));
+  spotAxis = float3(dot(eT, u_SpotLightSourceDirection[0]),
+                    dot(eB, u_SpotLightSourceDirection[0]),
+                    dot(eN, u_SpotLightSourceDirection[0]));
+#else
+  normal = mul(n, CC_NormalMatrix);
+#endif
+  texCoord = float2(a_texCoord.x, 1.0 - a_texCoord.y);
+  position = mul(eye, CC_PMatrix);
+}

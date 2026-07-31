@@ -1,0 +1,383 @@
+{
+  "format": 1,
+  "shaders": [
+    {
+      "hash": "ec98300789fd9176",
+      "stage": "vertex",
+      "source": "textured_color.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ]
+    },
+    {
+      "hash": "5e957238bf3f9ec3",
+      "stage": "fragment",
+      "source": "textured_color.frag.cg",
+      "matrices": []
+    },
+    {
+      "hash": "0282604bb73d8959",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "1",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "6459ec7eba6ca2c9",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "2",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "387528f586d9a945",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "3",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "9771c75bb0520db1",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "4",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "7ae5c5254713c071",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "5",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "9a2c9b63f2807e34",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "6",
+        "VITAARC_MATRIX": "CC_MVPMatrix"
+      }
+    },
+    {
+      "hash": "4eee75bf90c5f9b7",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_PMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "7",
+        "VITAARC_MATRIX": "CC_PMatrix"
+      }
+    },
+    {
+      "hash": "f4a4c2a2d87dddc7",
+      "stage": "vertex",
+      "source": "basic.vert.cg",
+      "matrices": [
+        "CC_PMatrix"
+      ],
+      "defines": {
+        "VITAARC_VERTEX_MODE": "0",
+        "VITAARC_MATRIX": "CC_PMatrix"
+      }
+    },
+    {
+      "hash": "b5141e539c8d190b",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "1"
+      }
+    },
+    {
+      "hash": "314c11da3e0426ce",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "2"
+      }
+    },
+    {
+      "hash": "f19c249e1313863b",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "3"
+      }
+    },
+    {
+      "hash": "28fa8b3a83b0c735",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "4"
+      }
+    },
+    {
+      "hash": "3c87b1f7a7d8f1b7",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "5"
+      }
+    },
+    {
+      "hash": "aa6b0d0a409257d6",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "6"
+      }
+    },
+    {
+      "hash": "0125208850e49130",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "7"
+      }
+    },
+    {
+      "hash": "7df155414b0c3171",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "8"
+      }
+    },
+    {
+      "hash": "eda166d565fc7c14",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "9"
+      }
+    },
+    {
+      "hash": "c93f6bf0a398f0c8",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "10"
+      }
+    },
+    {
+      "hash": "a03079106c686b27",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "11"
+      }
+    },
+    {
+      "hash": "4e64fbc7f2983c21",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "12"
+      }
+    },
+    {
+      "hash": "e23c7959f0a6cc17",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "13"
+      }
+    },
+    {
+      "hash": "e669e6fb5c8c8ea0",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "14"
+      }
+    },
+    {
+      "hash": "dcb2802e89c35ade",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "3"
+      }
+    },
+    {
+      "hash": "0f0b0e532b67bcff",
+      "stage": "vertex",
+      "source": "skinned_texture.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ]
+    },
+    {
+      "hash": "bc1fb194609f35f2",
+      "stage": "fragment",
+      "source": "lighting.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_TEXTURED": "1"
+      }
+    },
+    {
+      "hash": "4c30710630e86bbd",
+      "stage": "fragment",
+      "source": "lighting.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_TEXTURED": "0"
+      }
+    },
+    {
+      "hash": "0b15f466b994f3d3",
+      "stage": "vertex",
+      "source": "lighting.vert.cg",
+      "matrices": [
+        "CC_MVMatrix",
+        "CC_PMatrix",
+        "CC_NormalMatrix"
+      ],
+      "defines": {
+        "VITAARC_SKINNED": "1"
+      }
+    },
+    {
+      "hash": "c8747ea74aab7c83",
+      "stage": "vertex",
+      "source": "lighting.vert.cg",
+      "matrices": [
+        "CC_MVMatrix",
+        "CC_PMatrix",
+        "CC_NormalMatrix"
+      ],
+      "defines": {
+        "VITAARC_SKINNED": "0"
+      }
+    },
+    {
+      "hash": "6ddbb84bbfcb3f81",
+      "stage": "fragment",
+      "source": "lighting.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_NORMAL_MAP": "1",
+        "VITAARC_TEXTURED": "1"
+      }
+    },
+    {
+      "hash": "7697beef64faad08",
+      "stage": "vertex",
+      "source": "lighting.vert.cg",
+      "matrices": [
+        "CC_MVMatrix",
+        "CC_PMatrix",
+        "CC_NormalMatrix"
+      ],
+      "defines": {
+        "VITAARC_NORMAL_MAP": "1",
+        "VITAARC_SKINNED": "1"
+      }
+    },
+    {
+      "hash": "5769a50a0e497776",
+      "stage": "vertex",
+      "source": "lighting.vert.cg",
+      "matrices": [
+        "CC_MVMatrix",
+        "CC_PMatrix",
+        "CC_NormalMatrix"
+      ],
+      "defines": {
+        "VITAARC_NORMAL_MAP": "1",
+        "VITAARC_SKINNED": "0"
+      }
+    },
+    {
+      "hash": "a8ea01ef6d08709c",
+      "stage": "fragment",
+      "source": "basic.frag.cg",
+      "matrices": [],
+      "defines": {
+        "VITAARC_FRAGMENT_MODE": "15"
+      }
+    },
+    {
+      "hash": "820045cee05a2b82",
+      "stage": "vertex",
+      "source": "depth_color.vert.cg",
+      "matrices": []
+    },
+    {
+      "hash": "9f61a214a7972b5d",
+      "stage": "fragment",
+      "source": "terrain.frag.cg",
+      "matrices": []
+    },
+    {
+      "hash": "49f7a29bade7b0e0",
+      "stage": "vertex",
+      "source": "terrain.vert.cg",
+      "matrices": [
+        "CC_MVPMatrix"
+      ]
+    },
+    {
+      "hash": "4324130ab247785b",
+      "stage": "fragment",
+      "source": "skybox.frag.cg",
+      "matrices": []
+    },
+    {
+      "hash": "dc8dd034f0ef6ebd",
+      "stage": "vertex",
+      "source": "skybox.vert.cg",
+      "matrices": [
+        "u_cameraRot"
+      ]
+    }
+  ]
+}

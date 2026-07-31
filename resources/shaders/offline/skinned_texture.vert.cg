@@ -1,0 +1,18 @@
+// Cocos 60-joint position skinning; exact source hash 0f0b0e532b67bcff.
+#include "skin_rows.cginc"
+void main(float3 a_position : POSITION,
+          float4 a_blendWeight : BLENDWEIGHT,
+          float4 a_blendIndex : BLENDINDICES,
+          float2 a_texCoord : TEXCOORD0,
+          uniform float4 u_matrixPalette[180],
+          uniform float4x4 CC_MVPMatrix,
+          out float4 position : POSITION,
+          out float2 texCoord : TEXCOORD0)
+{
+  float4 row0, row1, row2;
+  skinRows(a_blendWeight, a_blendIndex, u_matrixPalette, row0, row1, row2);
+  float4 p = float4(a_position, 1.0);
+  float4 skinned = float4(dot(p, row0), dot(p, row1), dot(p, row2), p.w);
+  position = mul(skinned, CC_MVPMatrix);
+  texCoord = float2(a_texCoord.x, 1.0 - a_texCoord.y);
+}

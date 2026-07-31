@@ -1,0 +1,48 @@
+// Explicit Cocos 2D shader variants; selected by hashes in manifest.json.
+#ifndef VITAARC_MATRIX
+#define VITAARC_MATRIX CC_MVPMatrix
+#endif
+#ifndef VITAARC_VERTEX_MODE
+#define VITAARC_VERTEX_MODE 0
+#endif
+#if VITAARC_VERTEX_MODE == 3
+#define INPUT_UV a_texcoord
+#else
+#define INPUT_UV a_texCoord
+#endif
+void main(float4 a_position : POSITION,
+          float4 a_color : COLOR0,
+          float2 INPUT_UV : TEXCOORD0,
+          uniform float4x4 VITAARC_MATRIX,
+          uniform float4 u_color,
+          uniform float u_pointSize,
+          out float4 position : POSITION,
+          out float4 color : COLOR0
+#if VITAARC_VERTEX_MODE == 4 || VITAARC_VERTEX_MODE == 5
+          , out float pointSize : PSIZE
+#elif VITAARC_VERTEX_MODE != 2
+          , out float2 texCoord : TEXCOORD0
+#endif
+          )
+{
+  position = mul(a_position, VITAARC_MATRIX);
+#if VITAARC_VERTEX_MODE == 1 || VITAARC_VERTEX_MODE == 6
+  color = float4(1, 1, 1, 1);
+#elif VITAARC_VERTEX_MODE == 3
+  color = float4(a_color.rgb * a_color.a, a_color.a);
+#elif VITAARC_VERTEX_MODE == 5
+  color = u_color;
+#else
+  color = a_color;
+#endif
+#if VITAARC_VERTEX_MODE == 4
+  pointSize = INPUT_UV.x;
+#elif VITAARC_VERTEX_MODE == 5
+  pointSize = u_pointSize;
+#elif VITAARC_VERTEX_MODE != 2
+  texCoord = INPUT_UV;
+#if VITAARC_VERTEX_MODE == 6 || VITAARC_VERTEX_MODE == 7
+  texCoord.y = 1.0 - texCoord.y;
+#endif
+#endif
+}

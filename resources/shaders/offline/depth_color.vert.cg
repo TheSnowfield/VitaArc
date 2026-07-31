@@ -1,0 +1,12 @@
+void main(float4 a_position : POSITION,
+          float2 a_texCoord : TEXCOORD0,
+          float3 a_color : COLOR0,
+          uniform float depth,
+          out float4 position : POSITION,
+          out float2 texCoord : TEXCOORD0,
+          out float3 color : COLOR0)
+{
+  position = float4(a_position.xy, depth, 1.0);
+  texCoord = a_texCoord;
+  color = a_color;
+}

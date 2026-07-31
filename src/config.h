@@ -12,5 +12,7 @@
 #define PATH_TO_USER "ux0:vitaarc/"
 #define PATH_TO_LOGFILE PATH_TO_USER "boot.log"
 #define PATH_TO_DATA PATH_TO_USER "persistent/data/"
+#define PATH_TO_FILES PATH_TO_DATA "files/"
+#define ANDROID_FILES_PATH "/data/data/moe.low.arc/files"
 
 #endif /* __CONFIG_H */

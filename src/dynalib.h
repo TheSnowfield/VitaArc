@@ -4,27 +4,56 @@
 #include <types.h>
 #include <elf.h>
 
-typedef struct dynalib_t
-{
-  uint32_t ref_count;
-  uint32_t slot_index;
-  char library_name[64];
-  char library_path[128];
-  void *library_image_base;
-  SceUID image_mem_block;
+#define DYNALIB_MAX_SEGMENTS 16
 
-  Elf32_Ehdr *elf_header;
-  Elf32_Phdr *elf_segment_base;
-  Elf32_Shdr *elf_section_base;
-  Elf32_Shdr *elf_symbol_section;
-  Elf32_Shdr *elf_init_array_section;
+/**
+ * @brief A loaded ELF and its retained mappings.
+ * @note Finalization precedes unmapping.
+ */
+typedef struct dynalib_t {
+    /* Registry handle. */
+    uint32_t refs;
+    uint32_t slot;
+    char name[64];
+    char path[128];
 
-  void *elf_section_string_table;
-  Elf32_Sym *elf_dynamic_symbols;
-  void *elf_dynamic_string_table;
-  uint32_t elf_dynamic_symbol_count;
+    /* Metadata image and mapped segments. */
+    void* image;
+    SceUID image_id;
+    uintptr_t base;
+    uint32_t span;
+    SceUID blocks[DYNALIB_MAX_SEGMENTS];
+    uint32_t block_count;
+    bool initialized;
+    bool unloading;
+    bool finalized;
 
-  void *text_base;
+    /* ELF views into the retained metadata image. */
+    Elf32_Ehdr* header;
+    Elf32_Phdr* phdr;
+    Elf32_Shdr* shdr;
+    Elf32_Shdr* symtab;
+    Elf32_Shdr* ctors;
+    Elf32_Shdr* dtors;
+
+    void* names;
+    Elf32_Sym* symbols;
+    void* strings;
+    uint32_t nsyms;
+
+    /* Code and subsystem cleanup hooks. */
+    void* text;
+
+    /**
+     * @brief Prepare final release. Failure leaves the module intact for retry.
+     */
+    bool (*prepare)(struct dynalib_t* library);
+
+    /**
+     * @brief Finish cleanup after finalizers, before code and exports are unmapped.
+     */
+    void (*finish)(struct dynalib_t* library);
+    void* context;
 } dynalib_t;
 
 #endif /* __DYNALIB_H */

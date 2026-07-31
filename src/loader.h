@@ -10,7 +10,7 @@
  *
  * @return not 0 success
  */
-dynalib_t *loader_load_library(const char *library_path);
+dynalib_t* loader_load_library(const char* library_path);
 
 /**
  * Init so library
@@ -18,7 +18,9 @@ dynalib_t *loader_load_library(const char *library_path);
  * @param library Library instance handle
  *
  */
-void loader_init_library(dynalib_t *library);
+bool loader_init_library(dynalib_t* library);
+
+void loader_flush_caches(dynalib_t* library);
 
 /**
  * Free so library
@@ -27,7 +29,7 @@ void loader_init_library(dynalib_t *library);
  *
  * @return void
  */
-void loader_free_library(dynalib_t *library);
+void loader_free_library(dynalib_t* library);
 
 /**
  * Get proc address by symbol name
@@ -38,7 +40,16 @@ void loader_free_library(dynalib_t *library);
  *
  * @return not 0 success
  */
-void *loader_get_proc_address(dynalib_t *library, const char *symbol_name);
+void* loader_get_proc_address(dynalib_t* library, const char* symbol_name);
+
+void* loader_get_global_proc_address(const char* symbol_name);
+
+/* ARM EHABI table for a PC in a loaded executable segment. The module must
+ * remain loaded while the caller unwinds, including during finalizers. */
+uintptr_t loader_find_exidx(uintptr_t pc, int* count);
+
+void* loader_get_bridge_proc_address(const char* symbol_name);
+void* loader_get_import_proc_address(dynalib_t* library, const char* symbol_name);
 
 /**
  * Get library image base
@@ -47,7 +58,7 @@ void *loader_get_proc_address(dynalib_t *library, const char *symbol_name);
  *
  * @return library image base
  */
-void *loader_get_library_image_base(dynalib_t *library);
+void* loader_get_library_image_base(dynalib_t* library);
 
 /**
  * Find loaded library by name
@@ -56,7 +67,7 @@ void *loader_get_library_image_base(dynalib_t *library);
  *
  * @return not 0 success
  */
-dynalib_t *loader_find_library(const char *library_name);
+dynalib_t* loader_find_library(const char* library_name);
 
 /**
  * Clone a handle
@@ -65,7 +76,7 @@ dynalib_t *loader_find_library(const char *library_name);
  *
  * @return not 0 success
  */
-dynalib_t *loader_clone_handle(dynalib_t *library);
+dynalib_t* loader_clone_handle(dynalib_t* library);
 
 /**
  * Find an empty library slot (Internal use)
@@ -81,7 +92,7 @@ int32_t loader_find_empty_slot(void);
  *
  * @return not 0 success
  */
-bool loader_load_sections(dynalib_t *library);
+bool loader_load_sections(dynalib_t* library);
 
 /**
  * Print ELF fotmat information (Internal use)
@@ -90,7 +101,6 @@ bool loader_load_sections(dynalib_t *library);
  *
  * @return not 0 success
  */
-void loader_debug_print_elf_table(dynalib_t *library);
-
+void loader_debug_print_elf_table(dynalib_t* library);
 
 #endif /* __LOADER_H */

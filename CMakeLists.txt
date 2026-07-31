@@ -31,6 +31,7 @@ project(VitaArc)
 # to build Vita specific artifacts (self/vpk).
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Freetype REQUIRED)
 
 ## Configuration options for this app
 # Display name (under bubble in LiveArea)
@@ -52,7 +53,6 @@ set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 include_directories(
   "src"
   "src/bridges"
-  "third-party"
   "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
@@ -62,13 +62,8 @@ link_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-## Collect every user-mode C/C++ source under src. CONFIGURE_DEPENDS causes
-## CMake to regenerate the list when a source file is added or removed.
-file(GLOB_RECURSE VITAARC_SOURCES
-  CONFIGURE_DEPENDS
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-)
+# Explicit subsystem membership is shared with the host tests.
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
 set(BRIDGE_SYMBOL_DEFINITION
   "${CMAKE_CURRENT_SOURCE_DIR}/src/bridges/symbol.def")
@@ -107,7 +102,11 @@ target_link_libraries(${PROJECT_NAME}
   vitaGL
   vitashark
   mathneon
+  vorbisfile
+  vorbis
+  ogg
   SceKernelDmacMgr_stub
+  SceLibKernel_stub
   SceShaccCgExt
 
   taihen_stub
@@ -115,6 +114,7 @@ target_link_libraries(${PROJECT_NAME}
   SceAppMgr_stub
   SceAppUtil_stub
   SceAudio_stub
+  SceAudiodec_stub
   SceAudioIn_stub
   SceCtrl_stub
   SceCommonDialog_stub
@@ -128,6 +128,10 @@ target_link_libraries(${PROJECT_NAME}
   SceVshBridge_stub
   SceNetCtl_stub
   SceRtc_stub
+  Freetype::Freetype
+  png
+  bz2
+  z
 )
 
 ## Create Vita files
@@ -141,6 +145,30 @@ set(VITA_VPK_OUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk.out")
 set(VITA_VPK "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk")
 set(APK_IMPORT_SCRIPT
   "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_apk.py")
+
+file(GLOB SHADER_REPLACEMENTS
+  CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders/*.cg"
+)
+set(SHADER_VPK_ARGUMENTS)
+foreach(SHADER_REPLACEMENT IN LISTS SHADER_REPLACEMENTS)
+  get_filename_component(SHADER_NAME "${SHADER_REPLACEMENT}" NAME)
+  list(APPEND SHADER_VPK_ARGUMENTS
+    -a "${SHADER_REPLACEMENT}=shaders/${SHADER_NAME}")
+endforeach()
+
+set(VITAARC_SHADER_BINARY_DIR "" CACHE PATH "Optional generated offline shader pack directory")
+if(VITAARC_SHADER_BINARY_DIR)
+  if(NOT EXISTS "${VITAARC_SHADER_BINARY_DIR}/offline.enabled")
+    message(FATAL_ERROR "Offline shader pack is missing offline.enabled; run tools/compile_shaders.py")
+  endif()
+  file(GLOB SHADER_BINARIES CONFIGURE_DEPENDS "${VITAARC_SHADER_BINARY_DIR}/*.vgxp")
+  list(APPEND SHADER_BINARIES "${VITAARC_SHADER_BINARY_DIR}/offline.enabled")
+  foreach(SHADER_BINARY IN LISTS SHADER_BINARIES)
+    get_filename_component(SHADER_NAME "${SHADER_BINARY}" NAME)
+    list(APPEND SHADER_VPK_ARGUMENTS -a "${SHADER_BINARY}=shaders/${SHADER_NAME}")
+  endforeach()
+endif()
 
 option(VITAARC_PACKAGE_APK
   "Import an Arcaea APK from third-party/arcaea into the VPK" ON)
@@ -199,6 +227,13 @@ add_custom_command(
     -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png=sce_sys/livearea/contents/background.png"
     -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png=sce_sys/livearea/contents/startup.png"
     -a "${CMAKE_CURRENT_SOURCE_DIR}/livearea/template.xml=sce_sys/livearea/contents/template.xml"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libvorbis.txt=licenses/libvorbis.txt"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libogg.txt=licenses/libogg.txt"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/freetype.txt=licenses/freetype.txt"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libpng.txt=licenses/libpng.txt"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/bzip2.txt=licenses/bzip2.txt"
+    -a "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/zlib.txt=licenses/zlib.txt"
+    ${SHADER_VPK_ARGUMENTS}
     -s "${VITA_SFO}"
     -b "${VITA_SELF}"
     "${VITA_VPK_OUT}"
@@ -207,11 +242,20 @@ add_custom_command(
     "${VITA_SFO}"
     "${VITA_SELF}"
     "${APK_IMPORT_SCRIPT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tools/apk_manifest.py"
     ${ARCAEA_APK_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/template.xml"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libvorbis.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libogg.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/freetype.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/libpng.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/bzip2.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/licenses/zlib.txt"
+    ${SHADER_REPLACEMENTS}
+    ${SHADER_BINARIES}
   COMMENT "Building vpk ${PROJECT_NAME}.vpk"
   USES_TERMINAL
   VERBATIM

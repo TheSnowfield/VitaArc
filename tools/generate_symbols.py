@@ -23,6 +23,7 @@ generated_includes = r"""
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -40,12 +41,14 @@ generated_includes = r"""
 
 #include <android/assetmgr.h>
 #include <android/log.h>
+#include <abi/softfp.h>
 #include <audio/provider.h>
+#include <compat/compat.h>
 #include <eabi.h>
-#include <libc/impl/bionic/bionic.h>
-#include <libc/impl/libc.h>
-#include <libc/impl/pthread.h>
-#include <opengl/impl/opengl.h>
+#include <libc/bionic/bionic.h>
+#include <libc/libc.h>
+#include <libc/pthread.h>
+#include <opengl/gl.h>
 """.strip()
 
 

@@ -10,6 +10,7 @@ import sys
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from apk_manifest import version_name
 
 
 copy_buffer_size = 1024 * 1024
@@ -183,6 +184,7 @@ def import_apk(vpk_path: Path, apk_path: Path, prefix: str) -> None:
             target_names.add(target_name)
             target_entries.append((source_info, target_name))
 
+        version = version_name(apk.read("AndroidManifest.xml"))
         with zipfile.ZipFile(vpk_path, "a", allowZip64=True) as vpk:
             existing_names = set(vpk.namelist())
             collisions = sorted(existing_names.intersection(target_names))
@@ -190,6 +192,9 @@ def import_apk(vpk_path: Path, apk_path: Path, prefix: str) -> None:
                 raise ValueError(
                     f"VPK entry already exists: {collisions[0]}"
                 )
+            if 'vitaarc-apk-version.txt' in existing_names:
+                raise ValueError('VPK already contains APK version metadata')
+            vpk.writestr('vitaarc-apk-version.txt', version + '\n')
 
             total_size = sum(
                 source_info.file_size

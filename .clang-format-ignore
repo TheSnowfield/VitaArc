@@ -1,0 +1,5 @@
+src/elf.h
+src/bridges/jni/aosp/*
+src/bridges/libc/bionic/*
+third-party/*
+build/*

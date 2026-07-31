@@ -13,6 +13,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test-jni:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Install host test dependencies
+        # libffi is used only by host native dispatch; Vita uses AAPCS32 packing.
+        run: sudo apt-get update && sudo apt-get install -y libffi-dev libvorbis-dev libfreetype-dev fonts-dejavu-core
+      - name: Configure host tests
+        run: cmake -S tests -B build/host-tests -DCMAKE_BUILD_TYPE=Debug
+      - name: Build JNI mock tests
+        run: cmake --build build/host-tests --parallel 2
+      - name: Run JNI mock closed loop with sanitizers
+        run: ctest --test-dir build/host-tests --output-on-failure
+
   build:
     runs-on: ubuntu-latest
     container:
@@ -24,8 +39,6 @@ jobs:
     steps:
       - name: Check out sources
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Build base VPK with VitaSDK
         env:

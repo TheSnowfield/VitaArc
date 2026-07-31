@@ -1,5 +1,7 @@
 build/
 .vscode/
+__pycache__/
+*.py[cod]
 
 # ignore arcaea apk files
 third-party/arcaea

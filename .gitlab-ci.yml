@@ -1,11 +1,22 @@
 image: vitasdk/vitasdk:latest
 
 stages:
+  - test
   - build
 
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
   VITAARC_PACKAGE_APK: "OFF"
+
+test-jni:
+  image: ubuntu:24.04
+  stage: test
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends build-essential cmake python3 libffi-dev libvorbis-dev libfreetype-dev fonts-dejavu-core
+  script:
+    - cmake -S tests -B build/host-tests -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build build/host-tests --parallel 2
+    - ctest --test-dir build/host-tests --output-on-failure
 
 build-vpk:
   stage: build

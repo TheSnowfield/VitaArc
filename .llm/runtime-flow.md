@@ -25,13 +25,9 @@ log_begin(PATH_TO_LOGFILE);
 ux0:vitaarc/boot.log
 ```
 
-当前 `LOG_OVERUDP` 已定义，所以实际不会打开该文件，而是初始化网络并向：
-
-```text
-10.20.0.227:23333
-```
-
-发送 UDP。`tools/udp_logger.py` 默认监听 `0.0.0.0:23333`。
+默认截断并写入该本地文件，同时将 INFO 及以上日志输出到系统控制台。
+UDP 调试仅在构建时显式定义 `LOG_OVERUDP` 和 `UDP_HOST` 后启用；
+不再内置特定机器的接收地址。`tools/udp_logger.py` 默认监听 `0.0.0.0:23333`。
 
 ## 2. vitaGL 配置和初始化
 

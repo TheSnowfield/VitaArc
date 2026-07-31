@@ -1,5 +1,9 @@
 # Android and JNI bridges
 
+2026-10-24 update: JNI/Cocos dispatch, preferences, fields, string regions and
+startup behavior now supersede the older descriptions below. See
+`jni-cocos-testing.md` and `tests/README.md` for current behavior and validation.
+
 ## Android log
 
 统一 `symbol.def` 注册：

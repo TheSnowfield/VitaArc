@@ -80,17 +80,10 @@ path is not currently enabled.
 - `log_e`
 - `log_f`
 
-Compile-time configuration currently enables UDP:
-
-```c
-#define LOG_OVERUDP
-#define UDP_PORT 23333
-#define UDP_HOST "10.20.0.227"
-```
-
-`tools/udp_logger.py` is the matching Python receiver and defaults to
-`0.0.0.0:23333`. With UDP disabled, `log_begin(PATH_TO_LOGFILE)` targets
-`ux0:vitaarc/boot.log`.
+Default logging truncates and writes `ux0:vitaarc/boot.log`. INFO and higher also
+mirror to sceClibPrintf, even when the optional file sink cannot open. UDP builds
+must explicitly define LOG_OVERUDP and UDP_HOST; no fixed peer is embedded.
+`tools/udp_logger.py` defaults to listening on `0.0.0.0:23333`.
 
 UDP startup loads/initializes Vita networking, allocates 65535 bytes for
 `sceNetInit`, creates a datagram socket and connects it to the fixed peer. Most
@@ -106,19 +99,20 @@ V         I             W         E       F
 
 `TAG` derives the final slash-separated component of `__FILE__`.
 
-`log_base` formats `[level] [tag] message\n` into 1024 bytes. It repeatedly
-passes the complete buffer size instead of remaining capacity and advances by
-the would-have-written return value, so truncation can move the position out of
-bounds. UDP mode delays 50 microseconds after each structured log.
+`log_base` formats `[level] [tag] message\n` into 1024 bytes, bounds the remaining
+capacity and clamps would-have-written lengths. Linked ARM tests verify long
+tags/bodies and raw writes. Optional UDP mode delays 50 microseconds after each
+structured log; that delay and network initialization are absent by default.
 
 `log_printf` formats raw text without level, tag or automatic newline. The
 shader bridge correctly uses `log_printf("%s", shader)` rather than treating
 shader text as a format string.
 
-`log_end` currently sets the started flag to false before trying to emit “Log
-stop”, so that message is suppressed. It closes the socket but does not
-terminate NetCtl/Net, release the init memory, or unload the network sysmodule.
-The infinite loop in `main` normally makes this function unreachable.
+`log_end` writes the final stop message before clearing its active flag, closes
+the sink and resets its handle to -1. Zero is accepted as a valid open result.
+The optional UDP path still needs its separate network ownership/cleanup audit;
+it is not enabled in ordinary builds. Runtime failure shutdown and native
+lifecycle probes now exercise the logger's stop path.
 
 ## Vita3K logging paths
 

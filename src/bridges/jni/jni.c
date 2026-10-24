@@ -7,6 +7,7 @@
 #include <loader.h>
 #include <logcat/logcat.h>
 #include <libc/posix.h>
+#include <android/asset_cache.h>
 
 #include <abi/calling.h>
 
@@ -166,6 +167,7 @@ bool bridge_jni_cocos_publish_bitmap(int width, int height, const uint8_t* rgba)
 
 void bridge_jni_cocos_stop(void)
 {
+    a_asset_cache_clear();
     __ready = false;
     memset(&__cocos, 0, sizeof(__cocos));
     if(__env) {

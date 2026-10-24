@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -12,6 +13,7 @@
 #include <logcat/logcat.h>
 
 #include "assetmgr.h"
+#include "asset_cache.h"
 
 #define ASSET_PATH_CAPACITY 1024
 
@@ -147,9 +149,22 @@ a_asset_t* a_asset_manager_open(a_asset_manager_t* manager, const char* filename
         return NULL;
     }
 
+    if(!a_asset_cached(path)) {
+        log_v(TAG, "Asset probe missed: %s", path);
+        errno = ENOENT;
+        return NULL;
+    }
+
     FILE* stream = fopen(path, "rb");
     if(!stream) {
-        log_w(TAG, "Asset not found: %s", path);
+        int error = errno;
+        if(error == ENOENT || error == ENOTDIR) {
+            log_v(TAG, "Asset probe missed: %s", path);
+        } else {
+            log_e(TAG, "Asset open failed: %s error=%d (%s)", path, error, strerror(error));
+        }
+
+        errno = error;
         return NULL;
     }
 

@@ -45,6 +45,7 @@ add_library(jni_bridge STATIC
   ${VITAARC_FILE_SOURCES}
   "${VITAARC_ROOT}/src/bridges/libc/posix.c"
   "${VITAARC_ROOT}/src/bridges/jni/jni.c"
+  "${VITAARC_ROOT}/src/bridges/android/asset_cache.c"
   "${VITAARC_ROOT}/src/bridges/android/assetmgr.c"
   mocks/platform.c)
 target_include_directories(jni_bridge PUBLIC

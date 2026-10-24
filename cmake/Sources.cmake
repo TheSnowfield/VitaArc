@@ -44,6 +44,7 @@ set(VITAARC_ABI_SOURCES
 )
 
 set(VITAARC_ANDROID_SOURCES
+    "${VITAARC_SOURCE_ROOT}/bridges/android/asset_cache.c"
     "${VITAARC_SOURCE_ROOT}/bridges/android/assetmgr.c"
     "${VITAARC_SOURCE_ROOT}/bridges/android/log.c"
     "${VITAARC_SOURCE_ROOT}/bridges/android/media.c"

@@ -67,6 +67,25 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
 option(VITAARC_VERBOSE_LOGS "Enable verbose trace logging" OFF)
 
+set(VITAARC_HEAP_MB 64 CACHE STRING "Native heap reservation in MiB")
+set(VITAARC_GPU_RAM_MB 32 CACHE STRING "Maximum graphics RAM pool in MiB")
+set(VITAARC_GPU_STREAM_MB 6 CACHE STRING "Graphics streaming pool in MiB")
+foreach(MEMORY_OPTION VITAARC_HEAP_MB VITAARC_GPU_RAM_MB VITAARC_GPU_STREAM_MB)
+  if(NOT "${${MEMORY_OPTION}}" MATCHES "^[1-9][0-9]*$")
+    message(FATAL_ERROR "${MEMORY_OPTION} must be a positive integer")
+  endif()
+  if(${MEMORY_OPTION} GREATER 256)
+    message(FATAL_ERROR "${MEMORY_OPTION} must not exceed 256 MiB")
+  endif()
+endforeach()
+if(VITAARC_GPU_STREAM_MB GREATER_EQUAL VITAARC_GPU_RAM_MB)
+  message(FATAL_ERROR "The graphics streaming pool must fit inside its RAM pool")
+endif()
+
+set_source_files_properties("${VITAARC_SOURCE_ROOT}/platform/memory.c" PROPERTIES
+  COMPILE_DEFINITIONS
+    "VITAARC_HEAP_MB=${VITAARC_HEAP_MB};VITAARC_GPU_RAM_MB=${VITAARC_GPU_RAM_MB};VITAARC_GPU_STREAM_MB=${VITAARC_GPU_STREAM_MB}")
+
 set(BRIDGE_SYMBOL_DEFINITION
   "${CMAKE_CURRENT_SOURCE_DIR}/src/bridges/symbol.def")
 set(BRIDGE_SYMBOL_GENERATOR

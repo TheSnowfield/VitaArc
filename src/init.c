@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <malloc.h>
 #include <psp2/io/dirent.h>
 #include <psp2/io/fcntl.h>
 #include <psp2/io/stat.h>
@@ -23,6 +22,7 @@
 #include "logcat/screen.h"
 #include "platform/input.h"
 #include "platform/loop.h"
+#include "platform/memory.h"
 #include "platform/timing.h"
 #include "config.h"
 #include "utils/debug.h"
@@ -38,14 +38,7 @@ static void __clocks(void)
 
 static void log_startup_heap(const char* stage)
 {
-    struct mallinfo heap = mallinfo();
-    log_i(TAG,
-        "Startup heap %s: used=%u free=%u arena=%u",
-        stage,
-        (unsigned)heap.uordblks,
-        (unsigned)heap.fordblks,
-        (unsigned)heap.arena);
-    log_flush();
+    vita_memory_log(stage);
 }
 
 typedef struct {
@@ -55,19 +48,20 @@ typedef struct {
     bool capture;
 } vita_app_t;
 
-static void __video(void)
+static bool __video(void)
 {
     vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE, SHARK_ENABLE);
     vglSetVDMBufferSize(128 * 1024);
     vglSetVertexBufferSize(2 * 1024 * 1024);
     vglSetFragmentBufferSize(512 * 1024);
     vglSetUSSEBufferSize(16 * 1024);
-    // vitaGL returns whether it reduced the requested resolution, not success.
-    if(vglInitExtended(0, 960, 544, 24 * 1024 * 1024, SCE_GXM_MULTISAMPLE_NONE)) {
-        log_w(TAG, "VitaGL selected a fallback display resolution");
+    if(!vita_memory_setup()) {
+        return false;
     }
 
     log_i(TAG, "VitaGL initialized");
+    vita_memory_log("graphics");
+    return true;
 }
 
 static bool __shaders(void)
@@ -201,6 +195,7 @@ static void __loop(vita_app_t* app)
         }
 
         __present(app);
+        vita_memory_tick(frame_started);
 
         // Count render and swap/vsync time toward Java's requested frame interval.
         uint32_t delay = vita_frame_delay(frame_started, sceKernelGetProcessTimeWide());
@@ -229,11 +224,13 @@ int main(void)
     log_begin(PATH_TO_LOGFILE);
     log_i(TAG, "Startup policy: prefer packaged offline shaders before runtime compiler");
     __clocks();
-    __video();
-    log_screen_ready();
+    bool video = __video();
+    if(video) {
+        log_screen_ready();
+    }
 
     bool ready = false;
-    if(__shaders()) {
+    if(video && __shaders()) {
         ready = __boot(&app);
     }
 

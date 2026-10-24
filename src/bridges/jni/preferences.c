@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 
 #include <config.h>
+#include <logcat/logcat.h>
 #include <libc/file.h>
 #include <libc/posix.h>
 #include "preferences.h"
@@ -26,6 +27,39 @@ typedef struct preference_entry {
 static pthread_mutex_t __preferences_mutex = PTHREAD_MUTEX_INITIALIZER;
 static const unsigned char __magic[8] = {'V', 'A', 'R', 'C', 'P', 'R', '1', 0};
 
+static bool __directory_error(const char* call, const char* path)
+{
+    int error = errno;
+    log_e(TAG, "%s failed: %s error=%d (%s)", call, path, error, strerror(error));
+    errno = error;
+    return false;
+}
+
+static bool __prepare_one(const char* path)
+{
+    struct stat status;
+    if(stat(path, &status) != 0) {
+        if(errno != ENOENT) {
+            return __directory_error("stat", path);
+        }
+
+        if(bridge_mkdir(path, 0777) != 0 && errno != EEXIST) {
+            return __directory_error("mkdir", path);
+        }
+
+        if(stat(path, &status) != 0) {
+            return __directory_error("stat", path);
+        }
+    }
+
+    if(!S_ISDIR(status.st_mode)) {
+        errno = ENOTDIR;
+        return __directory_error("stat", path);
+    }
+
+    return true;
+}
+
 static bool __prepare_directory(const char* directory)
 {
     char path[1024];
@@ -42,13 +76,7 @@ static bool __prepare_directory(const char* directory)
 
         *cursor = 0;
         /* Device roots (ux0:) already exist on Vita. */
-        if(cursor[-1] != ':' && bridge_mkdir(path, 0777) != 0 && errno != EEXIST) {
-            return false;
-        }
-
-        struct stat status;
-        if(stat(path, &status) != 0 || !S_ISDIR(status.st_mode)) {
-            errno = ENOTDIR;
+        if(cursor[-1] != ':' && !__prepare_one(path)) {
             return false;
         }
 

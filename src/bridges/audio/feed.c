@@ -12,6 +12,12 @@
 #define FEED_PRIME 4u
 #define FEED_STACK (128 * 1024)
 
+typedef enum feed_command_t {
+    FEED_WAIT,
+    FEED_SEEK,
+    FEED_OPEN,
+} feed_command_t;
+
 typedef struct audio_block_t {
     uint64_t start;
     uint64_t end;
@@ -33,12 +39,15 @@ struct audio_feed_t {
     pthread_cond_t work;
     pthread_cond_t ready;
     bool running;
-    bool command;
+    bool active;
+    feed_command_t command;
     bool seeking;
     bool result;
     bool loop;
     bool next_loop;
     uint64_t target;
+    char path[512];
+    bool has_mp3;
 
     /* Positions follow consumed samples, never the decoder's read-ahead. */
     audio_block_t blocks[FEED_BLOCKS];
@@ -76,22 +85,22 @@ static bool __sync_init(audio_feed_t* feed)
     return true;
 }
 
-static void __decode(audio_feed_t* feed, audio_block_t* block, bool loop)
+static void __decode(audio_stream_t* stream, audio_block_t* block, bool loop)
 {
     block->frames = 0;
-    block->start = vita_audio_stream_position_frames(feed->stream);
+    block->start = vita_audio_stream_position_frames(stream);
     block->end = block->start;
     block->ended = false;
 
     for(uint32_t frame = 0; frame < FEED_FRAMES; ++frame) {
         int16_t* pcm = &block->pcm[frame * 2];
-        if(!vita_audio_stream_next_sample(feed->stream, loop, pcm, pcm + 1)) {
+        if(!vita_audio_stream_next_sample(stream, loop, pcm, pcm + 1)) {
             block->ended = true;
             break;
         }
 
         ++block->frames;
-        uint64_t position = vita_audio_stream_position_frames(feed->stream);
+        uint64_t position = vita_audio_stream_position_frames(stream);
         bool wrapped = position < block->end;
         block->end = position;
         if(wrapped) {
@@ -112,7 +121,7 @@ static bool __fill(audio_feed_t* feed, bool prime)
     pthread_mutex_unlock(&feed->mutex);
 
     audio_block_t block = {0};
-    __decode(feed, &block, loop);
+    __decode(feed->stream, &block, loop);
 
     pthread_mutex_lock(&feed->mutex);
     if(!feed->running || (feed->seeking && !prime)) {
@@ -131,6 +140,40 @@ static bool __fill(audio_feed_t* feed, bool prime)
     return block.frames != 0;
 }
 
+static void __prime(audio_feed_t* feed, bool result)
+{
+    for(uint32_t block = 0; block < FEED_PRIME; ++block) {
+        if(!__fill(feed, true)) {
+            break;
+        }
+    }
+
+    pthread_mutex_lock(&feed->mutex);
+    feed->result = result;
+    feed->seeking = false;
+    pthread_cond_broadcast(&feed->ready);
+    pthread_mutex_unlock(&feed->mutex);
+}
+
+static void __open(audio_feed_t* feed)
+{
+    /* Reopening is reserved for a detached feed with no other owners. */
+    vita_audio_stream_close(feed->stream);
+    feed->stream = vita_audio_stream_open(feed->path, feed->has_mp3);
+    bool result = feed->stream != NULL;
+
+    pthread_mutex_lock(&feed->mutex);
+    feed->command = FEED_WAIT;
+    feed->head = 0;
+    feed->count = 0;
+    feed->offset = 0;
+    feed->eof = !result;
+    feed->loop = false;
+    feed->position = 0;
+    pthread_mutex_unlock(&feed->mutex);
+    __prime(feed, result);
+}
+
 static void __seek(audio_feed_t* feed)
 {
     pthread_mutex_lock(&feed->mutex);
@@ -138,7 +181,7 @@ static void __seek(audio_feed_t* feed)
     uint64_t previous = feed->position;
     bool loop = feed->next_loop;
     bool old_loop = feed->loop;
-    feed->command = false;
+    feed->command = FEED_WAIT;
     pthread_mutex_unlock(&feed->mutex);
 
     bool result = vita_audio_stream_seek_frames(feed->stream, target);
@@ -156,17 +199,7 @@ static void __seek(audio_feed_t* feed)
     feed->position = vita_audio_stream_position_frames(feed->stream);
     pthread_mutex_unlock(&feed->mutex);
 
-    for(uint32_t block = 0; block < FEED_PRIME; ++block) {
-        if(!__fill(feed, true)) {
-            break;
-        }
-    }
-
-    pthread_mutex_lock(&feed->mutex);
-    feed->result = result;
-    feed->seeking = false;
-    pthread_cond_broadcast(&feed->ready);
-    pthread_mutex_unlock(&feed->mutex);
+    __prime(feed, result);
 }
 
 static void* __worker(void* argument)
@@ -176,13 +209,19 @@ static void* __worker(void* argument)
     pthread_mutex_lock(&feed->mutex);
     while(feed->running) {
         if(feed->command) {
+            feed_command_t command = feed->command;
             pthread_mutex_unlock(&feed->mutex);
-            __seek(feed);
+            switch(command) {
+                case FEED_OPEN: __open(feed); break;
+                case FEED_SEEK: __seek(feed); break;
+                default: break;
+            }
+
             pthread_mutex_lock(&feed->mutex);
             continue;
         }
 
-        if(feed->eof || feed->count == FEED_BLOCKS) {
+        if(!feed->active || feed->eof || feed->count == FEED_BLOCKS) {
             pthread_cond_wait(&feed->work, &feed->mutex);
             continue;
         }
@@ -278,6 +317,63 @@ void audio_feed_close(audio_feed_t* feed)
     free(feed);
 }
 
+static bool __wait(audio_feed_t* feed, feed_command_t command)
+{
+    feed->seeking = true;
+    feed->command = command;
+    pthread_cond_signal(&feed->work);
+
+    while(feed->running && feed->seeking) {
+        pthread_cond_wait(&feed->ready, &feed->mutex);
+    }
+
+    return feed->running && feed->result;
+}
+
+static bool __move(audio_feed_t* feed, uint64_t position, bool loop)
+{
+    if(feed->running && feed->result && position == feed->position && loop == feed->loop) {
+        return true;
+    }
+
+    feed->target = position;
+    feed->next_loop = loop;
+    return __wait(feed, FEED_SEEK);
+}
+
+bool audio_feed_park(audio_feed_t* feed)
+{
+    if(!feed || atomic_load(&feed->refs) != 1) {
+        return false;
+    }
+
+    pthread_mutex_lock(&feed->mutex);
+    feed->active = false;
+    pthread_mutex_unlock(&feed->mutex);
+    return true;
+}
+
+bool audio_feed_reopen(audio_feed_t* feed, const char* path, bool has_mp3)
+{
+    if(!feed || !path || atomic_load(&feed->refs) != 1) {
+        return false;
+    }
+
+    if(strlen(path) >= sizeof(feed->path)) {
+        return false;
+    }
+
+    pthread_mutex_lock(&feed->control);
+    pthread_mutex_lock(&feed->mutex);
+    feed->active = false;
+    feed->has_mp3 = has_mp3;
+    strcpy(feed->path, path);
+    bool result = __wait(feed, FEED_OPEN);
+    pthread_mutex_unlock(&feed->mutex);
+    pthread_mutex_unlock(&feed->control);
+    return result;
+}
+
 bool audio_feed_seek(audio_feed_t* feed, uint64_t position, bool loop)
 {
     if(!feed) {
@@ -286,17 +382,26 @@ bool audio_feed_seek(audio_feed_t* feed, uint64_t position, bool loop)
 
     pthread_mutex_lock(&feed->control);
     pthread_mutex_lock(&feed->mutex);
-    feed->target = position;
-    feed->next_loop = loop;
-    feed->seeking = true;
-    feed->command = true;
-    pthread_cond_signal(&feed->work);
+    bool result = __move(feed, position, loop);
+    pthread_mutex_unlock(&feed->mutex);
+    pthread_mutex_unlock(&feed->control);
+    return result;
+}
 
-    while(feed->running && feed->seeking) {
-        pthread_cond_wait(&feed->ready, &feed->mutex);
+bool audio_feed_start(audio_feed_t* feed, bool loop)
+{
+    if(!feed) {
+        return false;
     }
 
-    bool result = feed->running && feed->result;
+    pthread_mutex_lock(&feed->control);
+    pthread_mutex_lock(&feed->mutex);
+    bool result = __move(feed, feed->position, loop);
+    if(result) {
+        feed->active = true;
+        pthread_cond_signal(&feed->work);
+    }
+
     pthread_mutex_unlock(&feed->mutex);
     pthread_mutex_unlock(&feed->control);
     return result;
@@ -331,6 +436,7 @@ uint32_t audio_feed_read(audio_feed_t* feed, int16_t* pcm, uint32_t frames, bool
         return 0;
     }
 
+    feed->active = true;
     uint32_t copied = 0;
     while(copied < frames && feed->count) {
         audio_block_t* block = &feed->blocks[feed->head];

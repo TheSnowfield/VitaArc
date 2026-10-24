@@ -112,6 +112,8 @@ void vita_audio_destroy(audio_t* state)
         audio_feed_close(state->bgm[i].feed);
     }
 
+    audio_feed_close(state->idle);
+
     for(uint32_t i = 0; i < VITA_AUDIO_MAX_SFX; ++i) {
         if(state->sfx[i].used) {
             vita_wav_free(&state->sfx[i].pcm);

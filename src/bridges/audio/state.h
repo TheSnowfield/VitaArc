@@ -60,6 +60,9 @@ struct audio_t {
     audio_asset_t sfx[VITA_AUDIO_MAX_SFX];
     audio_voice_t voices[VITA_AUDIO_MAX_VOICES];
     audio_track_t bgm[VITA_AUDIO_BGM_CHANNELS];
+
+    /* One detached feed retains its worker for the next track change. */
+    audio_feed_t* idle;
 };
 
 float audio_gain(float volume);

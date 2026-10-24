@@ -1,9 +1,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "buffers.h"
 #include "pixel_store.h"
+
+#define BUFFER_BUCKETS 256u
 
 /* The game uses a single GL context on its render owner thread. Guest names
  * must never be passed as vitaGL's pointer-valued native buffer handles. */
@@ -13,6 +16,8 @@ typedef struct bridge_buffer {
     bool created;
     bool deleted;
     struct bridge_buffer* next;
+    struct bridge_buffer* retired;
+    struct bridge_buffer* chain;
 } bridge_buffer_t;
 
 typedef struct bridge_attrib {
@@ -28,13 +33,18 @@ typedef struct bridge_vertex_array {
     struct bridge_vertex_array* next;
 } bridge_vertex_array_t;
 
+/* Retired names may be reused while a VAO still owns the old object. Keep
+ * ownership, pending deletion and name lookup as separate links. */
 static bridge_buffer_t* __buffers;
+static bridge_buffer_t* __retired;
+static bridge_buffer_t* __index[BUFFER_BUCKETS];
 static bridge_buffer_t* __array_buffer;
 static bridge_vertex_array_t __default_array;
 static bridge_vertex_array_t* __arrays = &__default_array;
 static bridge_vertex_array_t* __current_array = &__default_array;
 static GLuint __next_name = 1;
 static GLenum __error;
+static GLint __attrib_limit;
 
 static void __set_error(GLenum error)
 {
@@ -45,13 +55,23 @@ static void __set_error(GLenum error)
 
 static bridge_buffer_t* __find_buffer(GLuint name)
 {
-    for(bridge_buffer_t* buffer = __buffers; buffer; buffer = buffer->next) {
+    for(bridge_buffer_t* buffer = __index[name % BUFFER_BUCKETS]; buffer; buffer = buffer->chain) {
         if(buffer->name == name && !buffer->deleted) {
             return buffer;
         }
     }
 
     return NULL;
+}
+
+static void __forget(bridge_buffer_t* buffer)
+{
+    bridge_buffer_t** link = &__index[buffer->name % BUFFER_BUCKETS];
+    while(*link != buffer) {
+        link = &(*link)->chain;
+    }
+
+    *link = buffer->chain;
 }
 
 static bool __is_referenced(bridge_buffer_t* buffer)
@@ -77,15 +97,22 @@ static bool __is_referenced(bridge_buffer_t* buffer)
 
 static void __collect_deleted(void)
 {
-    bridge_buffer_t** link = &__buffers;
+    bridge_buffer_t** link = &__retired;
     while(*link) {
         bridge_buffer_t* buffer = *link;
-        if(!buffer->deleted || __is_referenced(buffer)) {
-            link = &buffer->next;
+        if(__is_referenced(buffer)) {
+            link = &buffer->retired;
             continue;
         }
 
-        *link = buffer->next;
+        *link = buffer->retired;
+        bridge_buffer_t** live = &__buffers;
+        while(*live != buffer) {
+            live = &(*live)->next;
+        }
+
+        *live = buffer->next;
+        __forget(buffer);
         if(buffer->native) {
             glDeleteBuffers(1, &buffer->native);
         }
@@ -96,8 +123,16 @@ static void __collect_deleted(void)
 
 static bridge_buffer_t* __find_native(GLuint native)
 {
+    if(!native) {
+        return NULL;
+    }
+
+    if(__array_buffer && __array_buffer->native == native) {
+        return __array_buffer;
+    }
+
     for(bridge_buffer_t* buffer = __buffers; buffer; buffer = buffer->next) {
-        if(buffer->native == native && native) {
+        if(buffer->native == native) {
             return buffer;
         }
     }
@@ -144,6 +179,9 @@ static bridge_buffer_t* __reserve_buffer(GLuint name)
     buffer->name = name;
     buffer->next = __buffers;
     __buffers = buffer;
+    unsigned slot = name % BUFFER_BUCKETS;
+    buffer->chain = __index[slot];
+    __index[slot] = buffer;
     return buffer;
 }
 
@@ -162,6 +200,7 @@ void bridge_gl_gen_buffers(GLsizei count, GLuint* buffers)
             while(__buffers != previous) {
                 bridge_buffer_t* buffer = __buffers;
                 __buffers = buffer->next;
+                __forget(buffer);
                 free(buffer);
             }
 
@@ -211,6 +250,7 @@ void bridge_gl_bind_buffer(GLenum target, GLuint name)
             __set_error(GL_OUT_OF_MEMORY);
             if(!reserved) {
                 __buffers = buffer->next;
+                __forget(buffer);
                 free(buffer);
             }
 
@@ -264,6 +304,8 @@ void bridge_gl_delete_buffers(GLsizei count, const GLuint* buffers)
         }
 
         buffer->deleted = true;
+        buffer->retired = __retired;
+        __retired = buffer;
         if(__array_buffer == buffer) {
             __array_buffer = NULL;
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -289,9 +331,11 @@ void bridge_gl_delete_buffers(GLsizei count, const GLuint* buffers)
 void bridge_gl_vertex_attrib_pointer(
     GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
 {
-    GLint maximum = 0;
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maximum);
-    if(index >= (GLuint)maximum || size < 1 || size > 4 || stride < 0) {
+    if(!__attrib_limit) {
+        glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &__attrib_limit);
+    }
+
+    if(index >= (GLuint)__attrib_limit || size < 1 || size > 4 || stride < 0) {
         __set_error(GL_INVALID_VALUE);
         return;
     }
@@ -526,5 +570,8 @@ void bridge_gl_shutdown_buffers(void)
 
     __next_name = 1;
     __error = GL_NO_ERROR;
+    __retired = NULL;
+    __attrib_limit = 0;
+    memset(__index, 0, sizeof(__index));
     bridge_gl_reset_pixel_store();
 }

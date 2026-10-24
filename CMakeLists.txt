@@ -67,7 +67,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
 option(VITAARC_VERBOSE_LOGS "Enable verbose trace logging" OFF)
 
-set(VITAARC_HEAP_MB 64 CACHE STRING "Native heap reservation in MiB")
+set(VITAARC_HEAP_MB 256 CACHE STRING "Native heap reservation in MiB")
 set(VITAARC_GPU_RAM_MB 32 CACHE STRING "Maximum graphics RAM pool in MiB")
 set(VITAARC_GPU_STREAM_MB 6 CACHE STRING "Graphics streaming pool in MiB")
 foreach(MEMORY_OPTION VITAARC_HEAP_MB VITAARC_GPU_RAM_MB VITAARC_GPU_STREAM_MB)

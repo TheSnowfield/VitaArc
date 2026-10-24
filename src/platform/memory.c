@@ -7,7 +7,7 @@
 #include "memory.h"
 
 #ifndef VITAARC_HEAP_MB
-#define VITAARC_HEAP_MB 64
+#define VITAARC_HEAP_MB 256
 #endif
 
 #ifndef VITAARC_GPU_RAM_MB

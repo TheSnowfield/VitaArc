@@ -6,6 +6,8 @@
 
 void bridge_patch_cocos2dx(dynalib_t* library);
 bool bridge_cocos_configure_storage(dynalib_t* library);
+bool bridge_cocos_configure_textures(dynalib_t* library);
+void bridge_cocos_release_textures(void);
 
 void bridge_cocos2dx_renderer_native_init(dynalib_t* library, uint32_t screen_width, uint32_t screen_height);
 

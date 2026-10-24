@@ -108,6 +108,11 @@ static bool __boot(vita_app_t* app)
 
     bridge_patch_gl(cocos);
     bridge_patch_cocos2dx(cocos);
+    if(!bridge_cocos_configure_textures(cocos)) {
+        log_f(TAG, "Texture profile initialization failed");
+        return false;
+    }
+
     loader_flush_caches(cocos);
     if(!loader_init_library(cocos)) {
         log_f(TAG, "Cocos constructor initialization failed");
@@ -210,6 +215,7 @@ static void __stop(vita_app_t* app)
     bridge_jni_cocos_stop();
     glFinish();
     loader_free_library(app->library);
+    bridge_cocos_release_textures();
     glFinish();
     bridge_gl_shutdown_buffers();
 }

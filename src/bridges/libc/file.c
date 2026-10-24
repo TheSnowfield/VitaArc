@@ -19,6 +19,7 @@
 #include <psp2/io/stat.h>
 #include <psp2/kernel/rng.h>
 #include <psp2/rtc.h>
+#include <platform/io.h>
 #include <platform/newlib.h>
 #include <logcat/logcat.h>
 #endif
@@ -203,10 +204,23 @@ static int __open_file(const char* path, int flags, unsigned int mode)
         return -1;
     }
 
-    int uid = directory ? sceIoDopen(canonical) : sceIoOpen(canonical, _fcntl2sony(native_flags), mode & 07777);
+    unsigned perm = vita_io_mode(mode);
+    int uid = directory ? sceIoDopen(canonical) : sceIoOpen(canonical, _fcntl2sony(native_flags), perm);
     if(uid < 0) {
+        int error = __vita_sce_errno_to_errno(uid, 0);
+        if((flags & 3) != BIONIC_O_RDONLY || flags & BIONIC_O_CREAT) {
+            log_e(TAG,
+                "Open failed: %s flags=0x%X mode=0%o vita=0%o error=0x%08X",
+                canonical,
+                (unsigned)flags,
+                mode & 07777,
+                perm,
+                (unsigned)uid);
+        }
+
         free(canonical);
-        return __native_error(uid);
+        errno = error;
+        return -1;
     }
 
     int fd = __register_descriptor(uid, directory ? 1 : 0, canonical, native_flags);

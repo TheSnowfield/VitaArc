@@ -13,6 +13,7 @@
 #include <psp2/io/stat.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/kernel/threadmgr.h>
+#include <platform/io.h>
 #include <platform/newlib.h>
 #else
 #include <sys/ioctl.h>
@@ -102,7 +103,7 @@ int bridge_mkdir(const char* path, mode_t mode)
         return -1;
     }
 
-    int result = sceIoMkdir(canonical, mode & 07777);
+    int result = sceIoMkdir(canonical, vita_io_mode(mode));
     free(canonical);
     if(result < 0) {
         errno = __vita_sce_errno_to_errno(result, 0);
@@ -460,6 +461,7 @@ int bridge_fchmod(int fd, mode_t mode)
         return -1;
     }
 
+    mode = vita_io_mode(mode);
 #endif
     return fchmod(fd, mode);
 }

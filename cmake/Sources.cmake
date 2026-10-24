@@ -123,6 +123,7 @@ set(VITAARC_PLATFORM_SOURCES
     "${VITAARC_SOURCE_ROOT}/platform/input.c"
     "${VITAARC_SOURCE_ROOT}/platform/loop.c"
     "${VITAARC_SOURCE_ROOT}/platform/memory.c"
+    "${VITAARC_SOURCE_ROOT}/platform/perf.c"
     "${VITAARC_SOURCE_ROOT}/platform/stdio.c"
     "${VITAARC_SOURCE_ROOT}/platform/timing.c"
 )

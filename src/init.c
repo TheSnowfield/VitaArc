@@ -23,6 +23,7 @@
 #include "platform/input.h"
 #include "platform/loop.h"
 #include "platform/memory.h"
+#include "platform/perf.h"
 #include "platform/timing.h"
 #include "config.h"
 #include "utils/debug.h"
@@ -194,7 +195,9 @@ static void __loop(vita_app_t* app)
             continue;
         }
 
+        uint64_t rendered = sceKernelGetProcessTimeWide();
         __present(app);
+        vita_perf_frame(frame_started, rendered, sceKernelGetProcessTimeWide());
         vita_memory_tick(frame_started);
 
         // Count render and swap/vsync time toward Java's requested frame interval.

@@ -21,6 +21,24 @@ typedef struct gl_shader_t {
 
 static gl_shader_t __tracked_shaders[MAX_TRACKED_SHADERS];
 
+static size_t __texture_header(char* source, size_t size)
+{
+    const char header[] = "#extension GL_OES_EGL_image_external : require\n";
+    size_t length = sizeof(header) - 1;
+    if(size < length || memcmp(source, header, length)) {
+        return size;
+    }
+
+    if(strstr(source + length, "samplerExternalOES")) {
+        return size;
+    }
+
+    /* Recent Cocos emits this video-texture extension for ordinary 2D shaders
+     * too. Their remaining source is identical to the packaged programs. */
+    memmove(source, source + length, size - length + 1);
+    return size - length;
+}
+
 static gl_shader_t* __track_shader(GLuint handle)
 {
     if(!handle) {
@@ -176,6 +194,7 @@ void _gl_shader_source(GLuint handle, GLsizei count, const GLchar* const* string
     }
 
     original[size] = '\0';
+    size = __texture_header(original, size);
 
     GLint type = 0;
     glGetShaderiv(handle, GL_SHADER_TYPE, &type);

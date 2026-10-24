@@ -38,6 +38,7 @@ set(VITAARC_APPLICATION_SOURCES
 )
 
 set(VITAARC_ABI_SOURCES
+    "${VITAARC_SOURCE_ROOT}/bridges/abi/jump.c"
     "${VITAARC_SOURCE_ROOT}/bridges/abi/kuser.c"
     "${VITAARC_SOURCE_ROOT}/bridges/abi/softfp.c"
 )
@@ -100,6 +101,7 @@ set(VITAARC_LIBC_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/libc/posix.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/pthread.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/rwlock.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/signals.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/sync.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/thread_attributes.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/walk.c"

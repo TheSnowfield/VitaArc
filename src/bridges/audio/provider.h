@@ -8,6 +8,7 @@
 extern uintptr_t vita_audio_provider_vtable[];
 extern uintptr_t vita_audio_provider_vtable_v2[];
 extern uintptr_t vita_audio_provider_vtable_v3[];
+extern uintptr_t vita_audio_provider_vtable_v7[];
 
 void* audio_provider_construct(void);
 int VITAARC_SOFTFP audio_provider_init(void* instance, float sfx_volume, float bgm_volume);
@@ -22,6 +23,12 @@ int audio_provider_get_bgm_position(void* instance, int channel);
 void audio_provider_set_bgm_position(void* instance, int position_ms, int channel);
 void VITAARC_SOFTFP audio_provider_set_channel_bgm_volume(void* instance, float volume, int channel);
 void VITAARC_SOFTFP audio_provider_set_bgm_volume(void* instance, float volume);
+void VITAARC_SOFTFP audio_provider_set_master_volume(void* instance, float volume, bool apply);
+void audio_provider_schedule(void* instance, const void* vector);
+int VITAARC_SOFTFP audio_provider_play_sfx_v7(
+    void* instance, const char* path, bool loop, bool force, float volume, int begin, int end);
+float VITAARC_SOFTFP audio_provider_get_sfx_volume(void* instance);
+bool audio_provider_is_active(void* instance);
 
 void audio_provider_preload_sfx(void* instance, const char* path);
 void audio_provider_unload_sfx(void* instance, const char* path);

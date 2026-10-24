@@ -5,9 +5,44 @@
 #include <audio/provider.h>
 #include "internal.h"
 
+static bool __provider_v7(dynalib_t* library)
+{
+    const char* name = "_ZN24AudioProviderFMODAndroidC2Ev";
+    for(uint32_t index = 0; index < library->nsyms; ++index) {
+        const Elf32_Sym* symbol = &library->symbols[index];
+        if(symbol->st_shndx == SHN_UNDEF || symbol->st_size != 116 || ELF32_ST_TYPE(symbol->st_info) != STT_FUNC) {
+            continue;
+        }
+
+        if(strcmp((const char*)library->strings + symbol->st_name, name)) {
+            continue;
+        }
+
+        uintptr_t offset = symbol->st_value & ~(uintptr_t)1;
+        if(offset > library->span || symbol->st_size > library->span - offset) {
+            return false;
+        }
+
+        const unsigned char* code = (const void*)(library->base + offset);
+        uint64_t hash = UINT64_C(14695981039346656037);
+        for(unsigned byte = 0; byte < symbol->st_size; ++byte) {
+            hash = (hash ^ code[byte]) * UINT64_C(1099511628211);
+        }
+
+        return hash == UINT64_C(0xc19c3bea851b075c);
+    }
+
+    return false;
+}
+
 void* loader_get_import_proc_address(dynalib_t* library, const char* symbol_name)
 {
     if(strcmp(symbol_name, "_ZTV24AudioProviderFMODAndroid") == 0) {
+        if(__provider_v7(library)) {
+            log_i(TAG, "Selected AudioProvider layout 7");
+            return vita_audio_provider_vtable_v7;
+        }
+
         uintptr_t update = (uintptr_t)loader_get_proc_address(library, "_ZN12AudioManager6updateEf");
         uintptr_t code = update & ~(uintptr_t)1;
         bool executable = false;

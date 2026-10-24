@@ -67,6 +67,37 @@ uintptr_t vita_audio_provider_vtable_v3[] = {PROVIDER_COMMON,
 
 #undef PROVIDER_COMMON
 
+uintptr_t vita_audio_provider_vtable_v7[] = {
+    0,
+    0,
+    (uintptr_t)audio_provider_init,
+    (uintptr_t)audio_provider_destruct,
+    (uintptr_t)audio_provider_delete,
+    (uintptr_t)audio_provider_load_bgm,
+    (uintptr_t)audio_provider_unload_bgm,
+    (uintptr_t)audio_provider_play_bgm,
+    (uintptr_t)audio_provider_set_bgm_paused,
+    (uintptr_t)audio_provider_get_bgm_position,
+    (uintptr_t)audio_provider_set_bgm_position,
+    (uintptr_t)audio_provider_set_channel_bgm_volume,
+    (uintptr_t)audio_provider_set_master_volume,
+    (uintptr_t)audio_provider_schedule,
+    (uintptr_t)audio_provider_preload_sfx,
+    (uintptr_t)audio_provider_unload_sfx,
+    (uintptr_t)audio_provider_play_sfx_v7,
+    (uintptr_t)audio_provider_stop_sfx_v3,
+    (uintptr_t)audio_provider_get_sfx_volume_v3,
+    (uintptr_t)audio_provider_set_sfx_volume_v3,
+    (uintptr_t)audio_provider_set_sfx_volume,
+    (uintptr_t)audio_provider_get_sfx_volume,
+    (uintptr_t)audio_provider_play_sfx_v3,
+    (uintptr_t)audio_provider_update,
+    (uintptr_t)audio_provider_update,
+    (uintptr_t)audio_provider_suspend,
+    (uintptr_t)audio_provider_resume,
+    (uintptr_t)audio_provider_is_active,
+};
+
 static audio_provider_t* get_provider(void* instance)
 {
     return (audio_provider_t*)instance;
@@ -95,7 +126,8 @@ int VITAARC_SOFTFP audio_provider_init(void* instance, float sfx_volume, float b
         return 1;
     }
 
-    provider->state = vita_audio_create(sfx_volume, bgm_volume);
+    int channels = provider->vtable == &vita_audio_provider_vtable_v7[2] ? VITA_AUDIO_MAX_BGM : VITA_AUDIO_BGM_CHANNELS;
+    provider->state = vita_audio_create_channels(sfx_volume, bgm_volume, channels);
     if(!provider->state) {
         log_e(TAG, "Unable to initialize Vita AudioProvider");
         return 0;
@@ -182,6 +214,64 @@ void VITAARC_SOFTFP audio_provider_set_bgm_volume(void* instance, float volume)
     if(provider && provider->state) {
         vita_audio_set_bgm_volume(provider->state, volume);
     }
+}
+
+void VITAARC_SOFTFP audio_provider_set_master_volume(void* instance, float volume, bool apply)
+{
+    audio_provider_t* provider = get_provider(instance);
+    if(provider) {
+        vita_audio_set_master_volume(provider->state, volume, apply);
+    }
+}
+
+void audio_provider_schedule(void* instance, const void* vector)
+{
+    audio_provider_t* provider = get_provider(instance);
+    if(!provider || !provider->state || !vector) {
+        return;
+    }
+
+    /* NDK ARM32 vector<pair<string, int>>: three pointers, 16-byte pairs.
+     * The caller owns the by-value argument and destroys it after this call. */
+    const uintptr_t* bounds = vector;
+    uintptr_t first = bounds[0];
+    uintptr_t last = bounds[1];
+    if(last < first || last > bounds[2] || (last - first) % 16 || (last - first) / 16 > 4096) {
+        log_e(TAG, "Invalid scheduled SFX vector");
+        return;
+    }
+
+    for(uintptr_t entry = first; entry < last; entry += 16) {
+        const unsigned char* text = (const void*)entry;
+        const char* path = text[0] & 1 ? *(const char* const*)(text + 8) : (const char*)text + 1;
+        int position = *(const int*)(text + 12);
+        if(!vita_audio_schedule_sfx(provider->state, path, position)) {
+            log_e(TAG, "Cannot schedule SFX at %d ms: %s", position, path);
+        }
+    }
+}
+
+int VITAARC_SOFTFP audio_provider_play_sfx_v7(
+    void* instance, const char* path, bool loop, bool force, float volume, int begin, int end)
+{
+    audio_provider_t* provider = get_provider(instance);
+    if(!provider) {
+        return -1;
+    }
+
+    return vita_audio_play_sfx_range(provider->state, path, loop, force, volume, begin, end);
+}
+
+float VITAARC_SOFTFP audio_provider_get_sfx_volume(void* instance)
+{
+    audio_provider_t* provider = get_provider(instance);
+    return provider ? vita_audio_get_sfx_volume(provider->state) : 0.0f;
+}
+
+bool audio_provider_is_active(void* instance)
+{
+    audio_provider_t* provider = get_provider(instance);
+    return provider && vita_audio_is_active(provider->state);
 }
 
 void audio_provider_preload_sfx(void* instance, const char* path)

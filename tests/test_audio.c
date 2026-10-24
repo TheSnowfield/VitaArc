@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <vorbis/vorbisfile.h>
 
 #include <audio/backend.h>
@@ -239,6 +240,10 @@ static void __render(audio_t* state, uint32_t frames)
         uint32_t step = frames > VITA_AUDIO_BLOCK_FRAMES ? VITA_AUDIO_BLOCK_FRAMES : frames;
         assert(vita_audio_render(state, output, step));
         frames -= step;
+
+        /* The hardware output call supplies this clock in the application. */
+        struct timespec tick = {.tv_nsec = (long)((uint64_t)step * 1000000000 / VITA_AUDIO_SAMPLE_RATE)};
+        nanosleep(&tick, NULL);
     }
 }
 

@@ -34,7 +34,7 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
         def invoke():
             args = tuple(calls.reg(f"R{index}") for index in range(4))
             events.append((name, args))
-            if name.startswith("log_") and name not in ("log_begin", "log_end", "log_startup_heap"):
+            if name in ("log_i", "log_w", "log_e", "log_f"):
                 messages.append((name, string(args[1])))
             if name == "vglInitExtended":
                 assert args == (0, 960, 544, 24 * 1024 * 1024)
@@ -45,7 +45,8 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
                 if args[0]:
                     assert string(args[0]) == "ur0:data/external/libshacccg.suprx"
             if name in ("bridge_patch_gl", "bridge_patch_cocos2dx", "loader_flush_caches",
-                        "loader_init_library", "bridge_cocos_configure_storage", "loader_free_library"):
+                        "loader_init_library", "bridge_cocos_configure_storage",
+                        "bridge_cocos_configure_textures", "loader_free_library"):
                 assert args[0] == handle
             if name == "bridge_jni_cocos_start":
                 assert args[:3] == (handle, 960, 544)
@@ -71,14 +72,15 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
         calls.register(image.symbols[name], invoke)
 
     for name in (
-            "log_begin", "log_end", "log_i", "log_w", "log_e", "log_f",
+            "log_begin", "log_end", "log_i", "log_w", "log_e", "log_f", "log_flush",
+            "log_screen_begin", "log_screen_ready", "log_screen_end", "sceIoMkdir",
             "scePowerSetArmClockFrequency", "scePowerSetBusClockFrequency",
             "scePowerSetGpuClockFrequency", "scePowerSetGpuXbarClockFrequency",
             "vglSetupRuntimeShaderCompiler", "vglSetVDMBufferSize",
             "vglSetVertexBufferSize", "vglSetFragmentBufferSize", "vglSetUSSEBufferSize",
             "bridge_compat_initialize", "bridge_patch_gl", "bridge_patch_cocos2dx",
             "loader_flush_caches", "bridge_jni_cocos_stop", "glFinish",
-            "loader_free_library", "bridge_gl_shutdown_buffers", "vita_frame_step",
+            "loader_free_library", "bridge_cocos_release_textures", "bridge_gl_shutdown_buffers", "vita_frame_step",
             "vglSwapBuffers", "sceKernelDelayThread", "sceKernelExitProcess", "shark_init",
             "bridge_shader_enable_offline", "log_startup_heap"):
         endpoint(name)
@@ -88,12 +90,17 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
     endpoint("loader_load_library", 0 if failure == "load" else handle)
     endpoint("loader_init_library", int(failure != "constructors"))
     endpoint("bridge_cocos_configure_storage", int(failure != "storage"))
+    endpoint("bridge_cocos_configure_textures", 1)
     endpoint("bridge_jni_cocos_start", int(failure != "jni"))
     endpoint("vita_input_initialize", int(failure != "input"))
 
     assert calls.call(image.symbols["main"]) == 1
     names = [event[0] for event in events]
     assert names.count("vglInitExtended") == 1
+    assert names.index("log_screen_begin") < names.index("log_begin")
+    assert names.index("vglInitExtended") < names.index("log_screen_ready")
+    assert names.index("log_screen_ready") < names.index("bridge_shader_enable_offline")
+    assert names.count("log_screen_end") == 1
     assert names.count("shark_init") == (0 if compiler == "offline" else 1 if compiler == "primary" else 2)
     assert names.count("bridge_shader_enable_offline") == 1
     assert names.index("vglInitExtended") < names.index("bridge_shader_enable_offline")
@@ -116,7 +123,7 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
         assert "bridge_patch_gl" not in names and "loader_free_library" not in names
         assert "bridge_jni_cocos_stop" not in names and "glFinish" not in names
     else:
-        shutdown = ["bridge_jni_cocos_stop", "glFinish", "loader_free_library",
+        shutdown = ["bridge_jni_cocos_stop", "glFinish", "loader_free_library", "bridge_cocos_release_textures",
                     "glFinish", "bridge_gl_shutdown_buffers", "log_end", "sceKernelExitProcess"]
         assert names[-len(shutdown):] == shutdown
     if failure == "constructors":
@@ -126,6 +133,7 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
     if failure in ("constructors", "storage", "jni"):
         assert "vita_input_initialize" not in names
     if failure == "frame":
+        assert names.index("log_screen_end") < names.index("vita_frame_step")
         assert names.count("vita_frame_step") == 3
         assert names.count("vglSwapBuffers") == names.count("vita_frame_delay") == 1
         delays = [args[0] for name, args in events if name == "sceKernelDelayThread"]

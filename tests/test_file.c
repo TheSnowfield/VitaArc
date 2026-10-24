@@ -8,12 +8,12 @@
 
 #include <config.h>
 #include <libc/file.h>
+#include "paths.h"
 #include <libc/posix.h>
 
 static void __test_flags_and_paths(void)
 {
-    assert(mkdir("ux0:vitaarc", 0700) == 0);
-    assert(mkdir("ux0:vitaarc/persistent", 0700) == 0);
+    test_dirs(PATH_TO_USER "persistent/");
     assert(mkdir(PATH_TO_DATA, 0700) == 0);
     assert(bridge_access("/data/data/moe.low.arc", F_OK) == 0);
     bridge_bionic_stat_t status;

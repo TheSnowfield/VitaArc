@@ -8,6 +8,7 @@
 #include <psp2/io/stat.h>
 #include <platform/newlib.h>
 #include <libc/posix.h>
+#include <config.h>
 
 static vita_newlib_descriptor_t __descriptor = {.uid = 91, .flags = O_RDWR};
 
@@ -30,7 +31,7 @@ char* __realpath(const char* path)
 
 int sceIoMkdir(const char* path, unsigned int mode)
 {
-    assert(strcmp(path, "ux0:vitaarc/persistent/data/requested") == 0 && mode == 0610);
+    assert(strcmp(path, PATH_TO_DATA "requested") == 0 && mode == 0616);
     return __error ? -123 : 0;
 }
 

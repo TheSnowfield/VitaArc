@@ -25,7 +25,7 @@ def main():
         str(root / "tests/vita_audio_probe.c"), str(root / "src/bridges/audio/mp3.c"),
         str(root / "src/bridges/audio/stream.c"),
         *[str(root / "src/bridges/audio" / (name + ".c"))
-          for name in ("backend", "common", "mixer", "bgm", "sfx", "wav")],
+          for name in ("backend", "common", "feed", "mixer", "bgm", "sfx", "wav")],
         str(root / "src/logcat/logcat.c"),
         "-Wl,--whole-archive", "-lpthread", "-Wl,--no-whole-archive",
         "-lvorbisfile", "-lvorbis", "-logg", "-lm",

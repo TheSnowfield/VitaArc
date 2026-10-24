@@ -15,6 +15,7 @@
 #include <libc/directory.h>
 #include <libc/file.h>
 #include <libc/posix.h>
+#include "paths.h"
 
 static bool __fail_allocation;
 static char __long_name[256];
@@ -57,7 +58,7 @@ static void __check_entry(const bridge_dirent_t* entry)
     assert(bridge_bionic_lstat(path, &status) == 0);
     /* Some WSL filesystems report a different inode for '..' in getdents than
      * stat. Compare every converted inode with independent native readdir. */
-    DIR* native = opendir("ux0:vitaarc/persistent/data/list");
+    DIR* native = opendir(PATH_TO_DATA "list");
     assert(native);
     struct dirent* native_entry;
     bool found = false;
@@ -201,14 +202,13 @@ static void* __worker(void* argument)
 int main(void)
 {
     unsigned initial = __fd_count();
-    assert(bridge_mkdir("ux0:vitaarc", 0700) == 0);
-    assert(bridge_mkdir("ux0:vitaarc/persistent", 0700) == 0);
+    test_dirs(PATH_TO_USER "persistent/");
     assert(bridge_mkdir("/data/data/moe.low.arc", 0700) == 0);
     assert(bridge_mkdir("/data/data/moe.low.arc/list", 0700) == 0);
     assert(bridge_mkdir("/data/data/moe.low.arc/list/folder", 0700) == 0);
     int fd = bridge_open("/data/data/moe.low.arc/list/file", BIONIC_O_CREAT | BIONIC_O_RDWR, 0600u);
     assert(fd >= 0 && bridge_close(fd) == 0);
-    assert(symlink("file", "ux0:vitaarc/persistent/data/list/link") == 0);
+    assert(symlink("file", PATH_TO_DATA "list/link") == 0);
     memset(__long_name, 'x', 255);
     char path[512];
     snprintf(path, sizeof(path), "/data/data/moe.low.arc/list/%s", __long_name);

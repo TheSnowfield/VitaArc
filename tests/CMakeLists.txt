@@ -26,6 +26,12 @@ endif()
 
 set(VITAARC_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
 include("${VITAARC_ROOT}/cmake/Sources.cmake")
+
+add_executable(test_log_text test_log_text.c "${VITAARC_ROOT}/src/logcat/text.c")
+target_include_directories(test_log_text PRIVATE "${VITAARC_ROOT}/src")
+target_compile_options(test_log_text PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+add_test(NAME startup_log_text COMMAND test_log_text)
+
 add_library(jni_bridge STATIC
   ${VITAARC_JNI_RUNTIME_SOURCES}
   "${VITAARC_ROOT}/src/bridges/jni/thread.c"
@@ -196,14 +202,14 @@ target_compile_options(test_thread_attributes PRIVATE -Wall -Wextra -Werror -UND
 target_link_options(test_thread_attributes PRIVATE -Wl,--gc-sections,--wrap=pthread_attr_init,--wrap=pthread_attr_destroy,--wrap=pthread_attr_setstacksize,--wrap=pthread_create)
 
 if(VITAARC_SANITIZERS AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes)
+  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
     target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=address,undefined)
   endforeach()
 endif()
 
 if(VITAARC_THREAD_SANITIZER AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes)
+  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
     target_compile_options(${target} PRIVATE -fsanitize=thread -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=thread)
     get_target_property(target_type ${target} TYPE)

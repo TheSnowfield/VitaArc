@@ -17,6 +17,7 @@
 #include <platform/newlib.h>
 #include <psp2/io/stat.h>
 #include <psp2/io/dirent.h>
+#include <config.h>
 
 typedef struct mock_file {
     char path[1024];
@@ -26,10 +27,10 @@ typedef struct mock_file {
     char bytes[64];
 } mock_file_t;
 
-static mock_file_t __files[16] = {{.path = "ux0:vitaarc/persistent/data/file"},
-    {.path = "ux0:vitaarc/persistent/data/other"},
-    {.path = "ux0:vitaarc/persistent/data/directory", .exists = true, .status = {.st_mode = SCE_S_IFDIR | 0700}},
-    {.path = "ux0:vitaarc/persistent/data/link", .exists = true, .status = {.st_mode = SCE_S_IFLNK | 0700}}};
+static mock_file_t __files[16] = {{.path = PATH_TO_DATA "file"},
+    {.path = PATH_TO_DATA "other"},
+    {.path = PATH_TO_DATA "directory", .exists = true, .status = {.st_mode = SCE_S_IFDIR | 0700}},
+    {.path = PATH_TO_DATA "link", .exists = true, .status = {.st_mode = SCE_S_IFLNK | 0700}}};
 
 typedef struct mock_open {
     mock_file_t* file;
@@ -555,7 +556,7 @@ static void __test_files(void)
     int fd = bridge_open(
         "/data/data/moe.low.arc/file", BIONIC_O_CREAT | BIONIC_O_EXCL | BIONIC_O_RDWR | BIONIC_O_CLOEXEC, 0640u);
     assert(
-        fd >= 3 && __creation_mode == 0640 && (__creation_flags & O_CREAT) && (__creation_flags & O_ACCMODE) == O_RDWR);
+        fd >= 3 && __creation_mode == 0646 && (__creation_flags & O_CREAT) && (__creation_flags & O_ACCMODE) == O_RDWR);
     assert(bridge_fcntl(fd, 1) == 1);
     int duplicate = bridge_fcntl(fd, 0, 0);
     int protected_duplicate = bridge_fcntl(fd, 1030, 0);
@@ -578,7 +579,7 @@ static void __test_files(void)
 
     assert(bridge_read(fd, bytes, 3) == 3 && strcmp(bytes, "bcd") == 0);
     bridge_bionic_stat_t status, named;
-    assert(bridge_bionic_fstat(fd, &status) == 0 && status.size == 6 && status.mode == 0100640);
+    assert(bridge_bionic_fstat(fd, &status) == 0 && status.size == 6 && status.mode == 0100646);
     assert(status.modify_seconds == 1700000002 && status.modify_nanoseconds == 654321000);
     assert(bridge_bionic_stat("/data/user/0/moe.low.arc/file", &named) == 0 && named.inode == status.inode);
     assert(bridge_fcntl(fd, 4, BIONIC_O_APPEND) == 0);
@@ -685,8 +686,8 @@ static void __test_random(void)
     assert(bridge_fopen("/dev/urandom", "w") == NULL && errno == ENOTSUP);
 }
 
-#define SOURCE_PATH "ux0:vitaarc/persistent/data/source"
-#define TARGET_PATH "ux0:vitaarc/persistent/data/target"
+#define SOURCE_PATH PATH_TO_DATA "source"
+#define TARGET_PATH PATH_TO_DATA "target"
 #define SOURCE_GUEST "/data/data/moe.low.arc/source"
 #define TARGET_GUEST "/data/user/0/moe.low.arc/target"
 
@@ -750,10 +751,10 @@ static void __test_rename(void)
     __expect_originals();
 
     /* Existing backups survive, and collisions never invoke remove. */
-    __seed("ux0:vitaarc/persistent/data/.vitaarc-rename-00000001.bak", "recovery", SCE_S_IFREG | 0600);
+    __seed(PATH_TO_DATA ".vitaarc-rename-00000001.bak", "recovery", SCE_S_IFREG | 0600);
     assert(bridge_rename(SOURCE_GUEST, TARGET_GUEST) == 0 && __rename_calls == 4);
     __expect_contents(TARGET_PATH, "new");
-    __expect_contents("ux0:vitaarc/persistent/data/.vitaarc-rename-00000001.bak", "recovery");
+    __expect_contents(PATH_TO_DATA ".vitaarc-rename-00000001.bak", "recovery");
 
     __reset_rename();
     __lookup(TARGET_PATH)->exists = false;
@@ -832,13 +833,13 @@ static void __test_concurrent_renames(void)
 {
     for(unsigned iteration = 0; iteration < 16; ++iteration) {
         __reset_rename();
-        __seed("ux0:vitaarc/persistent/data/second", "second", SCE_S_IFREG | 0600);
+        __seed(PATH_TO_DATA "second", "second", SCE_S_IFREG | 0600);
         pthread_t first, second;
         assert(pthread_create(&first, NULL, __rename_worker, SOURCE_GUEST) == 0);
         assert(pthread_create(&second, NULL, __rename_worker, "/data/data/moe.low.arc/second") == 0);
         assert(pthread_join(first, NULL) == 0 && pthread_join(second, NULL) == 0);
         assert(__rename_calls == 6 && !__find_backup() && __errors == 0 && __warnings == 0);
-        assert(!__lookup(SOURCE_PATH) && !__lookup("ux0:vitaarc/persistent/data/second"));
+        assert(!__lookup(SOURCE_PATH) && !__lookup(PATH_TO_DATA "second"));
         mock_file_t* target = __lookup(TARGET_PATH);
         assert(target && target->exists && (!strcmp(target->bytes, "new") || !strcmp(target->bytes, "second")));
     }
@@ -852,7 +853,7 @@ int main(void)
     __test_files();
     __test_random();
     assert(bridge_mkdir("/data/user/0/moe.low.arc/requested", 0610) == 0);
-    assert(__lookup("ux0:vitaarc/persistent/data/requested")->status.st_mode == (SCE_S_IFDIR | 0610));
+    assert(__lookup(PATH_TO_DATA "requested")->status.st_mode == (SCE_S_IFDIR | 0616));
     assert(bridge_mkdir("/data/data/moe.low.arc/requested", 0700) == -1 && errno == EEXIST);
     __test_rename();
     __test_concurrent_renames();

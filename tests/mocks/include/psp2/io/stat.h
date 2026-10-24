@@ -16,6 +16,8 @@ typedef struct SceIoStat {
 } SceIoStat;
 
 #define SCE_CST_SIZE 4
+#define SCE_S_IRSYS 000004
+#define SCE_S_IWSYS 000002
 #define SCE_S_IFREG 0020000
 #define SCE_S_IFDIR 0010000
 #define SCE_S_IFLNK 0040000

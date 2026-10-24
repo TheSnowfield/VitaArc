@@ -8,11 +8,11 @@
 
 #include <config.h>
 #include <libc/posix.h>
+#include "paths.h"
 
 static void __test_files(void)
 {
-    assert(mkdir("ux0:vitaarc", 0700) == 0);
-    assert(mkdir("ux0:vitaarc/persistent", 0700) == 0);
+    test_dirs(PATH_TO_USER "persistent/");
     assert(mkdir(PATH_TO_DATA, 0700) == 0);
     const char* directory = "/data/data/moe.low.arc/files";
     assert(bridge_mkdir(directory, 0700) == 0);

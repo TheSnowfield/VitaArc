@@ -42,6 +42,7 @@ generated_includes = r"""
 
 #include <android/assetmgr.h>
 #include <android/log.h>
+#include <android/media.h>
 #include <abi/softfp.h>
 #include <audio/provider.h>
 #include <compat/compat.h>

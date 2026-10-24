@@ -20,6 +20,8 @@ static const property_t __properties[] = {
 };
 
 uint8_t bridge_bionic_stdio[1024] __attribute__((aligned(8)));
+FILE* bridge_bionic_stdout;
+FILE* bridge_bionic_stderr;
 // Legacy Bionic imports are pointer variables, not the tables themselves.
 // Entry zero represents EOF; byte values index the following 256 entries.
 static uint8_t __ctype[257];
@@ -48,6 +50,9 @@ void bridge_compat_initialize(void)
     if(bridge_compat_initialized) {
         return;
     }
+
+    bridge_bionic_stdout = stdout;
+    bridge_bionic_stderr = stderr;
 
     __tolower[0] = __toupper[0] = -1;
     for(uint32_t value = 0; value < 256; ++value) {

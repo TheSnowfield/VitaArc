@@ -11,9 +11,13 @@
 #include "cxx.h"
 #include "memory.h"
 #include "directory.h"
+#include "fortify.h"
+#include "auxv.h"
+#include "match.h"
 #include "guest_errno.h"
 
 extern int* __errno(void);
+extern void* __emutls_get_address(void* control);
 static const uint32_t __stack_chk_guard = 0xDEADBEEF;
 
 void bridge_stack_chk_fail();

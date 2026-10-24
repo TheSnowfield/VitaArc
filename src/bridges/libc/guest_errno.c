@@ -2,12 +2,18 @@
 
 #include <errno.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include "guest_errno.h"
 
 /* GNU extension with the same va_list ABI on newlib and the host. Avoid
  * enabling glibc's incompatible GNU strerror_r prototype in this unit. */
 extern int vasprintf(char** buffer, const char* format, va_list arguments);
+extern double strtod_l(const char* text, char** end, locale_t locale);
+extern long long strtoll_l(const char* text, char** end, int base, locale_t locale);
+extern unsigned long long strtoull_l(const char* text, char** end, int base, locale_t locale);
+extern int usleep(useconds_t delay);
+extern int getentropy(void* buffer, size_t length);
 
 typedef struct {
     int native;

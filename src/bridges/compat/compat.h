@@ -3,9 +3,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <libc/poll.h>
 
 extern uint8_t bridge_bionic_stdio[1024];
+extern FILE* bridge_bionic_stdout;
+extern FILE* bridge_bionic_stderr;
 extern const uint8_t* bridge_bionic_ctype;
 extern const int16_t* bridge_bionic_tolower;
 extern const int16_t* bridge_bionic_toupper;

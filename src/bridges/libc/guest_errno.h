@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <arpa/inet.h>
+#include <locale.h>
+#include <signal.h>
+#include <unistd.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -16,6 +19,11 @@
 #include "memory.h"
 #include "posix.h"
 #include "pthread.h"
+#include "locale.h"
+#include "fortify.h"
+#include "auxv.h"
+#include "walk.h"
+#include "signals.h"
 
 int bridge_errno_from_native(int error);
 int bridge_errno_to_native(int error);

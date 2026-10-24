@@ -15,6 +15,7 @@ generated_includes = r"""
 #include <ctype.h>
 #include <dirent.h>
 #include <locale.h>
+#include <libgen.h>
 #include <malloc.h>
 #include <math.h>
 #include <netdb.h>

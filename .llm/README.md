@@ -9,6 +9,10 @@
 - `build-and-packaging.md`：VitaSDK、CMake、生成目录、符号表生成、SELF/VPK、APK 选择和无 APK 的 CI 基础包。
 - `apk-vpk-resources.md`：VPK ZIP 格式验证、APK 全量导入规则、`app0:` 运行时映射和可写路径边界。
 - `runtime-flow.md`：当前 `main()` 从日志、vitaGL、SO 加载到 `JNI_OnLoad` 的执行顺序。
+- `memory-budget.md`：真机内存块、native/图形池预算、采样日志与当前内存构建。
+- `cpu-profile.md`：Vita3K 渲染热点、buffer 索引与延迟释放、帧耗时及启动图片日志。
+- `song-switch.md`：选歌连续切换、MP3 稀疏索引、解码预热与预览位置。
+- `song-switch-fast.md`：精确预热边界、定位点缓存、音频线程复用与后续切歌采样。
 - `elf-loader.md`：`dynalib_t`、Android ELF/SO 映射、relocation、自动符号解析和初始化。
 - `symbol-resolution.md`：`symbol.def`、构建期 Python 生成头文件、loader 内二分查找和批量依赖绑定。
 - `bridges-eabi-libc.md`：EABI、Bionic/libc、pthread、网络、文件路径兼容。

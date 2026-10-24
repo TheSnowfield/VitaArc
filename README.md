@@ -23,8 +23,9 @@ You may not get the game running correctly.
 
 ### Package game resources
 
-Place the official APK in `third-party/arcaea/` before building. The packaging
-script imports the selected APK into `package/` in the VPK. At runtime these
+To include game resources, place the official APK in `third-party/arcaea/`
+and enable `VITAARC_PACKAGE_APK`. The packaging script imports the selected
+APK into `package/` in the VPK. At runtime these
 read-only files are available below `app0:package/`; no manual extraction of
 the APK to the memory card is required.
 
@@ -40,14 +41,13 @@ artifact intentionally excludes the proprietary Arcaea APK resources.
 To build the same base VPK locally:
 
 ```sh
-VITAARC_PACKAGE_APK=OFF bash build.sh
+bash build.sh
 ```
 
-Local builds package an APK by default. If multiple APK versions are present,
-select one explicitly:
+Local builds also exclude APK resources by default. To package a selected APK:
 
 ```sh
-bash build.sh -DARCAEA_VERSION=1.6.1c
+bash build.sh -DVITAARC_PACKAGE_APK=ON -DARCAEA_VERSION=1.6.1c
 ```
 
 To compare every local APK without replacing the main VPK:

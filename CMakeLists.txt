@@ -212,7 +212,7 @@ if(VITAARC_SHADER_BINARY_DIR)
 endif()
 
 option(VITAARC_PACKAGE_APK
-  "Import an Arcaea APK from third-party/arcaea into the VPK" ON)
+  "Import an Arcaea APK from third-party/arcaea into the VPK" OFF)
 set(VITAARC_TEXTURE_PROFILE "vita" CACHE STRING
   "APK texture profile: original or vita")
 set_property(CACHE VITAARC_TEXTURE_PROFILE PROPERTY STRINGS original vita)

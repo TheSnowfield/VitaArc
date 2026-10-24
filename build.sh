@@ -5,7 +5,7 @@ export VITASDK="${VITASDK:-/usr/local/vitasdk}"
 
 build_dir="${BUILD_DIR:-build}"
 build_type="${CMAKE_BUILD_TYPE:-Release}"
-package_apk="${VITAARC_PACKAGE_APK:-ON}"
+package_apk="${VITAARC_PACKAGE_APK:-OFF}"
 
 cmake \
   -S . \

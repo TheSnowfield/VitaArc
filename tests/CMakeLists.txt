@@ -188,6 +188,7 @@ target_link_options(test_once PRIVATE -Wl,--gc-sections,--wrap=calloc,--wrap=fre
 
 add_executable(test_sync test_sync.c
   "${VITAARC_ROOT}/src/bridges/libc/sync.c"
+  "${VITAARC_ROOT}/src/bridges/libc/rwlock.c"
   "${VITAARC_ROOT}/src/bridges/libc/guest_errno.c")
 target_include_directories(test_sync PRIVATE "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
 target_link_libraries(test_sync PRIVATE Threads::Threads)

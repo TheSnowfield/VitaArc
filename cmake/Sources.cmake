@@ -99,6 +99,7 @@ set(VITAARC_LIBC_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/libc/poll.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/posix.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/pthread.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/rwlock.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/sync.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/thread_attributes.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/walk.c"

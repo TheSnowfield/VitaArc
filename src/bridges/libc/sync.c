@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "sync.h"
+#include "rwlock.h"
 #ifdef __vita__
 #include "posix.h"
 #endif
@@ -556,7 +557,11 @@ static bool __in_range(sync_entry_t* entry, uintptr_t base, size_t size)
 
 int bridge_sync_range_busy(uintptr_t base, size_t size)
 {
-    int result = 0;
+    int result = bridge_rwlock_range(base, size, 0);
+    if(result) {
+        return result;
+    }
+
     pthread_mutex_lock(&__sync_mutex);
     for(sync_entry_t* entry = __sync_entries; entry; entry = entry->next) {
         if(__in_range(entry, base, size) && (entry->users || entry->holds)) {
@@ -571,7 +576,16 @@ int bridge_sync_range_busy(uintptr_t base, size_t size)
 
 int bridge_sync_destroy_range(uintptr_t base, size_t size)
 {
-    int result = 0;
+    int result = bridge_sync_range_busy(base, size);
+    if(result) {
+        return result;
+    }
+
+    result = bridge_rwlock_range(base, size, 1);
+    if(result) {
+        return result;
+    }
+
     pthread_mutex_lock(&__sync_mutex);
     for(sync_entry_t* entry = __sync_entries; entry; entry = entry->next) {
         if(__in_range(entry, base, size) && (entry->users || entry->holds)) {

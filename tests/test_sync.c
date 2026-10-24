@@ -236,8 +236,29 @@ static void __check_ranges(void)
     assert(atomic_load(&__allocations) == 0);
 }
 
+static void __check_rwlocks(void)
+{
+    uint32_t controls[3] = {0x12345678, 0, 0x87654321};
+    bridge_rwlock_t* lock = &controls[1];
+    assert(bridge_rwlock_read(lock) == 0);
+    assert(bridge_rwlock_read(lock) == 0);
+    assert(bridge_rwlock_destroy(lock) == EBUSY);
+    assert(bridge_sync_range_busy((uintptr_t)controls, sizeof(controls)) == EBUSY);
+    assert(bridge_rwlock_unlock(lock) == 0);
+    assert(bridge_rwlock_unlock(lock) == 0);
+    assert(bridge_rwlock_write(lock) == 0);
+    assert(bridge_rwlock_unlock(lock) == 0);
+    assert(bridge_sync_destroy_range((uintptr_t)controls, sizeof(controls)) == 0);
+    assert(bridge_rwlock_read(lock) == EINVAL);
+    assert(bridge_rwlock_init(lock, NULL) == 0);
+    assert(bridge_rwlock_destroy(lock) == 0);
+    assert(controls[0] == 0x12345678 && controls[2] == 0x87654321);
+    assert(atomic_load(&__allocations) == 0);
+}
+
 int main(void)
 {
+    __check_rwlocks();
     __check_mutex_types();
     pthread_t threads[8];
     for(unsigned index = 0; index < 8; ++index) {

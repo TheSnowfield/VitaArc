@@ -112,6 +112,19 @@ set_source_files_properties(
 )
 list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_HEADER}")
 
+set(BOOT_LOGO_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/boot_logo.h")
+add_custom_command(
+  OUTPUT "${BOOT_LOGO_HEADER}"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_binary.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitagl.png" "${BOOT_LOGO_HEADER}"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_binary.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitagl.png"
+  COMMENT "Embedding boot logo"
+  VERBATIM
+)
+set_source_files_properties("${BOOT_LOGO_HEADER}" PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
+list(APPEND VITAARC_SOURCES "${BOOT_LOGO_HEADER}")
+
 ## Build and link
 add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE VITAARC_VERBOSE_LOGS=$<BOOL:${VITAARC_VERBOSE_LOGS}>)

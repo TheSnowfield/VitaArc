@@ -115,6 +115,7 @@ set(VITAARC_LOADER_SOURCES
 
 set(VITAARC_LOGCAT_SOURCES
     "${VITAARC_SOURCE_ROOT}/logcat/logcat.c"
+    "${VITAARC_SOURCE_ROOT}/logcat/logo.c"
     "${VITAARC_SOURCE_ROOT}/logcat/screen.c"
     "${VITAARC_SOURCE_ROOT}/logcat/text.c"
 )

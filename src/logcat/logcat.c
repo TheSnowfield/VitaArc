@@ -106,6 +106,20 @@ static void __write(log_level_t level, const char* text, size_t size)
     pthread_mutex_unlock(&__mutex);
 }
 
+static void __intro(void)
+{
+    static const char text[] =
+        "LICENSE / Credits\n"
+        "vitaGL / vitaShaRK - Rinnegatamante / contributors - LGPL-3.0-or-later\n"
+        "FreeType - The FreeType Project - FreeType License\n"
+        "libogg / libvorbis - Xiph.Org Foundation - BSD-3-Clause\n"
+        "libpng - PNG Reference Library License\n"
+        "zlib - zlib License / bzip2 - bzip2 License\n";
+
+    sceClibPrintf("%s", text);
+    __write(INFORMATION, text, sizeof(text) - 1);
+}
+
 void log_begin(const char* log_file_path)
 {
     pthread_mutex_lock(&__mutex);
@@ -158,11 +172,13 @@ void log_begin(const char* log_file_path)
 
     if(__log_stream < 0) {
         pthread_mutex_unlock(&__mutex);
+        __intro();
         return;
     }
 
     __log_started = true;
     pthread_mutex_unlock(&__mutex);
+    __intro();
     log_i(TAG, "Log started.");
 }
 

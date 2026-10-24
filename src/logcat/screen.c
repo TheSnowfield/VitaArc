@@ -7,6 +7,7 @@
 
 #include "screen.h"
 #include "text.h"
+#include "logo.h"
 
 #define LOG_FRAME_US 66666u
 
@@ -54,7 +55,7 @@ static void __write(log_level_t level, const char* data, size_t size)
     }
 
     uint64_t now = sceKernelGetProcessTimeWide();
-    if(level == VERBOSE && now - __last < LOG_FRAME_US) {
+    if(level < ERROR && now - __last < LOG_FRAME_US) {
         return;
     }
 
@@ -67,8 +68,10 @@ static void __write(log_level_t level, const char* data, size_t size)
 
 void log_screen_begin(void)
 {
+    const log_image_t* image = log_logo_open();
     pthread_mutex_lock(&__mutex);
     memset(&__text, 0, sizeof(__text));
+    log_text_image(&__text, image);
     __active = true;
     __ready = false;
     __owner = 0;
@@ -104,12 +107,12 @@ void log_screen_end(void)
     __ready = false;
     __active = false;
     pthread_mutex_unlock(&__mutex);
-    if(!ready) {
-        return;
+    if(ready) {
+        sceGxmDisplayQueueFinish();
+        vglSetDisplayCallback(NULL);
     }
 
-    sceGxmDisplayQueueFinish();
-    vglSetDisplayCallback(NULL);
+    log_logo_close();
 }
 
 /* Keep the library's display infrastructure; replace only its boot animation. */

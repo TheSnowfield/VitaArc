@@ -92,6 +92,8 @@ set(VITAARC_LIBC_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/libc/fortify.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/guest_errno.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/libc.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/locale.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/match.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/memory.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/once.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/poll.c"
@@ -99,6 +101,7 @@ set(VITAARC_LIBC_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/libc/pthread.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/sync.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/thread_attributes.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/walk.c"
 )
 
 set(VITAARC_OPENGL_SOURCES

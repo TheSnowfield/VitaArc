@@ -44,3 +44,31 @@ With this SDK/vitaGL combination, GLSL column-major matrix uploads require
 both scale and translation; a diagonal-only matrix does not verify this rule.
 The pack is incomplete until actual game runs establish coverage for all
 needed variants. Successful binary compilation alone does not prove game boot.
+
+## Arcaea 7.0 effects
+
+The APK contains additional GLSL effects. Generate their Cg sources with the
+vitaGL translator, then compile both manifests into the same output directory.
+The Linux host adapter was verified with vitaGL commit
+`76f43e6fbe1513cee44118da7ff2c16728c4fed2`. It uses that source tree's translator
+and preprocessor; no compiler binary is downloaded or included.
+
+```bash
+python3 tools/build_shader_translator.py --source /path/to/vitaGL --output build/shader-tools
+python3 tools/prepare_effects.py --apk third-party/arcaea/arcaea_7.0.260c.apk \
+  --translator build/shader-tools/translate --output build/effects-7
+```
+
+Run `compile_shaders.py` on the native Cg compiler's host, first with the normal
+manifest and then with `--manifest build/effects-7/manifest.json`, using the same
+`--output` directory. Pass that directory to `VITAARC_SHADER_BINARY_DIR` when
+packaging 7.0. Generated sources remain in the build directory. The adapter
+retains the supplied vitaGL implementation and its LGPL-3.0 license.
+
+Use `-DARCAEA_VERSION=7.0.260c` for this version. The default native heap is
+256 MiB for every APK version. Existing CMake caches retain their configured
+value; use `-DVITAARC_HEAP_MB=256` to update one. Packaging 7.0 rejects heap
+reservations smaller than 128 MiB.
+
+Android Surface/MediaCodec video decoding remains unavailable. Its external
+texture shader is excluded, and the media bridge reports unsupported formats.

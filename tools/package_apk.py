@@ -178,7 +178,7 @@ def write_apk(vpk, apk, entries, plan, version):
 
 
 def import_apk(
-    vpk_path: Path, apk_path: Path, prefix: str, textures: str = "original"
+    vpk_path: Path, apk_path: Path, prefix: str, textures: str = "original", heap_mb: int | None = None
 ) -> TexturePlan:
     if not zipfile.is_zipfile(vpk_path):
         raise ValueError(f"not a valid VPK/ZIP archive: {vpk_path}")
@@ -210,6 +210,9 @@ def import_apk(
             raise ValueError("APK contains reserved VitaArc metadata")
 
         version = version_name(apk.read("AndroidManifest.xml"))
+        if version == "7.0.260c" and heap_mb is not None and heap_mb < 128:
+            raise ValueError("Arcaea 7.0.260c requires -DVITAARC_HEAP_MB=128 or greater")
+
         plan = TexturePlan(apk, textures)
         with zipfile.ZipFile(vpk_path, "r") as vpk:
             existing_names = set(vpk.namelist())
@@ -251,6 +254,7 @@ def main() -> int:
     parser.add_argument("--version")
     parser.add_argument("--prefix", default="package")
     parser.add_argument("--textures", choices=("original", "vita"), default="vita")
+    parser.add_argument("--heap-mb", type=int, help="native heap configured in the packaged executable")
     parser.add_argument(
         "--list", action="store_true",
         help="list available APK versions and exit",
@@ -275,6 +279,7 @@ def main() -> int:
             selected_apk.path.resolve(),
             normalize_prefix(args.prefix),
             args.textures,
+            args.heap_mb,
         )
     except (OSError, ValueError, zipfile.BadZipFile) as error:
         print(f"package_apk.py: {error}", file=sys.stderr)

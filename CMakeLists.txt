@@ -67,6 +67,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
 option(VITAARC_VERBOSE_LOGS "Enable verbose trace logging" OFF)
 
+set(ARCAEA_VERSION "" CACHE STRING "Arcaea APK version to package without an interactive prompt")
 set(VITAARC_HEAP_MB 256 CACHE STRING "Native heap reservation in MiB")
 set(VITAARC_GPU_RAM_MB 32 CACHE STRING "Maximum graphics RAM pool in MiB")
 set(VITAARC_GPU_STREAM_MB 6 CACHE STRING "Graphics streaming pool in MiB")
@@ -233,13 +234,12 @@ if(VITAARC_PACKAGE_APK)
       "Configure with -DVITAARC_PACKAGE_APK=OFF to build a base VPK.")
   endif()
 
-  set(ARCAEA_VERSION "" CACHE STRING
-    "Arcaea APK version to package without an interactive prompt")
   set(APK_IMPORT_ARGUMENTS
     --vpk "${VITA_VPK_OUT}"
     --apk-dir "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea"
     --prefix package
     --textures "${VITAARC_TEXTURE_PROFILE}"
+    --heap-mb "${VITAARC_HEAP_MB}"
   )
   if(ARCAEA_VERSION)
     list(APPEND APK_IMPORT_ARGUMENTS --version "${ARCAEA_VERSION}")

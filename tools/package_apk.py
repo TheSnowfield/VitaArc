@@ -7,10 +7,12 @@ import argparse
 import re
 import shutil
 import sys
+import tempfile
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from apk_manifest import version_name
+from package_textures import TexturePlan, texture_map, texture_report
 
 
 copy_buffer_size = 1024 * 1024
@@ -158,7 +160,26 @@ def make_target_info(
     return target_info
 
 
-def import_apk(vpk_path: Path, apk_path: Path, prefix: str) -> None:
+def write_apk(vpk, apk, entries, plan, version):
+    vpk.writestr("vitaarc-apk-version.txt", version + "\n")
+    plan.describe()
+    for index, (source_info, target_name) in enumerate(entries, start=1):
+        target_info = make_target_info(source_info, target_name)
+        content = plan.rewrite(source_info.filename)
+        if content is not None:
+            vpk.writestr(target_info, content)
+        else:
+            with apk.open(source_info, "r") as source:
+                with vpk.open(target_info, "w") as target:
+                    shutil.copyfileobj(source, target, length=copy_buffer_size)
+
+        if index % 100 == 0 or index == len(entries):
+            print(f"  imported {index}/{len(entries)} files", flush=True)
+
+
+def import_apk(
+    vpk_path: Path, apk_path: Path, prefix: str, textures: str = "original"
+) -> TexturePlan:
     if not zipfile.is_zipfile(vpk_path):
         raise ValueError(f"not a valid VPK/ZIP archive: {vpk_path}")
     if not zipfile.is_zipfile(apk_path):
@@ -184,42 +205,41 @@ def import_apk(vpk_path: Path, apk_path: Path, prefix: str) -> None:
             target_names.add(target_name)
             target_entries.append((source_info, target_name))
 
+        metadata = {"vitaarc-apk-version.txt", texture_report, f"{prefix}/{texture_map}"}
+        if metadata.intersection(target_names):
+            raise ValueError("APK contains reserved VitaArc metadata")
+
         version = version_name(apk.read("AndroidManifest.xml"))
-        with zipfile.ZipFile(vpk_path, "a", allowZip64=True) as vpk:
+        plan = TexturePlan(apk, textures)
+        with zipfile.ZipFile(vpk_path, "r") as vpk:
             existing_names = set(vpk.namelist())
             collisions = sorted(existing_names.intersection(target_names))
             if collisions:
                 raise ValueError(
                     f"VPK entry already exists: {collisions[0]}"
                 )
-            if 'vitaarc-apk-version.txt' in existing_names:
-                raise ValueError('VPK already contains APK version metadata')
-            vpk.writestr('vitaarc-apk-version.txt', version + '\n')
+            if metadata.intersection(existing_names):
+                raise ValueError("VPK already contains APK metadata")
 
-            total_size = sum(
-                source_info.file_size
-                for source_info, _ in target_entries
-            )
-            print(
-                f"Importing {len(target_entries)} APK files "
-                f"({total_size} bytes) into {vpk_path} under {prefix}/"
-            )
+        total_size = sum(info.file_size for info, _ in target_entries)
+        print(
+            f"Importing {len(target_entries)} APK files "
+            f"({total_size} bytes) into {vpk_path} under {prefix}/"
+        )
+        with tempfile.NamedTemporaryFile(dir=vpk_path.parent, suffix=".partial", delete=False) as stream:
+            partial = Path(stream.name)
 
-            for index, (source_info, target_name) in enumerate(
-                target_entries, start=1
-            ):
-                target_info = make_target_info(source_info, target_name)
-                with apk.open(source_info, "r") as source:
-                    with vpk.open(target_info, "w") as target:
-                        shutil.copyfileobj(
-                            source, target, length=copy_buffer_size
-                        )
+        try:
+            shutil.copyfile(vpk_path, partial)
+            with zipfile.ZipFile(partial, "a", allowZip64=True) as vpk:
+                write_apk(vpk, apk, target_entries, plan, version)
+                plan.write_metadata(vpk, prefix)
 
-                if index % 100 == 0 or index == len(target_entries):
-                    print(
-                        f"  imported {index}/{len(target_entries)} files",
-                        flush=True,
-                    )
+            partial.replace(vpk_path)
+        finally:
+            partial.unlink(missing_ok=True)
+
+        return plan
 
 
 def main() -> int:
@@ -230,6 +250,7 @@ def main() -> int:
     parser.add_argument("--apk-dir", required=True, type=Path)
     parser.add_argument("--version")
     parser.add_argument("--prefix", default="package")
+    parser.add_argument("--textures", choices=("original", "vita"), default="vita")
     parser.add_argument(
         "--list", action="store_true",
         help="list available APK versions and exit",
@@ -253,6 +274,7 @@ def main() -> int:
             args.vpk.resolve(),
             selected_apk.path.resolve(),
             normalize_prefix(args.prefix),
+            args.textures,
         )
     except (OSError, ValueError, zipfile.BadZipFile) as error:
         print(f"package_apk.py: {error}", file=sys.stderr)

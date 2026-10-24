@@ -11,6 +11,7 @@ from pathlib import Path
 import zipfile
 
 from package_apk import enumerate_apks, import_apk
+from package_textures import texture_map, texture_report
 
 
 def sha256(path):
@@ -23,6 +24,7 @@ def main():
     parser.add_argument("--base-vpk", required=True, type=Path)
     parser.add_argument("--apk-dir", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--textures", choices=("original", "vita"), default="vita")
     parser.add_argument("--self", dest="self_path", type=Path,
                         help="Use this new bridge SELF while keeping the base VPK untouched")
     args = parser.parse_args()
@@ -34,13 +36,14 @@ def main():
     for path in [report_path, *[path for _, path in destinations]]:
         if path.exists() or path.with_suffix(path.suffix + ".partial").exists():
             raise FileExistsError(f"Preserve existing output: {path}")
-    report = {"base_vpk": str(args.base_vpk.resolve()),
+    report = {"textures": args.textures, "base_vpk": str(args.base_vpk.resolve()),
               "base_sha256": sha256(args.base_vpk), "variants": []}
     if args.self_path:
         report["self_source"] = str(args.self_path.resolve())
     with zipfile.ZipFile(args.base_vpk) as base:
         resources = [(info, base.read(info)) for info in base.infolist()
-                     if not info.filename.startswith("package/") and info.filename != 'vitaarc-apk-version.txt']
+                     if not info.filename.startswith("package/")
+                     and info.filename not in ("vitaarc-apk-version.txt", texture_report)]
         if args.self_path:
             replacement = args.self_path.read_bytes()
             resources = [(info, replacement if info.filename == "eboot.bin" else content)
@@ -52,7 +55,7 @@ def main():
             with zipfile.ZipFile(partial, "w") as vpk:
                 for info, content in resources:
                     vpk.writestr(info, content)
-            import_apk(partial, item.path, "package")
+            plan = import_apk(partial, item.path, "package", args.textures)
             with zipfile.ZipFile(partial) as vpk, zipfile.ZipFile(item.path) as apk:
                 if vpk.testzip() is not None:
                     raise ValueError(f"CRC verification failed: {partial}")
@@ -60,10 +63,22 @@ def main():
                             if not info.is_dir()}
                 actual = {info.filename: info for info in vpk.infolist()
                           if info.filename.startswith("package/")}
+                if args.textures == "vita":
+                    actual.pop(f"package/{texture_map}")
+                    if vpk.read(f"package/{texture_map}") != plan.manifest():
+                        raise ValueError("Texture manifest differs from converted assets")
+
                 if actual.keys() != expected.keys():
                     raise ValueError("APK file list differs from VPK package tree")
                 for name, info in actual.items():
                     original = expected[name]
+                    converted = plan.entries.get(original.filename)
+                    if converted:
+                        if info.CRC != converted.packed_crc:
+                            raise ValueError(f"Converted texture differs: {name}")
+
+                        continue
+
                     if (info.CRC, info.file_size) != (original.CRC, original.file_size):
                         raise ValueError(f"APK entry differs: {name}")
                 for info, content in resources:

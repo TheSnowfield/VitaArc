@@ -180,6 +180,13 @@ endif()
 
 option(VITAARC_PACKAGE_APK
   "Import an Arcaea APK from third-party/arcaea into the VPK" ON)
+set(VITAARC_TEXTURE_PROFILE "vita" CACHE STRING
+  "APK texture profile: original or vita")
+set_property(CACHE VITAARC_TEXTURE_PROFILE PROPERTY STRINGS original vita)
+if(NOT VITAARC_TEXTURE_PROFILE MATCHES "^(original|vita)$")
+  message(FATAL_ERROR "VITAARC_TEXTURE_PROFILE must be original or vita")
+endif()
+
 set(ARCAEA_APK_FILES)
 set(APK_IMPORT_COMMAND)
 if(VITAARC_PACKAGE_APK)
@@ -200,6 +207,7 @@ if(VITAARC_PACKAGE_APK)
     --vpk "${VITA_VPK_OUT}"
     --apk-dir "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea"
     --prefix package
+    --textures "${VITAARC_TEXTURE_PROFILE}"
   )
   if(ARCAEA_VERSION)
     list(APPEND APK_IMPORT_ARGUMENTS --version "${ARCAEA_VERSION}")
@@ -251,6 +259,7 @@ add_custom_command(
     "${VITA_SELF}"
     "${APK_IMPORT_SCRIPT}"
     "${CMAKE_CURRENT_SOURCE_DIR}/tools/apk_manifest.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_textures.py"
     ${ARCAEA_APK_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png"

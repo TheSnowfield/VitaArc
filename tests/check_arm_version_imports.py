@@ -21,8 +21,9 @@ def words(value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game-dir', type=Path, default=root / 'build/apk-versions/inspection')
+    parser.add_argument('--elf', type=Path, default=root / 'build/VitaArc')
     args = parser.parse_args()
-    case = LoaderCase({})
+    case = LoaderCase({}, args.elf)
     calls = case.calls
 
     def lookup(name):
@@ -95,7 +96,7 @@ def main():
 
     for version in ['1.6.1c', '1.9.0c', '2.0.0c', '3.0.0c']:
         data = (args.game_dir / ('arcaea_' + version) / 'libcocos2dcpp.so').read_bytes()
-        case = LoaderCase({'app0:/libcocos2dcpp.so': data})
+        case = LoaderCase({'app0:/libcocos2dcpp.so': data}, args.elf)
         library = case.load('app0:/libcocos2dcpp.so')
         assert library, (version, case.platform.messages)
         check_game_relocations(case, library, data)

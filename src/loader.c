@@ -27,7 +27,6 @@
 #include "loader/internal.h"
 
 static uint32_t __count;
-static uintptr_t __cursor = FIRST_LIBRARY_BASE;
 static dynalib_t* __libs[MAX_LIBRARY];
 
 void* loader_lookup(dynalib_t* requester, const char* symbol_name)
@@ -139,6 +138,53 @@ uintptr_t loader_find_exidx(uintptr_t pc, int* count)
     return 0;
 }
 
+static bool __window(dynalib_t* library)
+{
+    const Elf32_Ehdr* header = library->image;
+    const Elf32_Phdr* programs = (const void*)((uintptr_t)library->image + header->e_phoff);
+    uint32_t end = 0;
+    for(unsigned index = 0; index < header->e_phnum; ++index) {
+        const Elf32_Phdr* program = &programs[index];
+        if(program->p_type != PT_LOAD || !program->p_memsz) {
+            continue;
+        }
+
+        uint32_t last = program->p_vaddr + program->p_memsz;
+        if(last > end) {
+            end = last;
+        }
+    }
+
+    if(!end) {
+        return false;
+    }
+
+    uint32_t size = ALIGN_UP(end, PAGE_SIZE);
+    SceUID block = sceKernelAllocMemBlock("elf_window", SCE_KERNEL_MEMBLOCK_TYPE_USER_RW, size, NULL);
+    if(block <= 0) {
+        log_e(TAG, "Cannot reserve library window: size=%u error=0x%08X", size, (unsigned)block);
+        return false;
+    }
+
+    void* base = NULL;
+    int result = sceKernelGetMemBlockBase(block, &base);
+    sceKernelFreeMemBlock(block);
+    if(result < 0 || !base || (uintptr_t)base % PAGE_SIZE) {
+        log_e(TAG, "Invalid library window: base=%p error=0x%08X", base, (unsigned)result);
+        return false;
+    }
+
+    if((uint64_t)(uintptr_t)base + size > LIBRARY_ADDRESS_LIMIT) {
+        log_e(TAG, "Library window exceeds address limit: base=%p size=%u", base, size);
+        return false;
+    }
+
+    /* Select a whole free window through the kernel allocator, then replace
+     * the temporary reservation with individual RX/RW ELF segment blocks. */
+    library->base = (uintptr_t)base;
+    return true;
+}
+
 dynalib_t* loader_load_library(const char* library_path)
 {
     if(!library_path || !util_file_exists(library_path)) {
@@ -160,7 +206,7 @@ dynalib_t* loader_load_library(const char* library_path)
 
     uint32_t file_size = util_get_file_size(library_path);
     log_i(TAG, "ELF image %s: %u bytes", library_name, file_size);
-    if(file_size == 0 || file_size > LIBRARY_ADDRESS_LIMIT - FIRST_LIBRARY_BASE) {
+    if(file_size == 0 || file_size > LIBRARY_MAX_SPAN) {
         log_f(TAG, "Library is empty: %s", library_path);
         return NULL;
     }
@@ -204,6 +250,10 @@ dynalib_t* loader_load_library(const char* library_path)
 
     log_i(TAG, "ELF image validated");
 
+    if(!__window(library)) {
+        goto failed;
+    }
+
     int32_t slot = loader_find_empty_slot();
     if(slot < 0) {
         log_f(TAG, "Too many loaded libraries");
@@ -213,7 +263,6 @@ dynalib_t* loader_load_library(const char* library_path)
     library->slot = (uint32_t)slot;
     snprintf(library->path, sizeof(library->path), "%s", library_path);
     snprintf(library->name, sizeof(library->name), "%s", library_name);
-    library->base = __cursor;
 
     __libs[slot] = library;
     ++__count;
@@ -223,7 +272,6 @@ dynalib_t* loader_load_library(const char* library_path)
         goto failed;
     }
 
-    __cursor = ALIGN_UP(library->base + library->span, LIBRARY_BASE_ALIGNMENT);
     log_i(TAG, "Loaded %s at 0x%08X (%u segments)", library->name, library->base, library->block_count);
     loader_flush_caches(library);
     return loader_clone_handle(library);

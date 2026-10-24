@@ -200,9 +200,11 @@ def build_fixtures():
 
 
 class LoaderCase:
-    def __init__(self, files):
+    default_elf = root / "build/VitaArc"
+
+    def __init__(self, files, elf=None):
         self.calls = ArmCalls()
-        self.target = ArmImage(self.calls.machine, root / "build/VitaArc")
+        self.target = ArmImage(self.calls.machine, elf or self.default_elf)
         self.platform = LoaderPlatform(self.calls, self.target, files)
 
     def call(self, name, *args):
@@ -333,7 +335,7 @@ def check_failures(files):
     case.platform.short_read = True
     assert case.load("app0:/provider.so") == 0
     case.clean()
-    for allocation in (1, 2, 3):
+    for allocation in (1, 2, 3, 4):
         case = LoaderCase(files)
         case.platform.fail_allocation = allocation
         assert case.load("app0:/provider.so") == 0
@@ -479,8 +481,10 @@ def check_game_relocations(case, library, data):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--elf", type=Path, default=LoaderCase.default_elf)
     parser.add_argument("--game", type=Path, help="Optional local game SO; load and relocate without constructors")
     args = parser.parse_args()
+    LoaderCase.default_elf = args.elf
     files = build_fixtures()
     check_fixture(files)
     check_cocos_cleanup(files)

@@ -98,7 +98,7 @@ static bool __segments_ok(const elf_view_t* view)
             return false;
         }
 
-        if((uint64_t)program->p_vaddr + program->p_memsz > LIBRARY_ADDRESS_LIMIT - FIRST_LIBRARY_BASE) {
+        if((uint64_t)program->p_vaddr + program->p_memsz > LIBRARY_MAX_SPAN) {
             return false;
         }
 

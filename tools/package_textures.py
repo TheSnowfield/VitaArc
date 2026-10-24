@@ -78,6 +78,13 @@ def atlas_paths(apk: zipfile.ZipFile) -> set[str]:
 
 
 def small_size(width: int, height: int) -> tuple[int, int]:
+    if min(width, height) < 64 and max(width, height) > 4096:
+        while max(width, height) > 4096:
+            width = (width + 1) // 2
+            height = (height + 1) // 2
+
+        return width, height
+
     if min(width, height) < 64 or max(width, height) < 256:
         return width, height
 
@@ -114,13 +121,15 @@ class TexturePlan:
             with apk.open(info) as stream, Image.open(stream) as image:
                 width, height = image.size
 
-            if not 0 < width <= 4096 or not 0 < height <= 4096:
+            if not 0 < width <= 16384 or not 0 < height <= 16384:
                 raise ValueError(f"unsupported texture dimensions: {name}")
 
             self.rgba_before += width * height * 4
             size = small_size(width, height)
             if name in atlases or name.startswith(protected_roots) or name.endswith(".9.png"):
                 size = width, height
+                while max(size) > 4096:
+                    size = (size[0] + 1) // 2, (size[1] + 1) // 2
 
             self.rgba_after += size[0] * size[1] * 4
             if size == (width, height):

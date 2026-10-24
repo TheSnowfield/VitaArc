@@ -6,6 +6,11 @@
 #include <string.h>
 #include <strings.h>
 #include <psp2/kernel/rng.h>
+#ifdef __vita__
+#include <psp2/io/devctl.h>
+#else
+#include <sys/statvfs.h>
+#endif
 
 #include <config.h>
 #include <logcat/logcat.h>
@@ -26,6 +31,7 @@
 typedef enum cocos_operation {
     COCOS_GET_PREFERENCE,
     COCOS_SET_PREFERENCE,
+    COCOS_COMMIT_PREFERENCE,
     COCOS_DELETE_PREFERENCE,
     COCOS_STRING,
     COCOS_WRITABLE_PATH,
@@ -35,6 +41,10 @@ typedef enum cocos_operation {
     COCOS_CONTEXT,
     COCOS_LOG_LEVEL,
     COCOS_EXPANSION_CHECK,
+    COCOS_STARTUP,
+    COCOS_STORAGE,
+    COCOS_REFRESH_RATE,
+    COCOS_ANDROID_VERSION,
     COCOS_ANIMATION_INTERVAL,
     COCOS_BREADCRUMB,
     COCOS_BITMAP,
@@ -82,6 +92,16 @@ static const cocos_method_t __methods[] = {
     ANALYTICS_METHOD("trackTutorialComplete", "()V"),
     ANALYTICS_METHOD("trackTutorialStart", "()V"),
     ANALYTICS_METHOD("trackUnlock", "(" STRING ")V"),
+    ANALYTICS_METHOD("trackBundleDownloadFail", "(" STRING STRING ")V"),
+    ANALYTICS_METHOD("trackCacheAbsent", "()V"),
+    ANALYTICS_METHOD("trackCacheCorrupt", "()V"),
+    ANALYTICS_METHOD("trackCacheFull", "()V"),
+    ANALYTICS_METHOD("trackCachePresent", "(" STRING ")V"),
+    ANALYTICS_METHOD("trackCacheWriteFail", "()V"),
+    ANALYTICS_METHOD("trackHighscore", "(" STRING ")V"),
+    ANALYTICS_METHOD("trackRegionlessPurchaseFailure", "(" STRING ")V"),
+    ANALYTICS_METHOD("trackStoryOpen", "(" STRING STRING ")V"),
+    ANALYTICS_METHOD("trackUnknownSongDownload", "(" STRING ")V"),
 #undef ANALYTICS_METHOD
     {ACTIVITY_CLASS, "trackPurchaseComplete", "(" STRING "F)V", COCOS_ANALYTICS, 0, NULL},
     {ACTIVITY_CLASS, "trackPurchaseStarted", "(" STRING "F)V", COCOS_ANALYTICS, 0, NULL},
@@ -97,6 +117,8 @@ static const cocos_method_t __methods[] = {
     PREFERENCE_METHODS("Float", "F", 'F'),
     PREFERENCE_METHODS("Double", "D", 'D'),
     PREFERENCE_METHODS("String", STRING, 'S'),
+    {HELPER_CLASS, "setBoolForKey", "(" STRING "Z)Z", COCOS_COMMIT_PREFERENCE, 'Z', NULL},
+    {HELPER_CLASS, "setStringForKey", "(" STRING STRING ")Z", COCOS_COMMIT_PREFERENCE, 'S', NULL},
     {HELPER_CLASS, "deleteValueForKey", "(" STRING ")V", COCOS_DELETE_PREFERENCE, 0, NULL},
     {HELPER_CLASS, "getCocos2dxPackageName", "()" STRING, COCOS_STRING, 0, "moe.low.arc"},
     {HELPER_CLASS, "getCurrentLanguage", "()" STRING, COCOS_STRING, 0, "en"},
@@ -111,11 +133,32 @@ static const cocos_method_t __methods[] = {
     {ACTIVITY_CLASS, "generateGuid", "()" STRING, COCOS_GUID, 0, NULL},
     {ACTIVITY_CLASS, "logCrashlytics", "(" STRING ")V", COCOS_BREADCRUMB, 0, NULL},
     {ACTIVITY_CLASS, "startSceneLoadFinished", "()V", COCOS_EXPANSION_CHECK, 0, NULL},
+    {"low/moe/AppActivity", "startSceneLoadFinished", "()V", COCOS_STARTUP, 0, NULL},
+    {"low/moe/AppActivity", "getDeviceEstimatedStorageLeftKb", "()J", COCOS_STORAGE, 0, NULL},
+    {"low/moe/AppActivity", "getDisplayRefreshRate", "()F", COCOS_REFRESH_RATE, 0, NULL},
+    {"low/moe/AppActivity", "isAndroidVersion9OrHigher", "()Z", COCOS_ANDROID_VERSION, 0, NULL},
     {"org/cocos2dx/lib/Cocos2dxRenderer", "setAnimationInterval", "(F)V", COCOS_ANIMATION_INTERVAL, 0, NULL},
     {"com/sdkbox/plugin/SdkboxLog", "setDefaultDebugLevel", "(I)V", COCOS_LOG_LEVEL, 0, "_defaultLevel"}};
 
 static jobject __context;
 static jobject __asset_manager;
+static const char* __activity = ACTIVITY_CLASS;
+
+void jni_cocos_set_activity(bool modern)
+{
+    const char* name = modern ? "low/moe/AppActivity" : ACTIVITY_CLASS;
+    if(strcmp(name, __activity) == 0) {
+        return;
+    }
+
+    JNIEnv* env = jni_runtime_get_env();
+    if(__context && env) {
+        (*env)->DeleteGlobalRef(env, __context);
+    }
+
+    __context = NULL;
+    __activity = name;
+}
 
 static const cocos_method_t* __find_method(const char* class_name, const char* name, const char* signature)
 {
@@ -134,6 +177,14 @@ static const cocos_method_t* __find_method(const char* class_name, const char* n
         }
 
         return method;
+    }
+
+    if(strcmp(class_name, "low/moe/AppActivity") == 0) {
+        return __find_method(ACTIVITY_CLASS, name, signature);
+    }
+
+    if(strcmp(class_name, "low/moe/AnalyticsManager") == 0) {
+        return __find_method("org/cocos2dx/cpp/AnalyticsManager", name, signature);
     }
 
     return NULL;
@@ -175,7 +226,7 @@ static jobject __get_service(jobject* service, const char* class_name)
 
 jobject jni_cocos_get_context(void)
 {
-    return __get_service(&__context, ACTIVITY_CLASS);
+    return __get_service(&__context, __activity);
 }
 
 jobject jni_cocos_get_asset_manager(void)
@@ -311,7 +362,7 @@ static void __get_preference(JNIEnv* env, const char* key, char type, jvalue def
     free(value);
 }
 
-static void __set_preference(JNIEnv* env, const char* key, char type, jvalue input)
+static bool __set_preference(JNIEnv* env, const char* key, char type, jvalue input)
 {
     char number[64];
     const char* value = number;
@@ -338,7 +389,7 @@ static void __set_preference(JNIEnv* env, const char* key, char type, jvalue inp
             break;
 
         default:
-            return;
+            return false;
     }
 
     bool saved;
@@ -349,9 +400,7 @@ static void __set_preference(JNIEnv* env, const char* key, char type, jvalue inp
         saved = cocos_preferences_delete(key);
     }
 
-    if(!saved) {
-        __throw_io(env);
-    }
+    return saved;
 }
 
 static void __call_preference(JNIEnv* env, const cocos_method_t* method, const jvalue* args, jvalue* result)
@@ -374,7 +423,14 @@ static void __call_preference(JNIEnv* env, const cocos_method_t* method, const j
             break;
 
         case COCOS_SET_PREFERENCE:
-            __set_preference(env, key, method->value_type, args[1]);
+            if(!__set_preference(env, key, method->value_type, args[1])) {
+                __throw_io(env);
+            }
+
+            break;
+
+        case COCOS_COMMIT_PREFERENCE:
+            result->z = __set_preference(env, key, method->value_type, args[1]);
             break;
 
         case COCOS_DELETE_PREFERENCE:
@@ -482,6 +538,7 @@ bool jni_cocos_dispatch(
 
         case COCOS_GET_PREFERENCE:
         case COCOS_SET_PREFERENCE:
+        case COCOS_COMMIT_PREFERENCE:
         case COCOS_DELETE_PREFERENCE:
             __call_preference(env, method, args, result);
             break;
@@ -529,6 +586,36 @@ bool jni_cocos_dispatch(
 
             break;
         }
+
+        case COCOS_STARTUP:
+            if(!bridge_jni_cocos_notify_startup()) {
+                jclass exception = (*env)->FindClass(env, JEX_STATE);
+                (*env)->ThrowNew(env, exception, "Native startup notification failed");
+                (*env)->DeleteLocalRef(env, exception);
+            }
+
+            break;
+
+        case COCOS_STORAGE: {
+#ifdef __vita__
+            SceIoDevInfo info;
+            int status = sceIoDevctl("ux0:", 0x3001, NULL, 0, &info, sizeof(info));
+            result->j = status < 0 ? -1 : info.free_size / 1024;
+#else
+            struct statvfs info;
+            int status = statvfs(PATH_TO_USER, &info);
+            result->j = status < 0 ? -1 : (jlong)((uint64_t)info.f_bavail * info.f_frsize / 1024);
+#endif
+            break;
+        }
+
+        case COCOS_REFRESH_RATE:
+            result->f = 60.0f;
+            break;
+
+        case COCOS_ANDROID_VERSION:
+            result->z = JNI_FALSE;
+            break;
 
         case COCOS_EXPANSION_CHECK: {
             // The APK posts a storage-permission/expansion check to Android's UI thread.

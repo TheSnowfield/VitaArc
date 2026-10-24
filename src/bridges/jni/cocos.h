@@ -7,6 +7,7 @@
 bool jni_cocos_dispatch(
     JNIEnv* env, const char* class_name, const char* name, const char* signature, const jvalue* args, jvalue* result);
 jobject jni_cocos_get_context(void);
+void jni_cocos_set_activity(bool modern);
 jobject jni_cocos_get_asset_manager(void);
 
 #endif /* __BRIDGES_JNI_COCOS_H */

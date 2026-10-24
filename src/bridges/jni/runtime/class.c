@@ -13,6 +13,7 @@ typedef struct {
 
 static const jni_parent_t __parents[] = {
     {"org/cocos2dx/cpp/AppActivity", "org/cocos2dx/lib/Cocos2dxActivity"},
+    {"low/moe/AppActivity", "org/cocos2dx/lib/Cocos2dxActivity"},
     {"org/cocos2dx/lib/Cocos2dxActivity", "android/app/Activity"},
     {"android/app/Activity", "android/view/ContextThemeWrapper"},
     {"android/view/ContextThemeWrapper", "android/content/ContextWrapper"},

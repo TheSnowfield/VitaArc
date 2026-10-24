@@ -6,6 +6,7 @@
 #include <config.h>
 #include <loader.h>
 #include <logcat/logcat.h>
+#include <libc/posix.h>
 
 #include <abi/calling.h>
 
@@ -21,6 +22,8 @@ typedef void (*jni_string_call_t)(JNIEnv*, jobject, jstring);
 typedef void (*jni_bitmap_call_t)(JNIEnv*, jclass, jint, jint, jbyteArray);
 typedef void VITAARC_SOFTFP (*jni_touch_point_t)(JNIEnv*, jobject, jint, jfloat, jfloat);
 typedef void (*jni_touch_move_t)(JNIEnv*, jobject, jintArray, jfloatArray, jfloatArray);
+typedef void VITAARC_SOFTFP (*jni_touch_point_v7_t)(JNIEnv*, jobject, jint, jfloat, jfloat, jfloat, jlong);
+typedef void (*jni_touch_move_v7_t)(JNIEnv*, jobject, jintArray, jfloatArray, jfloatArray, jfloatArray, jlong);
 typedef jboolean (*jni_key_event_t)(JNIEnv*, jobject, jint, jboolean);
 
 typedef struct cocos_jni_exports_t {
@@ -30,9 +33,15 @@ typedef struct cocos_jni_exports_t {
     jni_touch_point_t touch_begin;
     jni_touch_point_t touch_end;
     jni_touch_move_t touch_move;
+    jni_touch_point_v7_t touch_begin_v7;
+    jni_touch_point_v7_t touch_end_v7;
+    jni_touch_move_v7_t touch_move_v7;
+    bool touch_v7;
     jni_key_event_t key_event;
     jni_void_call_t expansion_complete;
     bool expansion_delivered;
+    jni_void_call_t startup;
+    bool startup_delivered;
     jni_bitmap_call_t bitmap;
 } cocos_jni_exports_t;
 
@@ -40,6 +49,7 @@ typedef struct touch_arrays_t {
     jintArray ids;
     jfloatArray xs;
     jfloatArray ys;
+    jfloatArray pressure;
 } touch_arrays_t;
 
 static cocos_jni_exports_t __cocos;
@@ -113,6 +123,25 @@ bool bridge_jni_cocos_complete_expansion(void)
     return true;
 }
 
+bool bridge_jni_cocos_notify_startup(void)
+{
+    if(!__env || !__cocos.startup) {
+        return false;
+    }
+
+    if(__cocos.startup_delivered) {
+        return true;
+    }
+
+    __cocos.startup(__env, jni_cocos_get_context());
+    if(!__check_exception("native startup notification")) {
+        return false;
+    }
+
+    __cocos.startup_delivered = true;
+    return true;
+}
+
 bool bridge_jni_cocos_publish_bitmap(int width, int height, const uint8_t* rgba)
 {
     JNIEnv* env = jni_runtime_get_env();
@@ -144,6 +173,7 @@ void bridge_jni_cocos_stop(void)
             (*__env)->DeleteGlobalRef(__env, __touch_arrays[index].ids);
             (*__env)->DeleteGlobalRef(__env, __touch_arrays[index].xs);
             (*__env)->DeleteGlobalRef(__env, __touch_arrays[index].ys);
+            (*__env)->DeleteGlobalRef(__env, __touch_arrays[index].pressure);
         }
     }
 
@@ -166,6 +196,7 @@ static const jni_export_t __classes[] = {
     {"Java_org_cocos2dx_lib_Cocos2dxRenderer_", "org/cocos2dx/lib/Cocos2dxRenderer"},
     {"Java_com_sdkbox_plugin_SDKBox_", "com/sdkbox/plugin/SDKBox"},
     {"Java_org_cocos2dx_cpp_AppActivity_", "org/cocos2dx/cpp/AppActivity"},
+    {"Java_low_moe_AppActivity_", "low/moe/AppActivity"},
     {"Java_org_cocos2dx_lib_Cocos2dxBitmap_", "org/cocos2dx/lib/Cocos2dxBitmap"},
 };
 
@@ -176,12 +207,16 @@ static const jni_proto_t __signatures[] = {
     {"nativeOnPause", "()V"},
     {"nativeOnResume", "()V"},
     {"nativeTouchesBegin", "(IFF)V"},
+    {"nativeTouchesBegin", "(IFFFJ)V"},
     {"nativeTouchesEnd", "(IFF)V"},
+    {"nativeTouchesEnd", "(IFFFJ)V"},
     {"nativeTouchesMove", "([I[F[F)V"},
+    {"nativeTouchesMove", "([I[F[F[FJ)V"},
     {"nativeKeyEvent", "(IZ)Z"},
     {"initJVMPlatformUtils", "()V"},
     {"initJVMAnalytics", "()V"},
     {"notifyExpansionCheckComplete", "()V"},
+    {"notifyNativeStartupComplete", "()V"},
     {"nativeSetApkPath", "(Ljava/lang/String;)V"},
     {"setObbPath", "(Ljava/lang/String;)V"},
     {"setDeviceId", "(Ljava/lang/String;)V"},
@@ -210,7 +245,10 @@ static void* __registered_export(const char* name)
 
         for(size_t member = 0; member < sizeof(__signatures) / sizeof(__signatures[0]); ++member) {
             if(strcmp(method_name, __signatures[member].name) == 0) {
-                return jni_runtime_find_native(__classes[index].clazz, method_name, __signatures[member].sig);
+                void* call = jni_runtime_find_native(__classes[index].clazz, method_name, __signatures[member].sig);
+                if(call) {
+                    return call;
+                }
             }
         }
     }
@@ -225,7 +263,24 @@ static void* __resolve_export(dynalib_t* library, const char* name)
         return registered;
     }
 
-    return loader_get_proc_address(library, name);
+    void* proc = loader_get_proc_address(library, name);
+    if(proc) {
+        return proc;
+    }
+
+    const char* prefix = "Java_org_cocos2dx_cpp_AppActivity_";
+    size_t length = strlen(prefix);
+    if(strncmp(name, prefix, length)) {
+        return NULL;
+    }
+
+    char alias[160];
+    if(snprintf(alias, sizeof(alias), "Java_low_moe_AppActivity_%s", name + length) >= (int)sizeof(alias)) {
+        return NULL;
+    }
+
+    registered = __registered_export(alias);
+    return registered ? registered : loader_get_proc_address(library, alias);
 }
 
 static void* __required_export(dynalib_t* library, const char* name)
@@ -308,6 +363,10 @@ static bool __start(dynalib_t* library, uint32_t screen_width, uint32_t screen_h
         return false;
     }
 
+    bool modern = loader_get_proc_address(library, "Java_low_moe_AppActivity_initJVMPlatformUtils") != NULL;
+    __cocos.touch_v7 = modern;
+    jni_cocos_set_activity(modern);
+
     JNI_OnLoad on_load = (JNI_OnLoad)__required_export(library, "JNI_OnLoad");
     if(!on_load) {
         return false;
@@ -367,22 +426,29 @@ static bool __start(dynalib_t* library, uint32_t screen_width, uint32_t screen_h
         return false;
     }
 
-    __cocos.touch_begin =
-        (jni_touch_point_t)__required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin");
-    if(!__cocos.touch_begin) {
+    void* touch_begin = __required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin");
+    if(!touch_begin) {
         return false;
     }
 
-    __cocos.touch_end =
-        (jni_touch_point_t)__required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd");
-    if(!__cocos.touch_end) {
+    void* touch_end = __required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd");
+    if(!touch_end) {
         return false;
     }
 
-    __cocos.touch_move =
-        (jni_touch_move_t)__required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove");
-    if(!__cocos.touch_move) {
+    void* touch_move = __required_export(library, "Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove");
+    if(!touch_move) {
         return false;
+    }
+
+    if(modern) {
+        __cocos.touch_begin_v7 = touch_begin;
+        __cocos.touch_end_v7 = touch_end;
+        __cocos.touch_move_v7 = touch_move;
+    } else {
+        __cocos.touch_begin = touch_begin;
+        __cocos.touch_end = touch_end;
+        __cocos.touch_move = touch_move;
     }
 
     __cocos.key_event =
@@ -443,6 +509,8 @@ static bool __start(dynalib_t* library, uint32_t screen_width, uint32_t screen_h
     if(__cocos.expansion_complete && !bridge_jni_cocos_complete_expansion()) {
         return false;
     }
+
+    __cocos.startup = (jni_void_call_t)__resolve_export(library, "Java_low_moe_AppActivity_notifyNativeStartupComplete");
 
     native_init(__env, NULL, (jint)screen_width, (jint)screen_height);
     if(!__check_exception("nativeInit")) {
@@ -527,20 +595,44 @@ void bridge_jni_cocos_resume(void)
     __call_callback(__cocos.native_resume, "nativeOnResume");
 }
 
+static jlong __touch_time(void)
+{
+    struct timespec time;
+    if(bridge_clock_gettime(1, &time)) {
+        return 0;
+    }
+
+    return (jlong)time.tv_sec * 1000 + time.tv_nsec / 1000000;
+}
+
+static void __touch_point(
+    jni_touch_point_t call, jni_touch_point_v7_t modern, int32_t id, float x, float y, const char* stage)
+{
+    if(!call && !modern) {
+        return;
+    }
+
+    if(!__callback_ready()) {
+        return;
+    }
+
+    if(modern) {
+        modern(__env, NULL, id, x, y, 1.0f, __touch_time());
+    } else {
+        call(__env, NULL, id, x, y);
+    }
+
+    __callback_complete(stage);
+}
+
 void bridge_jni_cocos_touch_begin(int32_t id, float x, float y)
 {
-    if(__cocos.touch_begin && __callback_ready()) {
-        __cocos.touch_begin(__env, NULL, (jint)id, (jfloat)x, (jfloat)y);
-        __callback_complete("nativeTouchesBegin");
-    }
+    __touch_point(__cocos.touch_begin, __cocos.touch_begin_v7, id, x, y, "nativeTouchesBegin");
 }
 
 void bridge_jni_cocos_touch_end(int32_t id, float x, float y)
 {
-    if(__cocos.touch_end && __callback_ready()) {
-        __cocos.touch_end(__env, NULL, (jint)id, (jfloat)x, (jfloat)y);
-        __callback_complete("nativeTouchesEnd");
-    }
+    __touch_point(__cocos.touch_end, __cocos.touch_end_v7, id, x, y, "nativeTouchesEnd");
 }
 
 static jarray __retain_array(jarray array)
@@ -564,7 +656,19 @@ static bool __prepare_touch_arrays(touch_arrays_t* arrays, jsize count)
         arrays->ys = __retain_array((*__env)->NewFloatArray(__env, count));
     }
 
-    return arrays->ids && arrays->xs && arrays->ys;
+    if(!__cocos.touch_v7) {
+        return arrays->ids && arrays->xs && arrays->ys;
+    }
+
+    if(!arrays->pressure) {
+        const jfloat pressure[8] = {1, 1, 1, 1, 1, 1, 1, 1};
+        arrays->pressure = __retain_array((*__env)->NewFloatArray(__env, count));
+        if(arrays->pressure) {
+            (*__env)->SetFloatArrayRegion(__env, arrays->pressure, 0, count, pressure);
+        }
+    }
+
+    return arrays->ids && arrays->xs && arrays->ys && arrays->pressure;
 }
 
 void bridge_jni_cocos_touch_move(const int32_t* ids, const float* xs, const float* ys, uint32_t count)
@@ -573,7 +677,11 @@ void bridge_jni_cocos_touch_move(const int32_t* ids, const float* xs, const floa
         return;
     }
 
-    if(!__cocos.touch_move || !__callback_ready()) {
+    if(!__cocos.touch_move && !__cocos.touch_move_v7) {
+        return;
+    }
+
+    if(!__callback_ready()) {
         return;
     }
 
@@ -591,7 +699,12 @@ void bridge_jni_cocos_touch_move(const int32_t* ids, const float* xs, const floa
         return;
     }
 
-    __cocos.touch_move(__env, NULL, arrays->ids, arrays->xs, arrays->ys);
+    if(__cocos.touch_move_v7) {
+        __cocos.touch_move_v7(__env, NULL, arrays->ids, arrays->xs, arrays->ys, arrays->pressure, __touch_time());
+    } else {
+        __cocos.touch_move(__env, NULL, arrays->ids, arrays->xs, arrays->ys);
+    }
+
     __callback_complete("nativeTouchesMove");
 }
 

@@ -365,25 +365,3 @@ void bridge_patch_cocos2dx(dynalib_t* library)
         library->prepare = __cleanup_cocos;
     }
 }
-
-bool bridge_cocos_configure_storage(dynalib_t* library)
-{
-    // Vita does not expose POSIX advisory record locks. The game's bundled
-    // SQLite provides its standard atomic-directory locking VFS for this case.
-    // Register it before nativeInit constructs DBManager and opens st3.
-    void* (*find_vfs)(const char*) = loader_get_proc_address(library, "sqlite3_vfs_find");
-    int (*register_vfs)(void*, int) = loader_get_proc_address(library, "sqlite3_vfs_register");
-    if(!find_vfs || !register_vfs) {
-        log_e(TAG, "Game SQLite VFS exports are unavailable");
-        return false;
-    }
-
-    void* vfs = find_vfs("unix-dotfile");
-    if(!vfs || register_vfs(vfs, 1) != 0 || find_vfs(NULL) != vfs) {
-        log_e(TAG, "SQLite atomic-directory locking is unavailable");
-        return false;
-    }
-
-    log_i(TAG, "SQLite uses atomic-directory locking (unix-dotfile)");
-    return true;
-}

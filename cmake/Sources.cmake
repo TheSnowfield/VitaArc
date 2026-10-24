@@ -55,6 +55,7 @@ set(VITAARC_AUDIO_SOURCES
 
 set(VITAARC_COCOS2DX_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/cocos2dx.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/storage.c"
 )
 
 set(VITAARC_COMPAT_SOURCES

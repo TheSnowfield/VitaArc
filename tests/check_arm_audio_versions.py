@@ -1,8 +1,13 @@
 """Check real AudioManager callers against each retained provider ABI table."""
 from pathlib import Path
+import argparse
 from arm_fixture_build import root
 from check_arm_bridges import ArmCalls, ArmImage, float_bits
 from unicorn import arm_const as regs
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--elf', type=Path, default=root / 'build/VitaArc')
+args = parser.parse_args()
 
 for version, offset, table_name, update_slot, play_slot, loops in [
         ('1.6.1c', 0x1e4, 'vita_audio_provider_vtable', 15, 12, 0),
@@ -10,7 +15,7 @@ for version, offset, table_name, update_slot, play_slot, loops in [
         ('2.0.0c', 0x218, 'vita_audio_provider_vtable_v2', 16, 12, 2),
         ('3.0.0c', 0x218, 'vita_audio_provider_vtable_v3', 18, 17, -1)]:
     calls = ArmCalls()
-    target = ArmImage(calls.machine, root / 'build/VitaArc')
+    target = ArmImage(calls.machine, args.elf)
     game = ArmImage(calls.machine, root / f'build/apk-versions/inspection/arcaea_{version}/libcocos2dcpp.so', 0x98000000)
     manager, provider, state, path = [calls.SCRATCH + n for n in (0x1000,0x2000,0x3000,0x4000)]
     table = target.symbols[table_name] + 8
@@ -42,7 +47,14 @@ for version, offset, table_name, update_slot, play_slot, loops in [
             state,path,loops & 0xffffffff,0,float_bits(expected_volume)), version
         calls.machine.reg_write(regs.UC_ARM_REG_R0,71)
 
-    calls.register(target.symbols['vita_audio_play_sfx_ex'],played)
+    def played_legacy():
+        assert [calls.reg(f'R{index}') for index in range(4)] == [state, path, 0, 0]
+        calls.machine.reg_write(regs.UC_ARM_REG_R0, 71)
+
+    if version == '1.6.1c':
+        calls.register(target.symbols['vita_audio_play_sfx'], played_legacy)
+    else:
+        calls.register(target.symbols['vita_audio_play_sfx_ex'], played)
     entry = int.from_bytes(calls.machine.mem_read(table+play_slot*4,4),'little')
     arguments = (provider,path,1 if loops == -1 else loops,0,float_bits(.375))
     assert calls.call(entry,*arguments) == 71

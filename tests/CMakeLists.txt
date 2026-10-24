@@ -174,6 +174,39 @@ target_link_libraries(test_guest_errno PRIVATE Threads::Threads)
 target_compile_options(test_guest_errno PRIVATE -Wall -Wextra -Werror -UNDEBUG -ffunction-sections -fdata-sections)
 target_link_options(test_guest_errno PRIVATE -Wl,--gc-sections)
 
+add_executable(test_walk test_walk.c
+  "${VITAARC_ROOT}/src/bridges/libc/walk.c"
+  "${VITAARC_ROOT}/src/bridges/libc/guest_errno.c"
+  "${VITAARC_ROOT}/src/bridges/libc/directory.c"
+  "${VITAARC_ROOT}/src/bridges/libc/posix.c"
+  ${VITAARC_FILE_SOURCES})
+target_include_directories(test_walk PRIVATE "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
+target_link_libraries(test_walk PRIVATE Threads::Threads)
+target_compile_options(test_walk PRIVATE -Wall -Wextra -Werror -UNDEBUG -ffunction-sections -fdata-sections)
+target_link_options(test_walk PRIVATE -Wl,--gc-sections)
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/walk-runtime")
+add_test(NAME libc_bionic_walk COMMAND test_walk)
+set_tests_properties(libc_bionic_walk PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/walk-runtime")
+
+add_executable(test_storage_paths test_storage_paths.c "${VITAARC_ROOT}/src/bridges/jni/preferences.c")
+target_include_directories(test_storage_paths PRIVATE "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
+target_link_libraries(test_storage_paths PRIVATE Threads::Threads)
+target_compile_options(test_storage_paths PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+target_link_options(test_storage_paths PRIVATE -Wl,--wrap=stat)
+add_test(NAME storage_directory_preparation COMMAND test_storage_paths)
+
+add_executable(test_asset_cache test_asset_cache.c
+  "${VITAARC_ROOT}/src/bridges/android/asset_cache.c"
+  "${VITAARC_ROOT}/src/bridges/android/assetmgr.c")
+target_include_directories(test_asset_cache PRIVATE "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
+target_compile_definitions(test_asset_cache PRIVATE __vita__)
+target_compile_options(test_asset_cache PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+target_link_libraries(test_asset_cache PRIVATE Threads::Threads)
+target_link_options(test_asset_cache PRIVATE -Wl,--wrap=opendir,--wrap=readdir,--wrap=fopen)
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/asset-cache-runtime")
+add_test(NAME asset_directory_cache COMMAND test_asset_cache)
+set_tests_properties(asset_directory_cache PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/asset-cache-runtime")
+
 add_executable(test_poll test_poll.c "${VITAARC_ROOT}/src/bridges/libc/poll.c")
 target_include_directories(test_poll PRIVATE "${VITAARC_ROOT}/src/bridges")
 target_link_libraries(test_poll PRIVATE Threads::Threads)
@@ -206,6 +239,12 @@ target_compile_options(test_thread_attributes PRIVATE -Wall -Wextra -Werror -UND
 target_link_options(test_thread_attributes PRIVATE -Wl,--gc-sections,--wrap=pthread_attr_init,--wrap=pthread_attr_destroy,--wrap=pthread_attr_setstacksize,--wrap=pthread_create)
 
 if(VITAARC_SANITIZERS AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(test_asset_cache PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(test_asset_cache PRIVATE -fsanitize=address,undefined)
+  target_compile_options(test_storage_paths PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(test_storage_paths PRIVATE -fsanitize=address,undefined)
+  target_compile_options(test_walk PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(test_walk PRIVATE -fsanitize=address,undefined)
   foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
     target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=address,undefined)
@@ -213,6 +252,12 @@ if(VITAARC_SANITIZERS AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 if(VITAARC_THREAD_SANITIZER AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(test_asset_cache PRIVATE -fsanitize=thread -fno-omit-frame-pointer -fno-pie)
+  target_link_options(test_asset_cache PRIVATE -fsanitize=thread -no-pie)
+  target_compile_options(test_storage_paths PRIVATE -fsanitize=thread -fno-omit-frame-pointer -fno-pie)
+  target_link_options(test_storage_paths PRIVATE -fsanitize=thread -no-pie)
+  target_compile_options(test_walk PRIVATE -fsanitize=thread -fno-omit-frame-pointer -fno-pie)
+  target_link_options(test_walk PRIVATE -fsanitize=thread -no-pie)
   foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
     target_compile_options(${target} PRIVATE -fsanitize=thread -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=thread)

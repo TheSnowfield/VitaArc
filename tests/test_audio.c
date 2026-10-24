@@ -526,6 +526,85 @@ static void __test_sfx_versions(void)
     vita_audio_destroy(state);
 }
 
+static void __test_audio_v7(void)
+{
+    uint32_t header[] = {
+        0x46464952, 36 + 144 * 4, 0x45564157, 0x20746d66, 16,
+        0x00020001, 48000, 192000, 0x00100004, 0x61746164, 144 * 4,
+    };
+
+    int16_t samples[288];
+    for(unsigned frame = 0; frame < 144; ++frame) {
+        samples[frame * 2] = samples[frame * 2 + 1] = (frame / 48 + 1) * 1000;
+    }
+
+    FILE* file = fopen("range.wav", "wb");
+    assert(file && fwrite(header, 1, sizeof(header), file) == sizeof(header));
+    assert(fwrite(samples, 1, sizeof(samples), file) == sizeof(samples));
+    assert(fclose(file) == 0);
+
+    audio_t* state = vita_audio_create_channels(1, 0, VITA_AUDIO_MAX_BGM);
+    assert(state && vita_audio_is_active(state));
+    assert(vita_audio_load_bgm(state, "fixture48.mp3", 9));
+    vita_audio_play_bgm(state, false, 9, 0);
+    __render(state, 48);
+    assert(vita_audio_get_bgm_position(state, 9) == 1);
+    vita_audio_unload_bgm(state, 9);
+    assert(vita_audio_get_sfx_volume(state) == 1);
+    int16_t output[512];
+    assert(vita_audio_play_sfx_range(state, "range.wav", true, false, 1, 1, 2) > 0);
+    assert(vita_audio_render(state, output, 192));
+    for(unsigned frame = 0; frame < 192; ++frame) {
+        assert(output[frame * 2] == (frame < 48 ? 1000 : 2000));
+    }
+
+    vita_audio_stop_sfx_path(state, "range.wav");
+    assert(vita_audio_load_bgm(state, "fixture48.mp3", 0));
+    assert(vita_audio_schedule_sfx(state, "range.wav", 2));
+    assert(vita_audio_schedule_sfx(state, "range.wav", 1));
+    vita_audio_play_bgm(state, false, 0, 1);
+    assert(vita_audio_render(state, output, 256));
+    for(unsigned frame = 0; frame < 256; ++frame) {
+        int expected = 0;
+        if(frame >= 96 && frame < 240) {
+            expected += (((frame - 96) / 48 + 1) * 1000 * 26214) >> 15;
+        }
+
+        if(frame >= 144) {
+            expected += (((frame - 144) / 48 + 1) * 1000 * 26214) >> 15;
+        }
+
+        assert(output[frame * 2] == expected && output[frame * 2 + 1] == expected);
+    }
+
+    vita_audio_unload_sfx(state, "range.wav");
+    vita_audio_set_master_volume(state, 1, false);
+    assert(vita_audio_render(state, output, 48));
+    for(unsigned index = 0; index < 96; ++index) {
+        assert(output[index] == 0);
+    }
+
+    vita_audio_play_bgm(state, false, 0, 0);
+    assert(vita_audio_render(state, output, 48));
+    bool audible = false;
+    for(unsigned index = 0; index < 96; ++index) {
+        audible |= output[index] != 0;
+    }
+
+    assert(audible);
+    vita_audio_set_master_volume(state, 0, true);
+    assert(vita_audio_render(state, output, 48));
+    for(unsigned index = 0; index < 96; ++index) {
+        assert(output[index] == 0);
+    }
+
+    vita_audio_suspend(state);
+    assert(!vita_audio_is_active(state));
+    vita_audio_resume(state);
+    assert(vita_audio_is_active(state));
+    vita_audio_destroy(state);
+}
+
 static void __test_lifetime(void)
 {
     int initialized = mock_audio_library_inits;
@@ -562,6 +641,35 @@ static void __test_lifetime(void)
     mock_audio_module_failure = 0;
 }
 
+static void __test_sfx_cache(void)
+{
+    uint32_t header[] = {
+        0x46464952, 40, 0x45564157, 0x20746d66, 16,
+        0x00020001, 48000, 192000, 0x00100004, 0x61746164, 4,
+    };
+
+    audio_t* state = vita_audio_create(1, 0);
+    assert(state);
+    char path[32];
+    for(unsigned index = 0; index < 48; ++index) {
+        snprintf(path, sizeof(path), "cache-%u.wav", index);
+        int16_t samples[] = {1000 + index, -1000 - index};
+        FILE* file = fopen(path, "wb");
+        assert(file && fwrite(header, 1, sizeof(header), file) == sizeof(header));
+        assert(fwrite(samples, 1, sizeof(samples), file) == sizeof(samples));
+        assert(fclose(file) == 0);
+        assert(vita_audio_preload_sfx(state, path));
+    }
+
+    vita_audio_unload_sfx(state, "cache-0.wav");
+    assert(vita_audio_play_sfx_ex(state, "cache-47.wav", 0, false, 1) > 0);
+    int16_t output[2];
+    assert(vita_audio_render(state, output, 1));
+    assert(output[0] == 1047 && output[1] == -1047);
+    assert(vita_audio_preload_sfx(state, "cache-0.wav"));
+    vita_audio_destroy(state);
+}
+
 int main(void)
 {
     __fixture("fixture48.mp3", 48000, false);
@@ -586,6 +694,8 @@ int main(void)
     __test_provider();
     __test_float_wav();
     __test_sfx_versions();
+    __test_audio_v7();
+    __test_sfx_cache();
     __test_lifetime();
     assert(mock_audio_decoders == 0 && mock_audio_ports == 0 && mock_audio_threads == 0);
     assert(mock_audio_library_inits == mock_audio_library_terms);

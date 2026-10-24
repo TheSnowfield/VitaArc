@@ -290,7 +290,8 @@ static void __test_backend(void)
     assert(vita_audio_get_bgm_position(state, 0) == 150);
     __render(state, 48);
     assert(vita_audio_get_bgm_position(state, 0) == 150);
-    vita_audio_set_bgm_paused(state, false, 0);
+    vita_audio_play_bgm(state, false, 0, 0);
+    assert(vita_audio_get_bgm_position(state, 0) == 150);
     int16_t output[96];
     assert(vita_audio_render(state, output, 48));
     assert(output[0] == 7300 && output[1] == -7300);
@@ -308,6 +309,7 @@ static void __test_backend(void)
     assert(vita_audio_get_bgm_position(state, -1) == -1);
     assert(vita_audio_seek_bgm(state, INT_MAX, 0));
     assert(vita_audio_get_bgm_position(state, 0) == 480);
+    assert(vita_audio_seek_bgm(state, 0, 0));
     vita_audio_play_bgm(state, true, 0, 10);
     __render(state, 480);
     assert(vita_audio_get_bgm_position(state, 0) == 0);
@@ -317,7 +319,7 @@ static void __test_backend(void)
     assert(vita_audio_get_bgm_position(state, 0) == 10);
     vita_audio_play_bgm(state, true, 0, INT_MAX);
     __render(state, 4800);
-    assert(vita_audio_get_bgm_position(state, 0) == 0);
+    assert(vita_audio_get_bgm_position(state, 0) == 10);
     assert(vita_audio_seek_bgm(state, 100, 0));
     __render(state, 48);
     assert(vita_audio_get_bgm_position(state, 0) == 101);

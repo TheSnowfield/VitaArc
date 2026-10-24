@@ -15,14 +15,14 @@ static void __wrap(void)
     assert(text.row == 0 && text.col == LOG_COLS);
     assert(strlen(text.lines[0].text) == LOG_COLS);
     log_text_write(&text, WARNING, "!\n", 2);
-    assert(text.row == 2 && text.col == 0 && text.count == 3);
+    assert(text.row == 1 && text.col == 1 && text.count == 2 && text.newline);
     assert(!strcmp(text.lines[1].text, "!"));
     assert(text.lines[1].level == WARNING);
 
     memset(&text, 0, sizeof(text));
     log_text_write(&text, INFORMATION, line, sizeof(line));
     log_text_write(&text, INFORMATION, "\n", 1);
-    assert(text.row == 1 && text.count == 2);
+    assert(text.row == 0 && text.count == 1 && text.newline);
 }
 
 static void __scroll(void)
@@ -35,10 +35,10 @@ static void __scroll(void)
         log_text_write(&text, INFORMATION, line, (size_t)size);
     }
 
-    assert(text.count == LOG_ROWS && text.col == 0);
+    assert(text.count == LOG_ROWS && text.newline);
     unsigned first = (text.row + 1) % LOG_ROWS;
-    assert(!strcmp(text.lines[first].text, "line 6"));
-    assert(!text.lines[text.row].text[0]);
+    assert(!strcmp(text.lines[first].text, "line 5"));
+    assert(text.lines[text.row].text[0]);
 }
 
 static void __fragments(void)

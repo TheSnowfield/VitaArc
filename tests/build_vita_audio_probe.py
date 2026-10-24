@@ -23,6 +23,8 @@ def main():
         "-I", str(root / "src"),
         *(["-DVITAARC_VORBIS_PROBE"] if args.vorbis else []),
         str(root / "tests/vita_audio_probe.c"), str(root / "src/bridges/audio/mp3.c"),
+        str(root / "src/bridges/audio/mp3_frame.c"), str(root / "src/bridges/audio/mp3_index.c"),
+        str(root / "src/bridges/audio/mp3_marks.c"),
         str(root / "src/bridges/audio/stream.c"),
         *[str(root / "src/bridges/audio" / (name + ".c"))
           for name in ("backend", "common", "feed", "mixer", "bgm", "sfx", "wav")],

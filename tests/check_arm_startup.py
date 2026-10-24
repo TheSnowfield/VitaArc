@@ -36,9 +36,15 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
             events.append((name, args))
             if name in ("log_i", "log_w", "log_e", "log_f"):
                 messages.append((name, string(args[1])))
-            if name == "vglInitExtended":
-                assert args == (0, 960, 544, 24 * 1024 * 1024)
-                assert int.from_bytes(calls.machine.mem_read(calls.reg("SP"), 4), "little") == 0
+            if name == "sceKernelGetFreeMemorySize":
+                values = (16, 160 * 1024 * 1024, 112 * 1024 * 1024, 26 * 1024 * 1024)
+                calls.machine.mem_write(args[0], b"".join(value.to_bytes(4, "little") for value in values))
+            if name == "vglSetCircularPoolSize":
+                assert args[0] == 6 * 1024 * 1024
+            if name == "vglInitWithCustomThreshold":
+                assert args == (0, 960, 544, 128 * 1024 * 1024)
+                stack = calls.machine.mem_read(calls.reg("SP"), 16)
+                assert [int.from_bytes(stack[n:n+4], "little") for n in range(0, 16, 4)] == [0, 0x7fffffff, 0x7fffffff, 0]
             if name == "loader_load_library":
                 assert string(args[0]) == "app0:package/lib/armeabi-v7a/libcocos2dcpp.so"
             if name == "shark_init":
@@ -78,6 +84,7 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
             "scePowerSetGpuClockFrequency", "scePowerSetGpuXbarClockFrequency",
             "vglSetupRuntimeShaderCompiler", "vglSetVDMBufferSize",
             "vglSetVertexBufferSize", "vglSetFragmentBufferSize", "vglSetUSSEBufferSize",
+            "vglSetCircularPoolSize", "sceKernelGetFreeMemorySize", "vita_memory_log", "vita_memory_tick", "vita_perf_frame",
             "bridge_compat_initialize", "bridge_patch_gl", "bridge_patch_cocos2dx",
             "loader_flush_caches", "bridge_jni_cocos_stop", "glFinish",
             "loader_free_library", "bridge_cocos_release_textures", "bridge_gl_shutdown_buffers", "vita_frame_step",
@@ -86,7 +93,7 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
         endpoint(name)
     endpoint("sceKernelGetProcessTimeWide")
     endpoint("vita_frame_delay", pacing_delay)
-    endpoint("vglInitExtended", fallback)
+    endpoint("vglInitWithCustomThreshold", fallback)
     endpoint("loader_load_library", 0 if failure == "load" else handle)
     endpoint("loader_init_library", int(failure != "constructors"))
     endpoint("bridge_cocos_configure_storage", int(failure != "storage"))
@@ -96,14 +103,14 @@ def check_startup(elf, fallback, failure, compiler="primary", pacing_delay=0):
 
     assert calls.call(image.symbols["main"]) == 1
     names = [event[0] for event in events]
-    assert names.count("vglInitExtended") == 1
+    assert names.count("vglInitWithCustomThreshold") == 1
     assert names.index("log_screen_begin") < names.index("log_begin")
-    assert names.index("vglInitExtended") < names.index("log_screen_ready")
+    assert names.index("vglInitWithCustomThreshold") < names.index("log_screen_ready")
     assert names.index("log_screen_ready") < names.index("bridge_shader_enable_offline")
     assert names.count("log_screen_end") == 1
     assert names.count("shark_init") == (0 if compiler == "offline" else 1 if compiler == "primary" else 2)
     assert names.count("bridge_shader_enable_offline") == 1
-    assert names.index("vglInitExtended") < names.index("bridge_shader_enable_offline")
+    assert names.index("vglInitWithCustomThreshold") < names.index("bridge_shader_enable_offline")
     if compiler != "offline":
         assert names.index("bridge_shader_enable_offline") < names.index("shark_init")
     fallback_messages = [message for level, message in messages

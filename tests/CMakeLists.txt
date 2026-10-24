@@ -88,6 +88,8 @@ target_compile_options(test_threads PRIVATE -Wall -Wextra -Werror -UNDEBUG)
 
 add_executable(test_audio test_audio.c vorbis_fixture.c mocks/audio.c mocks/platform.c
   ${VITAARC_AUDIO_BACKEND_SOURCES} "${VITAARC_ROOT}/src/bridges/audio/mp3.c"
+  "${VITAARC_ROOT}/src/bridges/audio/mp3_frame.c" "${VITAARC_ROOT}/src/bridges/audio/mp3_index.c"
+  "${VITAARC_ROOT}/src/bridges/audio/mp3_marks.c"
   "${VITAARC_ROOT}/src/bridges/audio/stream.c"
   "${VITAARC_ROOT}/src/bridges/audio/provider.c" "${VITAARC_ROOT}/src/bridges/audio/wav.c")
 target_include_directories(test_audio PRIVATE

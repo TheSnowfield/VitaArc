@@ -1,0 +1,37 @@
+LICENSE / Credits
+vitaGL / vitaShaRK - Rinnegatamante / contributors - LGPL-3.0-or-later
+FreeType - The FreeType Project - FreeType License
+libogg / libvorbis - Xiph.Org Foundation - BSD-3-Clause
+libpng - PNG Reference Library License
+zlib - zlib License / bzip2 - bzip2 License
+[I] [logcat.c] 	Log started.
+[I] [init.c] 	Startup policy: prefer packaged offline shaders before runtime compiler
+[I] [memory.c] 	Memory budget: heap=128 MiB graphics RAM<=32 MiB stream=6 MiB
+[I] [init.c] 	VitaGL initialized
+[I] [memory.c] 	Memory graphics: heap used=51 reserved=131072 arena=584 peak=51 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=197632 VRAM=0 PHYCONT=26624 KiB
+[I] [init.c] 	Selected offline shader pack; skipping runtime compiler initialization
+[I] [memory.c] 	Memory before-library: heap used=51 reserved=131072 arena=584 peak=51 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=197632 VRAM=0 PHYCONT=26624 KiB
+[I] [loader.c] 	ELF image libcocos2dcpp.so: 18391920 bytes
+[I] [loader.c] 	ELF image storage at 0x89c00000
+[I] [loader.c] 	ELF image read complete
+[I] [loader.c] 	ELF image validated
+[I] [image.c] 	Map segment 1: base=0x98000000 size=17526784
+[I] [image.c] 	Map segment 2: base=0x990BA000 size=618496
+[I] [image.c] 	Map segment 3: base=0x99154000 size=339968
+[I] [relocation.c] 	Selected AudioProvider layout 7
+[I] [relocation.c] 	Resolved 474 external relocations
+[I] [loader.c] 	Loaded libcocos2dcpp.so at 0x98000000 (3 segments)
+[I] [textures.c] 	Vita texture profile: 3983 smaller images, original layout dimensions
+[I] [memory.c] 	Memory after-constructors: heap used=1704 reserved=131072 arena=1708 peak=1704 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=161792 VRAM=0 PHYCONT=26624 KiB
+[E] [storage.c] 	Data directory unavailable: ux0:data/vitaarc/persistent/data/files/ error=13 (Permission denied)
+[F] [init.c] 	Game database initialization failed
+[I] [logcat.c] 	Log stop.

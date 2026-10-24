@@ -1,5 +1,9 @@
 # Local APK comparison, 2026-10-24
 
+The 2026-10-25 verification of the current 256 MiB build is recorded in
+[current compatibility verification](compat/current.md). The SELF hashes and
+package descriptions below belong to the earlier comparison batch.
+
 ## Final local verification (supersedes historical status below)
 
 Current production SELF is

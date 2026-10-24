@@ -1,0 +1,2047 @@
+LICENSE / Credits
+vitaGL / vitaShaRK - Rinnegatamante / contributors - LGPL-3.0-or-later
+FreeType - The FreeType Project - FreeType License
+libogg / libvorbis - Xiph.Org Foundation - BSD-3-Clause
+libpng - PNG Reference Library License
+zlib - zlib License / bzip2 - bzip2 License
+[I] [logcat.c] 	Log started.
+[I] [init.c] 	Startup policy: prefer packaged offline shaders before runtime compiler
+[I] [memory.c] 	Memory budget: heap=128 MiB graphics RAM<=32 MiB stream=6 MiB
+[I] [init.c] 	VitaGL initialized
+[I] [memory.c] 	Memory graphics: heap used=51 reserved=131072 arena=584 peak=51 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=197632 VRAM=0 PHYCONT=26624 KiB
+[I] [init.c] 	Selected offline shader pack; skipping runtime compiler initialization
+[I] [memory.c] 	Memory before-library: heap used=51 reserved=131072 arena=584 peak=51 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=197632 VRAM=0 PHYCONT=26624 KiB
+[I] [loader.c] 	ELF image libcocos2dcpp.so: 18391920 bytes
+[I] [loader.c] 	ELF image storage at 0x89b00000
+[I] [loader.c] 	ELF image read complete
+[I] [loader.c] 	ELF image validated
+[I] [image.c] 	Map segment 1: base=0x98000000 size=17526784
+[I] [image.c] 	Map segment 2: base=0x990BA000 size=618496
+[I] [image.c] 	Map segment 3: base=0x99154000 size=339968
+[I] [relocation.c] 	Selected AudioProvider layout 7
+[I] [relocation.c] 	Resolved 474 external relocations
+[I] [loader.c] 	Loaded libcocos2dcpp.so at 0x98000000 (3 segments)
+[I] [textures.c] 	Vita texture profile: 3983 smaller images, original layout dimensions
+[I] [memory.c] 	Memory after-constructors: heap used=1704 reserved=131072 arena=1708 peak=1704 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=161792 VRAM=0 PHYCONT=26624 KiB
+[I] [storage.c] 	SQLite uses atomic-directory locking (unix-dotfile)
+[I] [storage.c] 	Database ready: ux0:data/vitaarc/persistent/data/files/st3
+[I] [memory.c] 	Memory before-JNI: heap used=1704 reserved=131072 arena=1776 peak=1704 KiB
+[I] [memory.c] 	Graphics RAM: used=10802 free=16845 reserved=27648 peak=10802 KiB
+[I] [memory.c] 	Graphics VRAM: used=12407 free=85896 reserved=98304 peak=12407 KiB
+[I] [memory.c] 	System free: RAM=161792 VRAM=0 PHYCONT=26624 KiB
+[E] [JniHelper] 	JniHelper::setJavaVM(0x81300024), pthread_self() = -2123366304
+[E] [main] 	cocos_android_app_init
+[I] [jni.c] 	JNI_OnLoad returned 0x00010004
+[I] [jni.c] 	Configured APK version 7.0.260c
+[I] [backend.c] 	Vita audio backend initialized on port 7
+[I] [provider.c] 	Vita AudioProvider initialized
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_open.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_close.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/item_click.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/item_click_alt.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/song_confirm.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/5_mp_shutter_close.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/beyond_song_confirm.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/breached_song_confirm.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_open_course.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_close_course.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/song_confirm_course.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_axiombutton.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/konzetsu/start_challenge.wav
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader 5e957238bf3f9ec3
+[I] [gl.c] 	_gl_bind_attrib_location(1, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(1, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 1
+[I] [gl.c] 	Compiled shader f4a4c2a2d87dddc7
+[I] [gl.c] 	Compiled shader 5e957238bf3f9ec3
+[I] [gl.c] 	_gl_bind_attrib_location(2, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(2, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 2
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader b294b2f0f14aa455
+[I] [gl.c] 	_gl_bind_attrib_location(3, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(3, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 3
+[I] [gl.c] 	Compiled shader f4a4c2a2d87dddc7
+[I] [gl.c] 	Compiled shader b294b2f0f14aa455
+[I] [gl.c] 	_gl_bind_attrib_location(4, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(4, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 4
+[I] [gl.c] 	Compiled shader 6459ec7eba6ca2c9
+[I] [gl.c] 	Compiled shader aa6b0d0a409257d6
+[I] [gl.c] 	_gl_bind_attrib_location(5, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(5, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 5
+[I] [gl.c] 	Compiled shader 9771c75bb0520db1
+[I] [gl.c] 	Compiled shader aa6b0d0a409257d6
+[I] [gl.c] 	_gl_bind_attrib_location(6, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(6, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 6
+[I] [gl.c] 	Compiled shader f4a4c2a2d87dddc7
+[I] [gl.c] 	Compiled shader aa6b0d0a409257d6
+[I] [gl.c] 	_gl_bind_attrib_location(7, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(7, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 7
+[I] [gl.c] 	Compiled shader 0282604bb73d8959
+[I] [gl.c] 	Compiled shader 314c11da3e0426ce
+[I] [gl.c] 	_gl_bind_attrib_location(8, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(8, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 8
+[I] [gl.c] 	Compiled shader 0282604bb73d8959
+[I] [gl.c] 	Compiled shader f19c249e1313863b
+[I] [gl.c] 	_gl_bind_attrib_location(9, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(9, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 9
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader b5141e539c8d190b
+[I] [gl.c] 	_gl_bind_attrib_location(10, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(10, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 10
+[I] [gl.c] 	Compiled shader 7ae5c5254713c071
+[I] [gl.c] 	Compiled shader aa6b0d0a409257d6
+[I] [gl.c] 	_gl_bind_attrib_location(11, 0, aVertex)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(11, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 11
+[I] [gl.c] 	Compiled shader 387528f586d9a945
+[I] [gl.c] 	Compiled shader a03079106c686b27
+[I] [gl.c] 	_gl_bind_attrib_location(12, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(12, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 12
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader 7df155414b0c3171
+[I] [gl.c] 	_gl_bind_attrib_location(13, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(13, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 13
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader eda166d565fc7c14
+[I] [gl.c] 	_gl_bind_attrib_location(14, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(14, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 14
+[I] [gl.c] 	Compiled shader f4a4c2a2d87dddc7
+[I] [gl.c] 	Compiled shader 3c87b1f7a7d8f1b7
+[I] [gl.c] 	_gl_bind_attrib_location(15, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(15, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 15
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader 0125208850e49130
+[I] [gl.c] 	_gl_bind_attrib_location(16, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(16, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 16
+[I] [gl.c] 	Compiled shader ec98300789fd9176
+[I] [gl.c] 	Compiled shader c93f6bf0a398f0c8
+[I] [gl.c] 	_gl_bind_attrib_location(17, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(17, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 17
+[I] [gl.c] 	Compiled shader 9a2c9b63f2807e34
+[I] [gl.c] 	Compiled shader 4e64fbc7f2983c21
+[I] [gl.c] 	_gl_bind_attrib_location(18, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(18, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 18
+[I] [gl.c] 	Compiled shader 9a2c9b63f2807e34
+[I] [gl.c] 	Compiled shader dcb2802e89c35ade
+[I] [gl.c] 	_gl_bind_attrib_location(19, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(19, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 19
+[I] [gl.c] 	Compiled shader 0f0b0e532b67bcff
+[I] [gl.c] 	Compiled shader dcb2802e89c35ade
+[I] [gl.c] 	_gl_bind_attrib_location(20, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(20, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 20
+[I] [gl.c] 	Compiled shader c8747ea74aab7c83
+[I] [gl.c] 	Compiled shader 4c30710630e86bbd
+[I] [gl.c] 	_gl_bind_attrib_location(21, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(21, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 21
+[I] [gl.c] 	Compiled shader c8747ea74aab7c83
+[I] [gl.c] 	Compiled shader bc1fb194609f35f2
+[I] [gl.c] 	_gl_bind_attrib_location(22, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(22, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 22
+[I] [gl.c] 	Compiled shader 0b15f466b994f3d3
+[I] [gl.c] 	Compiled shader bc1fb194609f35f2
+[I] [gl.c] 	_gl_bind_attrib_location(23, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(23, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 23
+[I] [gl.c] 	Compiled shader 5769a50a0e497776
+[I] [gl.c] 	Compiled shader 6ddbb84bbfcb3f81
+[I] [gl.c] 	_gl_bind_attrib_location(24, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(24, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 24
+[I] [gl.c] 	Compiled shader 7697beef64faad08
+[I] [gl.c] 	Compiled shader 6ddbb84bbfcb3f81
+[I] [gl.c] 	_gl_bind_attrib_location(25, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(25, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 25
+[I] [gl.c] 	Compiled shader 4eee75bf90c5f9b7
+[I] [gl.c] 	Compiled shader e23c7959f0a6cc17
+[I] [gl.c] 	_gl_bind_attrib_location(26, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(26, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 26
+[I] [gl.c] 	Compiled shader 4eee75bf90c5f9b7
+[I] [gl.c] 	Compiled shader e669e6fb5c8c8ea0
+[I] [gl.c] 	_gl_bind_attrib_location(27, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(27, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 27
+[I] [gl.c] 	Compiled shader dc8dd034f0ef6ebd
+[I] [gl.c] 	Compiled shader 4324130ab247785b
+[I] [gl.c] 	_gl_bind_attrib_location(28, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(28, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 28
+[I] [gl.c] 	Compiled shader 49f7a29bade7b0e0
+[I] [gl.c] 	Compiled shader 9f61a214a7972b5d
+[I] [gl.c] 	_gl_bind_attrib_location(29, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(29, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 29
+[I] [gl.c] 	Compiled shader 820045cee05a2b82
+[I] [gl.c] 	Compiled shader a8ea01ef6d08709c
+[I] [gl.c] 	_gl_bind_attrib_location(30, 0, a_position)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 1, a_color)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 2, a_texCoord)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 3, a_texCoord1)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 4, a_texCoord2)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 5, a_texCoord3)
+[I] [gl.c] 	_gl_bind_attrib_location(30, 6, a_normal)
+[I] [gl.c] 	Linked offline shader program 30
+[I] [cocos.c] 	Game breadcrumb: Screen: start
+[W] [method.c] 	Unsupported JNI method: low/moe/AppActivity.setScreenKeepAwake(Z)V
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_open_alt.wav
+[I] [jni.c] 	Cocos initialized at 960x544
+[I] [memory.c] 	Memory after-JNI: heap used=15766 reserved=131072 arena=18028 peak=15766 KiB
+[I] [memory.c] 	Graphics RAM: used=10808 free=16839 reserved=27648 peak=10808 KiB
+[I] [memory.c] 	Graphics VRAM: used=27094 free=71209 reserved=98304 peak=27094 KiB
+[I] [memory.c] 	System free: RAM=158720 VRAM=0 PHYCONT=26624 KiB
+[I] [init.c] 	Presented Cocos frame 1
+[I] [memory.c] 	Memory runtime: heap used=16237 reserved=131072 arena=18028 peak=16237 KiB
+[I] [memory.c] 	Graphics RAM: used=10809 free=16838 reserved=27648 peak=10809 KiB
+[I] [memory.c] 	Graphics VRAM: used=27606 free=70697 reserved=98304 peak=27606 KiB
+[I] [memory.c] 	System free: RAM=158720 VRAM=0 PHYCONT=26624 KiB
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/shutter_close_alt.wav
+[I] [init.c] 	Presented Cocos frame 120
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/tempest_unlock.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/item_cancel.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/menu_in.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/unlock.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/grade_appear.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/tap.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/world_unlock.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/awaken.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/upgrade.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/1.1_mp_open.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/1.2_mp_close.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/2_mp_readyscreen.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/3_mp_player_ready.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/4_mp_countdown.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/7_mp_exit_session.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/8_mp_notification.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/9.1_mp_char_expand.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/9.2_mp_char_contract.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/sticker.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_node_open.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_node_close.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_hp.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_challenge_complete.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_node_playable.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/endview_startsongpress.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/step.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_deny.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_maya_vanish.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_reveal.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_pack_hide.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_pack_reveal.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/beyond_boost_gain.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/6_mp_player_score.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/challenge_out.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/breached_results_change.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/beyond_progress_display.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/beyond_boost_banner.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/breached_progress_display.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/insight_invasion.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/6.2_winner_appear.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/story_transition.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/story_transition_long.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/diary_awakening.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/diary_discovery.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/diary_fade.wav
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/diary_clear.wav
+[I] [perf.c] 	Frame times: count=1800 render avg=606 peak=5829 present avg=16051 peak=18861 slow-render=0 us
+[I] [memory.c] 	Memory runtime: heap used=47442 reserved=131072 arena=57208 peak=47442 KiB
+[I] [memory.c] 	Graphics RAM: used=10812 free=16835 reserved=27648 peak=10812 KiB
+[I] [memory.c] 	Graphics VRAM: used=27606 free=70697 reserved=98304 peak=27606 KiB
+[I] [memory.c] 	System free: RAM=158720 VRAM=0 PHYCONT=26624 KiB
+[I] [sfx.c] 	Preloaded SFX: app0:package/assets/audio/konzetsu/song_unlock.wav
+[I] [cocos.c] 	Local analytics low/moe/AnalyticsManager.trackCachePresent(1408)
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/0_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/0_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_0_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_0_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/0u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/0u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_0u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_0u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/0o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/0o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_0o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_0o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/1_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/1_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_1_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_1_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/1u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/1u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_1u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_1u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/1o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/1o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_1o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_1o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/2_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/2_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_2_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_2_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/2u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/2u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_2u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_2u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/2o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/2o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/2o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/3_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/3_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_3_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_3_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/3u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/3u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/3o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/3o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/3u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/3o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/4_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/4_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_4_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_4_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/4u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/4u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_4u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_4u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/4o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/4o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/4o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/5_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/5_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_5_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_5_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/5u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/5u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/5o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/5o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/5u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/5o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/6_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/6_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_6_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_6_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/6u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/6u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/6o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/6o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/6u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/6o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/7_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/7_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_7_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_7_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/7u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/7u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/7o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/7o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/7u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/7o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/8_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/8_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_8_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_8_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/8u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/8u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/8o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/8o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/8u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/8o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/9_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/9_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_9_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_9_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/9u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/9u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/9o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/9o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/9u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/9o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/10_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/10_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_10_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_10_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/10u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/10u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_10u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_10u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/10o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/10o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/10o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/11_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/11_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_11_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_11_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/11u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/11u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_11u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_11u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/11o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/11o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/11o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/12_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/12_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_12_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_12_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/12u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/12u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_12u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_12u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/12o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/12o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/12o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/13_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/13_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_13_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_13_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/13u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/13u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_13u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_13u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/13o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/13o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/13o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/14_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/14_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_14_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_14_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/14u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/14u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/14o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/14o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/14u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/14o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/15_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/15_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_15_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_15_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/15u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/15u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/15o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/15o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/15u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/15o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/16_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/16_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_16_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_16_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/16u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/16u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/16o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/16o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/16u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/16o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/17_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/17_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_17_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_17_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/17u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/17u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/17o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/17o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/17u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/17o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/18_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/18_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_18_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_18_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/18u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/18u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/18o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/18o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/18u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/18o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/19_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/19_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_19_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_19_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/19u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/19u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_19u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_19u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/19o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/19o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/19o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/20_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/20_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_20_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_20_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/20u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/20u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/20o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/20o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/20u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/20o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/21_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/21_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_21_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_21_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/21u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/21u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_21u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_21u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/21o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/21o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/21o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/22_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/22_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_22_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_22_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/22u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/22u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/22o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/22o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/22u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/22o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/23_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/23_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_23_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_23_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/23u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/23u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_23u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_23u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/23o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/23o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/23o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/24_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/24_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_24_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_24_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/24u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/24u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/24o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/24o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/24u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/24o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/25_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/25_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_25_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_25_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/25u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/25u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/25o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/25o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/25u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/25o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/26_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/26_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_26_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_26_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/26u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/26u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_26u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_26u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/26o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/26o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/26o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/27_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/27_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_27_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_27_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/27u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/27u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_27u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_27u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/27o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/27o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/27o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/28_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/28_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_28_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_28_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/28u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/28u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_28u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_28u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/28o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/28o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/28o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/29_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/29_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_29_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_29_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/29u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/29u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_29u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_29u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/29o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/29o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/29o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/30_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/30_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_30_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_30_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/30u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/30u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_30u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_30u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/30o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/30o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/30o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/31_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/31_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_31_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_31_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/31u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/31u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/31o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/31o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/31u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/31o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/32_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/32_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_32_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_32_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/32u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/32u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/32o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/32o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/32u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/32o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/33_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/33_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_33_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_33_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/33u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/33u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/33o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/33o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/33u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/33o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/34_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/34_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_34_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_34_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/34u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/34u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_34u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_34u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/34o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/34o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/34o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/35_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/35_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_35_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_35_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/35u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/35u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/35o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/35o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/35u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/35o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/36_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/36_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_36_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_36_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/36u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/36u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_36u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_36u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/36o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/36o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/36o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/37_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/37_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_37_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_37_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/37u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/37u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/37o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/37o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/37u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/37o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/38_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/38_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_38_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_38_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/38u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/38u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/38o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/38o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/38u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/38o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/39_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/39_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_39_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_39_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/39u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/39u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/39o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/39o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/39u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/39o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/40_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/40_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_40_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_40_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/40u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/40u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/40o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/40o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/40u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/40o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/41_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/41_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_41_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_41_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/41u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/41u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/41o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/41o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/41u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/41o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/42_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/42_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_42_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_42_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/42u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/42u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_42u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_42u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/42o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/42o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/42o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/43_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/43_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_43_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_43_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/43u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/43u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_43u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_43u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/43o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/43o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/43o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/44_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/44_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_44_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_44_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/44u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/44u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/44o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/44o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/44u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/44o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/45_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/45_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_45_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_45_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/45u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/45u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/45o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/45o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/45u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/45o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/46_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/46_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_46_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_46_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/46u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/46u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/46o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/46o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/46u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/46o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/47_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/47_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_47_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_47_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/47u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/47u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/47o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/47o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/47u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/47o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/48_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/48_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_48_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_48_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/48u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/48u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/48o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/48o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/48u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/48o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/49_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/49_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_49_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_49_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/49u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/49u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/49o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/49o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/49u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/49o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/50_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/50_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_50_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_50_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/50u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/50u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/50o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/50o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/50u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/50o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/51_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/51_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_51_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_51_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/51u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/51u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/51o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/51o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/51u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/51o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/52_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/52_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_52_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_52_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/52u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/52u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/52o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/52o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/52u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/52o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/53_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/53_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_53_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_53_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/53u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/53u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/53o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/53o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/53u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/53o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/54_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/54_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_54_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_54_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/54u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/54u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/54o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/54o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/54u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/54o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/55_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/55_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_55_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_55_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/55u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/55u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/55o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/55o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/55u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/55o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/56_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/56_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_56_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_56_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/56u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/56u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/56o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/56o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/56u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/56o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/57_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/57_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_57_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_57_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/57u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/57u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/57o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/57o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/57u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/57o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/58_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/58_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_58_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_58_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/58u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/58u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/58o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/58o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/58u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/58o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/59_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/59_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_59_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_59_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/59u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/59u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/59o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/59o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/59u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/59o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/60_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/60_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_60_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_60_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/60u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/60u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/60o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/60o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/60u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/60o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/61_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/61_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_61_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_61_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/61u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/61u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/61o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/61o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/61u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/61o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/62_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/62_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_62_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_62_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/62u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/62u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/62o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/62o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/62u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/62o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/63_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/63_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_63_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_63_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/63u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/63u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/63o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/63o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/63u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/63o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/64_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/64_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_64_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_64_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/64u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/64u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/64o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/64o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/64u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/64o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/65_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/65_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_65_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_65_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/65u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/65u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/65o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/65o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/65u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/65o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/66_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/66_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_66_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_66_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/66u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/66u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_66u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_66u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/66o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/66o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/66o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/67_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/67_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_67_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_67_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/67u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/67u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/67o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/67o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/67u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/67o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/68_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/68_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_68_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_68_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/68u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/68u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/68o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/68o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/68u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/68o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/69_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/69_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_69_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_69_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/69u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/69u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/69o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/69o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/69u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/69o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/70_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/70_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_70_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_70_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/70u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/70u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/70o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/70o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/70u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/70o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/71_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/71_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_71_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_71_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/71u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/71u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_71u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_71u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/71o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/71o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/71o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/72_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/72_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_72_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_72_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/72u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/72u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/72o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/72o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/72u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/72o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/73_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/73_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_73_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_73_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/73u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/73u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_73u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_73u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/73o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/73o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/73o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/74_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/74_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_74_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_74_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/74u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/74u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/74o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/74o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/74u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/74o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/75_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/75_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_75_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_75_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/75u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/75u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/75o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/75o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/75u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/75o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/76_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/76_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_76_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_76_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/76u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/76u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/76o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/76o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/76u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/76o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/77_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/77_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_77_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_77_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/77u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/77u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/77o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/77o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/77u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/77o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/78_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/78_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_78_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_78_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/78u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/78u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/78o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/78o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/78u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/78o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_79_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_79_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/79o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/79o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/79u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/79o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_80_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_80_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/80o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/80o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/80u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/80o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/81_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/81_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_81_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_81_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/81u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/81u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_81u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_81u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/81o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/81o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/81o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/82_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/82_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_82_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_82_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/82u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/82u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_82u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_82u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/82o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/82o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/82o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/83_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/83_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_83_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_83_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/83u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/83u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/83o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/83o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/83u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/83o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/84_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/84_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_84_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_84_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/84u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/84u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_84u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_84u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/84o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/84o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/84o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/85_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/85_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_85_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_85_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/85u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/85u.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/85o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/85o.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/85u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/85o_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/86_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/86_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080_86_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080_86_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/char/1080/86u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package/assets/Resources/char/1080/86u_icon.png
+[W] [assetmgr.c] 	Asset not found: app0:package

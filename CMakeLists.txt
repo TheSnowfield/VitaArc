@@ -65,6 +65,8 @@ link_directories(
 # Explicit subsystem membership is shared with the host tests.
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
+option(VITAARC_VERBOSE_LOGS "Enable verbose trace logging" OFF)
+
 set(BRIDGE_SYMBOL_DEFINITION
   "${CMAKE_CURRENT_SOURCE_DIR}/src/bridges/symbol.def")
 set(BRIDGE_SYMBOL_GENERATOR
@@ -93,10 +95,12 @@ list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_HEADER}")
 
 ## Build and link
 add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE VITAARC_VERBOSE_LOGS=$<BOOL:${VITAARC_VERBOSE_LOGS}>)
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.
 target_link_libraries(${PROJECT_NAME}
   -Wl,--whole-archive pthread -Wl,--no-whole-archive
+  -Wl,--wrap=invoke_splashscreen
   m
   stdc++
   vitaGL

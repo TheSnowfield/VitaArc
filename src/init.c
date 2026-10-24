@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <psp2/io/dirent.h>
 #include <psp2/io/fcntl.h>
+#include <psp2/io/stat.h>
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/kernel/threadmgr.h>
@@ -19,6 +20,7 @@
 
 #include "loader.h"
 #include "logcat/logcat.h"
+#include "logcat/screen.h"
 #include "platform/input.h"
 #include "platform/loop.h"
 #include "platform/timing.h"
@@ -43,6 +45,7 @@ static void log_startup_heap(const char* stage)
         (unsigned)heap.uordblks,
         (unsigned)heap.fordblks,
         (unsigned)heap.arena);
+    log_flush();
 }
 
 typedef struct {
@@ -215,15 +218,23 @@ int main(void)
 {
     vita_app_t app = {0};
 
+    log_screen_begin();
+    sceIoMkdir(PATH_TO_USER, 0777);
     log_begin(PATH_TO_LOGFILE);
     log_i(TAG, "Startup policy: prefer packaged offline shaders before runtime compiler");
     __clocks();
     __video();
+    log_screen_ready();
 
+    bool ready = false;
     if(__shaders()) {
-        if(__boot(&app)) {
-            __loop(&app);
-        }
+        ready = __boot(&app);
+    }
+
+    log_flush();
+    log_screen_end();
+    if(ready) {
+        __loop(&app);
     }
 
     if(app.library) {

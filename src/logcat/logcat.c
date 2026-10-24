@@ -1,12 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
+#include <stdatomic.h>
 #include <psp2/io/fcntl.h>
+#ifdef LOG_OVERUDP
 #include <psp2/net/net.h>
 #include <psp2/net/netctl.h>
+#include <psp2/sysmodule.h>
+#endif
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/kernel/clib.h>
 #include <string.h>
-#include <psp2/sysmodule.h>
 
 #include <types.h>
 #include <config.h>
@@ -18,14 +22,95 @@
 #error "LOG_OVERUDP requires an explicit UDP_HOST"
 #endif
 #define UDP_PORT 23333
+#define LOG_BATCH (64 * 1024)
 
 static SceUID __log_stream = -1;
-static bool __log_started = false;
+static atomic_bool __log_started;
 static const char __log_level_string[] = {'V', 'I', 'W', 'E', 'F'};
+static pthread_mutex_t __mutex = PTHREAD_MUTEX_INITIALIZER;
+static _Atomic(log_view_t) __view;
+
+#ifndef LOG_OVERUDP
+static char __batch[LOG_BATCH];
+static size_t __fill;
+
+/* The sink lock is held. A failed sink must not stall application startup. */
+static void __flush(void)
+{
+    size_t sent = 0;
+    while(sent < __fill) {
+        int result = sceIoWrite(__log_stream, __batch + sent, __fill - sent);
+        if(result <= 0) {
+            break;
+        }
+
+        sent += (size_t)result;
+    }
+
+    __fill = 0;
+}
+#endif
+
+void log_set_view(log_view_t view)
+{
+    atomic_store(&__view, view);
+}
+
+void log_flush(void)
+{
+    if(!__log_started) {
+        return;
+    }
+
+    pthread_mutex_lock(&__mutex);
+#ifndef LOG_OVERUDP
+    if(__log_started) {
+        __flush();
+    }
+#endif
+    pthread_mutex_unlock(&__mutex);
+}
+
+static void __write(log_level_t level, const char* text, size_t size)
+{
+    log_view_t view = atomic_load(&__view);
+    if(view) {
+        view(level, text, size);
+    }
+
+    pthread_mutex_lock(&__mutex);
+    if(!__log_started) {
+        pthread_mutex_unlock(&__mutex);
+        return;
+    }
+
+#ifdef LOG_OVERUDP
+    sceNetSend(__log_stream, text, size, 0);
+#else
+    while(size) {
+        size_t room = sizeof(__batch) - __fill;
+        size_t count = size < room ? size : room;
+        memcpy(__batch + __fill, text, count);
+        __fill += count;
+        text += count;
+        size -= count;
+        if(__fill == sizeof(__batch)) {
+            __flush();
+        }
+    }
+
+    if(level >= ERROR) {
+        __flush();
+    }
+#endif
+    pthread_mutex_unlock(&__mutex);
+}
 
 void log_begin(const char* log_file_path)
 {
+    pthread_mutex_lock(&__mutex);
     if(__log_started) {
+        pthread_mutex_unlock(&__mutex);
         log_w(TAG, "Calling log_begin() while logging.");
         return;
     }
@@ -72,10 +157,12 @@ void log_begin(const char* log_file_path)
 #endif
 
     if(__log_stream < 0) {
+        pthread_mutex_unlock(&__mutex);
         return;
     }
 
     __log_started = true;
+    pthread_mutex_unlock(&__mutex);
     log_i(TAG, "Log started.");
 }
 
@@ -87,6 +174,15 @@ void log_end(void)
 
     // Stop log
     log_i(TAG, "Log stop.");
+    pthread_mutex_lock(&__mutex);
+    if(!__log_started) {
+        pthread_mutex_unlock(&__mutex);
+        return;
+    }
+
+#ifndef LOG_OVERUDP
+    __flush();
+#endif
     __log_started = false;
 
     // Close log
@@ -96,11 +192,18 @@ void log_end(void)
     sceIoClose(__log_stream);
 #endif
     __log_stream = -1;
+    pthread_mutex_unlock(&__mutex);
 }
 
 void log_base(log_level_t level, const char* tag, const char* format, va_list args)
 {
-    if(!__log_started && level == VERBOSE) {
+#if !VITAARC_VERBOSE_LOGS
+    if(level == VERBOSE) {
+        return;
+    }
+#endif
+
+    if(!__log_started && level == VERBOSE && !atomic_load(&__view)) {
         return;
     }
 
@@ -130,21 +233,16 @@ void log_base(log_level_t level, const char* tag, const char* format, va_list ar
         sceClibPrintf("%s", log_buffer);
     }
 
-    if(!__log_started) {
-        return;
-    }
-
-#ifdef LOG_OVERUDP
-    sceNetSend(__log_stream, log_buffer, used, 0);
-    sceKernelDelayThread(50);
-#else
-    sceIoWrite(__log_stream, log_buffer, used);
-#endif
+    __write(level, log_buffer, used);
 }
 
 inline void log_printf(const char* format, ...)
 {
-    if(!__log_started) {
+#if !VITAARC_VERBOSE_LOGS
+    return;
+#endif
+
+    if(!__log_started && !atomic_load(&__view)) {
         return;
     }
 
@@ -155,11 +253,7 @@ inline void log_printf(const char* format, ...)
     {
         int result = vsnprintf(log_buffer, sizeof(log_buffer), format, opt);
         size_t length = result < 0 ? 0 : strlen(log_buffer);
-#ifdef LOG_OVERUDP
-        sceNetSend(__log_stream, log_buffer, length, 0);
-#else
-        sceIoWrite(__log_stream, log_buffer, length);
-#endif
+        __write(VERBOSE, log_buffer, length);
     }
 
     va_end(opt);

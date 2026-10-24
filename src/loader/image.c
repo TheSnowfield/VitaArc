@@ -71,6 +71,8 @@ bool loader_load_sections(dynalib_t* library)
         options.attr = 0x01;
         SceKernelMemBlockType type =
             (program->p_flags & PF_X) ? SCE_KERNEL_MEMBLOCK_TYPE_USER_RX : SCE_KERNEL_MEMBLOCK_TYPE_USER_RW;
+        log_i(TAG, "Map segment %u: base=0x%08X size=%u", index, target_start, block_size);
+        log_flush();
         SceUID block =
             kuKernelAllocMemBlock((program->p_flags & PF_X) ? "elf_rx" : "elf_rw", type, block_size, &options);
         if(block <= 0) {

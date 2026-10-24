@@ -102,6 +102,12 @@ void vita_audio_unload_sfx(audio_t* state, const char* path)
     pthread_mutex_lock(&state->mutex);
     audio_asset_t* asset = find_sfx(state, resolved);
     if(asset) {
+        for(size_t index = 0; index < state->event_count; ++index) {
+            if(state->events[index].asset == asset) {
+                state->events[index].played = true;
+            }
+        }
+
         for(uint32_t i = 0; i < VITA_AUDIO_MAX_VOICES; ++i) {
             if(state->voices[i].asset == asset) {
                 memset(&state->voices[i], 0, sizeof(state->voices[i]));
@@ -121,23 +127,8 @@ int vita_audio_play_sfx(audio_t* state, const char* path, int unused, bool force
     return vita_audio_play_sfx_ex(state, path, unused, force, -1.0f);
 }
 
-int vita_audio_play_sfx_ex(audio_t* state, const char* path, int loop_count, bool force, float volume)
+audio_voice_t* audio_sfx_start(audio_t* state, audio_asset_t* asset, int loop_count, bool force, float volume)
 {
-    if(!state || !path) {
-        return -1;
-    }
-
-    char resolved[512];
-    if(!audio_path(path, resolved, sizeof(resolved))) {
-        return -1;
-    }
-
-    if(!vita_audio_preload_sfx(state, path)) {
-        return -1;
-    }
-
-    pthread_mutex_lock(&state->mutex);
-    audio_asset_t* asset = find_sfx(state, resolved);
     audio_voice_t* voice = NULL;
     for(uint32_t i = 0; i < VITA_AUDIO_MAX_VOICES; ++i) {
         if(!state->voices[i].active) {
@@ -162,11 +153,136 @@ int vita_audio_play_sfx_ex(audio_t* state, const char* path, int loop_count, boo
     voice->loops = loop_count < 0 ? -1 : loop_count;
     voice->handle = handle;
     voice->position = 0;
+    voice->begin = 0;
+    voice->end = asset ? asset->pcm.frame_count : 0;
+    voice->delay = 0;
     voice->asset = asset;
-    if(asset)
+    if(asset) {
         asset->last_handle = handle;
+    }
+
+    return voice;
+}
+
+static int __play(audio_t* state, const char* path, int loop_count, bool force, float volume, int begin, int end)
+{
+    if(!state || !path) {
+        return -1;
+    }
+
+    char resolved[512];
+    if(!audio_path(path, resolved, sizeof(resolved))) {
+        return -1;
+    }
+
+    if(!vita_audio_preload_sfx(state, path)) {
+        return -1;
+    }
+
+    pthread_mutex_lock(&state->mutex);
+    audio_asset_t* asset = find_sfx(state, resolved);
+    audio_voice_t* voice = audio_sfx_start(state, asset, loop_count, force, volume);
+    if(asset && begin >= 0 && end > begin) {
+        uint64_t first = (uint64_t)begin * VITA_AUDIO_SAMPLE_RATE / 1000;
+        uint64_t last = (uint64_t)end * VITA_AUDIO_SAMPLE_RATE / 1000;
+        if(last <= asset->pcm.frame_count) {
+            voice->begin = first;
+            voice->end = last;
+        }
+    }
+
+    int handle = asset ? voice->handle : -1;
     pthread_mutex_unlock(&state->mutex);
-    return asset ? handle : -1;
+    return handle;
+}
+
+int vita_audio_play_sfx_ex(audio_t* state, const char* path, int loop_count, bool force, float volume)
+{
+    return __play(state, path, loop_count, force, volume, 0, 0);
+}
+
+int vita_audio_play_sfx_range(audio_t* state, const char* path, bool loop, bool force, float volume, int begin, int end)
+{
+    return __play(state, path, loop ? -1 : 0, force, volume, begin, end);
+}
+
+bool vita_audio_schedule_sfx(audio_t* state, const char* path, int position)
+{
+    if(!state || position < 0) {
+        return false;
+    }
+
+    char resolved[512];
+    if(!audio_path(path, resolved, sizeof(resolved)) || !vita_audio_preload_sfx(state, path)) {
+        return false;
+    }
+
+    pthread_mutex_lock(&state->mutex);
+    audio_asset_t* asset = find_sfx(state, resolved);
+    if(!asset) {
+        pthread_mutex_unlock(&state->mutex);
+        return false;
+    }
+
+    if(state->event_count == state->event_capacity) {
+        size_t capacity = state->event_capacity ? state->event_capacity * 2 : 16;
+        if(capacity > 4096) {
+            pthread_mutex_unlock(&state->mutex);
+            return false;
+        }
+
+        audio_event_t* events = realloc(state->events, capacity * sizeof(*events));
+        if(!events) {
+            pthread_mutex_unlock(&state->mutex);
+            return false;
+        }
+
+        state->events = events;
+        state->event_capacity = capacity;
+    }
+
+    uint64_t frame = (uint64_t)position * VITA_AUDIO_SAMPLE_RATE / 1000;
+    size_t index = state->event_count;
+    while(index && state->events[index - 1].frame > frame) {
+        state->events[index] = state->events[index - 1];
+        --index;
+    }
+
+    if(index < state->event_next) {
+        state->event_next = index;
+    }
+
+    ++state->event_count;
+    audio_event_t* event = &state->events[index];
+    event->asset = asset;
+    event->frame = frame;
+    event->played = false;
+    pthread_mutex_unlock(&state->mutex);
+    return true;
+}
+
+float vita_audio_get_sfx_volume(audio_t* state)
+{
+    if(!state) {
+        return 0.0f;
+    }
+
+    pthread_mutex_lock(&state->mutex);
+    float volume = state->sfx_volume;
+    pthread_mutex_unlock(&state->mutex);
+    return volume;
+}
+
+bool vita_audio_is_active(audio_t* state)
+{
+    if(!state) {
+        return true;
+    }
+
+    pthread_mutex_lock(&state->mutex);
+    bool active = !state->suspended;
+    pthread_mutex_unlock(&state->mutex);
+    return active;
 }
 
 /* The newer FMOD provider remembers the most recently played channel for

@@ -14,6 +14,38 @@ static int16_t clamp_sample(int32_t sample)
     return (int16_t)sample;
 }
 
+static void __schedule(audio_t* state, uint32_t frames)
+{
+    audio_track_t* main = &state->bgm[0];
+    if(!main->feed || !main->playing || main->paused || main->delay >= frames) {
+        return;
+    }
+
+    uint32_t delay = main->delay;
+    uint64_t position = audio_feed_position(main->feed);
+    uint64_t end = position + frames - delay;
+    while(state->event_next < state->event_count) {
+        audio_event_t* event = &state->events[state->event_next];
+        if(event->played) {
+            ++state->event_next;
+            continue;
+        }
+
+        if(event->frame >= end) {
+            break;
+        }
+
+        audio_voice_t* voice = audio_sfx_start(state, event->asset, 0, true, -1.0f);
+        voice->delay = delay;
+        if(event->frame > position) {
+            voice->delay += event->frame - position;
+        }
+
+        event->played = true;
+        ++state->event_next;
+    }
+}
+
 static void mix_sfx(audio_t* state, int32_t* mix, uint32_t frames)
 {
     for(uint32_t voice_index = 0; voice_index < VITA_AUDIO_MAX_VOICES; ++voice_index) {
@@ -25,12 +57,17 @@ static void mix_sfx(audio_t* state, int32_t* mix, uint32_t frames)
         float volume = voice->volume < 0 ? state->sfx_volume : voice->volume;
         int32_t gain = (int32_t)(audio_gain(volume) * 32768.0f);
 
-        for(uint32_t frame = 0; frame < frames; ++frame) {
-            if(voice->position >= voice->asset->pcm.frame_count) {
+        uint32_t delay = voice->delay > frames ? frames : voice->delay;
+        voice->delay -= delay;
+        for(uint32_t frame = delay; frame < frames; ++frame) {
+            uint32_t end = voice->loops && voice->end ? voice->end : voice->asset->pcm.frame_count;
+            if(voice->position >= end) {
                 if(voice->loops) {
-                    if(voice->loops > 0)
+                    if(voice->loops > 0) {
                         --voice->loops;
-                    voice->position = 0;
+                    }
+
+                    voice->position = voice->begin;
                 } else {
                     voice->active = false;
                     break;
@@ -89,6 +126,7 @@ bool vita_audio_render(audio_t* state, int16_t* output, uint32_t frames)
 
     pthread_mutex_lock(&state->mutex);
     if(!state->suspended) {
+        __schedule(state, frames);
         mix_bgm(state, mix, frames);
         mix_sfx(state, mix, frames);
     }

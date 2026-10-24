@@ -101,6 +101,10 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE VITAARC_VERBOSE_LOGS=$<BOOL:$
 target_link_libraries(${PROJECT_NAME}
   -Wl,--whole-archive pthread -Wl,--no-whole-archive
   -Wl,--wrap=invoke_splashscreen
+  -Wl,--wrap=__sfp
+  -Wl,--wrap=__sinit
+  -Wl,--wrap=__sfp_lock_acquire
+  -Wl,--wrap=__sfp_lock_release
   m
   stdc++
   vitaGL

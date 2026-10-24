@@ -5,11 +5,11 @@
 #include <stdatomic.h>
 #include <psp2/types.h>
 #include "backend.h"
-#include "stream.h"
+#include "feed.h"
 #include "wav.h"
 
-/* The backend owns this state. Playback and mixing share the same mutex;
- * decoding resources are released only after the output thread has stopped. */
+/* The mixer lock protects controls and cached samples. File I/O, decoding and
+ * worker joins run outside it; each BGM feed owns its decoder and PCM queue. */
 #define VITA_AUDIO_GRAIN VITA_AUDIO_BLOCK_FRAMES
 #define VITA_AUDIO_CHANNELS 2
 #define VITA_AUDIO_MAX_SFX 32
@@ -32,7 +32,7 @@ typedef struct audio_voice_t {
 } audio_voice_t;
 
 typedef struct audio_track_t {
-    audio_stream_t* stream;
+    audio_feed_t* feed;
     bool playing;
     bool paused;
     bool loop;

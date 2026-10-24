@@ -11,6 +11,7 @@
 #include "mp3.h"
 
 #define VITA_AUDIO_OUTPUT_RATE 48000
+#define MP3_READ_BUFFER (32 * 1024)
 
 typedef struct mp3_frame_t {
     uint32_t frame_size;
@@ -21,6 +22,7 @@ typedef struct mp3_frame_t {
 
 struct mp3_stream_t {
     FILE* file;
+    uint8_t cache[MP3_READ_BUFFER];
     long first_frame_offset;
     uint8_t* encoded;
     int16_t* decoded;
@@ -145,21 +147,25 @@ static long skip_id3(FILE* file)
     return offset;
 }
 
-static bool find_mp3_frame(FILE* file, mp3_frame_t* frame, long* frame_offset)
+static bool read_mp3_header(FILE* file, uint8_t header[4], mp3_frame_t* frame)
 {
-    uint8_t header[4];
-    while(fread(header, 1, sizeof(header), file) == sizeof(header)) {
-        long offset = ftell(file) - (long)sizeof(header);
+    if(fread(header, 1, 4, file) != 4) {
+        return false;
+    }
+
+    for(;;) {
         if(parse_mp3_header(header, frame)) {
-            *frame_offset = offset;
-            fseek(file, offset, SEEK_SET);
             return true;
         }
 
-        fseek(file, offset + 1, SEEK_SET);
-    }
+        int byte = fgetc(file);
+        if(byte == EOF) {
+            return false;
+        }
 
-    return false;
+        memmove(header, header + 1, 3);
+        header[3] = (uint8_t)byte;
+    }
 }
 
 bool vita_mp3_library_init(uint32_t stream_count)
@@ -247,6 +253,10 @@ mp3_stream_t* vita_mp3_open(const char* path)
         return NULL;
     }
 
+    if(setvbuf(stream->file, (char*)stream->cache, _IOFBF, sizeof(stream->cache)) != 0) {
+        log_w(TAG, "MP3 input buffering unavailable: %s", path);
+    }
+
     unsigned char magic[4];
     if(fread(magic, 1, sizeof(magic), stream->file) == sizeof(magic) &&
         (memcmp(magic, "OggS", sizeof(magic)) == 0 || memcmp(magic, "RIFF", sizeof(magic)) == 0)) {
@@ -258,7 +268,14 @@ mp3_stream_t* vita_mp3_open(const char* path)
 
     skip_id3(stream->file);
     mp3_frame_t first_frame;
-    if(!find_mp3_frame(stream->file, &first_frame, &stream->first_frame_offset)) {
+    uint8_t header[4];
+    if(!read_mp3_header(stream->file, header, &first_frame)) {
+        vita_mp3_close(stream);
+        return NULL;
+    }
+
+    stream->first_frame_offset = ftell(stream->file) - 4;
+    if(stream->first_frame_offset < 0) {
         vita_mp3_close(stream);
         return NULL;
     }
@@ -345,13 +362,15 @@ static bool decode_next_frame(mp3_stream_t* stream)
 {
     for(uint32_t attempt = 0; attempt < 16; ++attempt) {
         mp3_frame_t frame;
-        long offset = 0;
-        if(!find_mp3_frame(stream->file, &frame, &offset)) {
+        uint8_t header[4];
+        if(!read_mp3_header(stream->file, header, &frame)) {
             stream->failed = ferror(stream->file) != 0;
             return false;
         }
 
-        if(fread(stream->encoded, 1, frame.frame_size, stream->file) != frame.frame_size) {
+        memcpy(stream->encoded, header, sizeof(header));
+        uint32_t remaining = frame.frame_size - sizeof(header);
+        if(fread(stream->encoded + sizeof(header), 1, remaining, stream->file) != remaining) {
             stream->failed = true;
             return false;
         }

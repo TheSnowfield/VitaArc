@@ -50,27 +50,30 @@ static void mix_bgm(audio_t* state, int32_t* mix, uint32_t frames)
 {
     for(uint32_t channel_index = 0; channel_index < VITA_AUDIO_BGM_CHANNELS; ++channel_index) {
         audio_track_t* channel = &state->bgm[channel_index];
-        if(!channel->stream || !channel->playing || channel->paused) {
+        if(!channel->feed || !channel->playing || channel->paused) {
             continue;
         }
 
+        uint32_t delay = channel->delay > frames ? frames : (uint32_t)channel->delay;
+        channel->delay -= delay;
+        if(delay == frames) {
+            continue;
+        }
+
+        int16_t pcm[VITA_AUDIO_GRAIN * VITA_AUDIO_CHANNELS];
+        bool ended = false;
+        uint32_t count = audio_feed_read(channel->feed, pcm, frames - delay, &ended);
         int32_t gain = (int32_t)(audio_gain(state->bgm_volume * channel->volume) * 32768.0f);
-        for(uint32_t frame = 0; frame < frames; ++frame) {
-            if(channel->delay > 0) {
-                --channel->delay;
-                continue;
-            }
 
-            int16_t left = 0;
-            int16_t right = 0;
-            if(!vita_audio_stream_next_sample(channel->stream, channel->loop, &left, &right)) {
-                channel->playing = false;
-                break;
-            }
+        for(uint32_t frame = 0; frame < count; ++frame) {
+            uint32_t source = frame * VITA_AUDIO_CHANNELS;
+            uint32_t output = (frame + delay) * VITA_AUDIO_CHANNELS;
+            mix[output] += (pcm[source] * gain) >> 15;
+            mix[output + 1] += (pcm[source + 1] * gain) >> 15;
+        }
 
-            uint32_t output = frame * VITA_AUDIO_CHANNELS;
-            mix[output] += (left * gain) >> 15;
-            mix[output + 1] += (right * gain) >> 15;
+        if(ended) {
+            channel->playing = false;
         }
     }
 }

@@ -24,6 +24,7 @@ set(VITAARC_FILE_SOURCES
 set(VITAARC_AUDIO_BACKEND_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/audio/backend.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/common.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/audio/feed.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/mixer.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/bgm.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/sfx.c"

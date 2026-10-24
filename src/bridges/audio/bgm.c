@@ -4,6 +4,19 @@
 #include <logcat/logcat.h>
 #include "state.h"
 
+static audio_feed_t* __retain(audio_t* state, int channel, bool* loop)
+{
+    pthread_mutex_lock(&state->mutex);
+    audio_track_t* bgm = &state->bgm[channel];
+    audio_feed_t* feed = audio_feed_retain(bgm->feed);
+    if(loop) {
+        *loop = bgm->loop;
+    }
+
+    pthread_mutex_unlock(&state->mutex);
+    return feed;
+}
+
 bool vita_audio_load_bgm(audio_t* state, const char* path, int channel)
 {
     if(!state || !path || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
@@ -15,21 +28,21 @@ bool vita_audio_load_bgm(audio_t* state, const char* path, int channel)
         return false;
     }
 
-    audio_stream_t* stream = vita_audio_stream_open(resolved, state->has_mp3);
-    if(!stream) {
+    audio_feed_t* feed = audio_feed_open(resolved, state->has_mp3);
+    if(!feed) {
         log_e(TAG, "Unable to load BGM: %s", resolved);
         return false;
     }
 
     pthread_mutex_lock(&state->mutex);
     audio_track_t* bgm = &state->bgm[channel];
-    audio_stream_t* previous = bgm->stream;
+    audio_feed_t* previous = bgm->feed;
     memset(bgm, 0, sizeof(*bgm));
-    bgm->stream = stream;
+    bgm->feed = feed;
     bgm->volume = 1.0f;
     snprintf(bgm->path, sizeof(bgm->path), "%s", resolved);
     pthread_mutex_unlock(&state->mutex);
-    vita_audio_stream_close(previous);
+    audio_feed_close(previous);
     log_i(TAG, "Loaded BGM channel %d: %s", channel, resolved);
     return true;
 }
@@ -42,9 +55,10 @@ void vita_audio_unload_bgm(audio_t* state, int channel)
 
     pthread_mutex_lock(&state->mutex);
     audio_track_t* bgm = &state->bgm[channel];
-    vita_audio_stream_close(bgm->stream);
+    audio_feed_t* previous = bgm->feed;
     memset(bgm, 0, sizeof(*bgm));
     pthread_mutex_unlock(&state->mutex);
+    audio_feed_close(previous);
 }
 
 void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
@@ -53,9 +67,15 @@ void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
         return;
     }
 
+    audio_feed_t* feed = __retain(state, channel, NULL);
+    if(!feed) {
+        return;
+    }
+
+    bool ready = audio_feed_seek(feed, 0, loop);
     pthread_mutex_lock(&state->mutex);
     audio_track_t* bgm = &state->bgm[channel];
-    if(bgm->stream && vita_audio_stream_reset(bgm->stream)) {
+    if(ready && bgm->feed == feed) {
         bgm->loop = loop;
         bgm->paused = false;
         bgm->playing = true;
@@ -63,6 +83,7 @@ void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
     }
 
     pthread_mutex_unlock(&state->mutex);
+    audio_feed_close(feed);
 }
 
 int vita_audio_get_bgm_position(audio_t* state, int channel)
@@ -72,9 +93,9 @@ int vita_audio_get_bgm_position(audio_t* state, int channel)
     }
 
     pthread_mutex_lock(&state->mutex);
-    audio_stream_t* stream = state->bgm[channel].stream;
-    uint64_t position = vita_audio_stream_position_frames(stream) / (VITA_AUDIO_SAMPLE_RATE / 1000);
-    int result = stream ? (position > INT_MAX ? INT_MAX : (int)position) : -1;
+    audio_feed_t* feed = state->bgm[channel].feed;
+    uint64_t position = audio_feed_position(feed) / (VITA_AUDIO_SAMPLE_RATE / 1000);
+    int result = feed ? (position > INT_MAX ? INT_MAX : (int)position) : -1;
     pthread_mutex_unlock(&state->mutex);
     return result;
 }
@@ -85,15 +106,23 @@ bool vita_audio_seek_bgm(audio_t* state, int position_ms, int channel)
         return false;
     }
 
+    bool loop = false;
+    audio_feed_t* feed = __retain(state, channel, &loop);
+    if(!feed) {
+        return false;
+    }
+
+    uint64_t position = (uint64_t)position_ms * (VITA_AUDIO_SAMPLE_RATE / 1000);
+    bool result = audio_feed_seek(feed, position, loop);
+
     pthread_mutex_lock(&state->mutex);
     audio_track_t* bgm = &state->bgm[channel];
-    uint64_t position = (uint64_t)position_ms * (VITA_AUDIO_SAMPLE_RATE / 1000);
-    bool result = vita_audio_stream_seek_frames(bgm->stream, position);
-    if(result) {
+    if(result && bgm->feed == feed) {
         bgm->delay = 0;
     }
 
     pthread_mutex_unlock(&state->mutex);
+    audio_feed_close(feed);
     return result;
 }
 

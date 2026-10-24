@@ -17,16 +17,21 @@ static int audio_thread(SceSize argument_size, void* arguments)
         return -1;
     }
 
-    int16_t output[VITA_AUDIO_GRAIN * VITA_AUDIO_CHANNELS];
+    /* Keep the submitted surface intact while preparing the next block. */
+    int16_t output[2][VITA_AUDIO_GRAIN * VITA_AUDIO_CHANNELS] __attribute__((aligned(64)));
+    unsigned next = 0;
     while(atomic_load(&state->running)) {
-        vita_audio_render(state, output, VITA_AUDIO_GRAIN);
-        int result = sceAudioOutOutput(state->port, output);
+        vita_audio_render(state, output[next], VITA_AUDIO_GRAIN);
+        int result = sceAudioOutOutput(state->port, output[next]);
         if(result < 0) {
             log_e(TAG, "sceAudioOutOutput failed: 0x%08X", result);
             sceKernelDelayThread(1000);
         }
+
+        next ^= 1;
     }
 
+    sceAudioOutOutput(state->port, NULL);
     return 0;
 }
 
@@ -104,7 +109,7 @@ void vita_audio_destroy(audio_t* state)
     }
 
     for(uint32_t i = 0; i < VITA_AUDIO_BGM_CHANNELS; ++i) {
-        vita_audio_stream_close(state->bgm[i].stream);
+        audio_feed_close(state->bgm[i].feed);
     }
 
     for(uint32_t i = 0; i < VITA_AUDIO_MAX_SFX; ++i) {

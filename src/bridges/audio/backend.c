@@ -37,6 +37,15 @@ static int audio_thread(SceSize argument_size, void* arguments)
 
 audio_t* vita_audio_create(float sfx_volume, float bgm_volume)
 {
+    return vita_audio_create_channels(sfx_volume, bgm_volume, VITA_AUDIO_BGM_CHANNELS);
+}
+
+audio_t* vita_audio_create_channels(float sfx_volume, float bgm_volume, int channels)
+{
+    if(channels < 1 || channels > VITA_AUDIO_MAX_BGM) {
+        return NULL;
+    }
+
     audio_t* state = calloc(1, sizeof(*state));
     if(!state) {
         return NULL;
@@ -47,6 +56,7 @@ audio_t* vita_audio_create(float sfx_volume, float bgm_volume)
     state->serial = 1;
     state->sfx_volume = audio_gain(sfx_volume);
     state->bgm_volume = audio_gain(bgm_volume);
+    state->bgm_count = channels;
     atomic_init(&state->running, false);
     if(pthread_mutex_init(&state->mutex, NULL) != 0) {
         free(state);
@@ -108,11 +118,12 @@ void vita_audio_destroy(audio_t* state)
         sceAudioOutReleasePort(state->port);
     }
 
-    for(uint32_t i = 0; i < VITA_AUDIO_BGM_CHANNELS; ++i) {
+    for(int i = 0; i < state->bgm_count; ++i) {
         audio_feed_close(state->bgm[i].feed);
     }
 
     audio_feed_close(state->idle);
+    free(state->events);
 
     for(uint32_t i = 0; i < VITA_AUDIO_MAX_SFX; ++i) {
         if(state->sfx[i].used) {

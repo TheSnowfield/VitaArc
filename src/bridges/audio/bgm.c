@@ -51,7 +51,7 @@ static audio_feed_t* __retain(audio_t* state, int channel, bool* loop)
 
 bool vita_audio_load_bgm(audio_t* state, const char* path, int channel)
 {
-    if(!state || !path || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || !path || channel < 0 || channel >= state->bgm_count) {
         return false;
     }
 
@@ -72,6 +72,12 @@ bool vita_audio_load_bgm(audio_t* state, const char* path, int channel)
     memset(bgm, 0, sizeof(*bgm));
     bgm->feed = feed;
     bgm->volume = 1.0f;
+    bgm->master = state->bgm_volume;
+    if(channel == 0) {
+        state->event_count = 0;
+        state->event_next = 0;
+    }
+
     snprintf(bgm->path, sizeof(bgm->path), "%s", resolved);
     pthread_mutex_unlock(&state->mutex);
     __retire(state, previous);
@@ -81,7 +87,7 @@ bool vita_audio_load_bgm(audio_t* state, const char* path, int channel)
 
 void vita_audio_unload_bgm(audio_t* state, int channel)
 {
-    if(!state || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || channel < 0 || channel >= state->bgm_count) {
         return;
     }
 
@@ -89,13 +95,18 @@ void vita_audio_unload_bgm(audio_t* state, int channel)
     audio_track_t* bgm = &state->bgm[channel];
     audio_feed_t* previous = bgm->feed;
     memset(bgm, 0, sizeof(*bgm));
+    if(channel == 0) {
+        state->event_count = 0;
+        state->event_next = 0;
+    }
+
     pthread_mutex_unlock(&state->mutex);
     __retire(state, previous);
 }
 
 void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
 {
-    if(!state || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || channel < 0 || channel >= state->bgm_count) {
         return;
     }
 
@@ -108,6 +119,7 @@ void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
     pthread_mutex_lock(&state->mutex);
     audio_track_t* bgm = &state->bgm[channel];
     if(ready && bgm->feed == feed) {
+        bgm->keep_master = false;
         bgm->loop = loop;
         bgm->paused = false;
         bgm->playing = true;
@@ -120,7 +132,7 @@ void vita_audio_play_bgm(audio_t* state, bool loop, int channel, int delay_ms)
 
 int vita_audio_get_bgm_position(audio_t* state, int channel)
 {
-    if(!state || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || channel < 0 || channel >= state->bgm_count) {
         return -1;
     }
 
@@ -134,7 +146,7 @@ int vita_audio_get_bgm_position(audio_t* state, int channel)
 
 bool vita_audio_seek_bgm(audio_t* state, int position_ms, int channel)
 {
-    if(!state || position_ms < 0 || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || position_ms < 0 || channel < 0 || channel >= state->bgm_count) {
         return false;
     }
 
@@ -160,18 +172,19 @@ bool vita_audio_seek_bgm(audio_t* state, int position_ms, int channel)
 
 void vita_audio_set_channel_bgm_volume(audio_t* state, float volume, int channel)
 {
-    if(!state || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || channel < 0 || channel >= state->bgm_count) {
         return;
     }
 
     pthread_mutex_lock(&state->mutex);
     state->bgm[channel].volume = audio_gain(volume);
+    state->bgm[channel].keep_master = false;
     pthread_mutex_unlock(&state->mutex);
 }
 
 void vita_audio_set_bgm_paused(audio_t* state, bool paused, int channel)
 {
-    if(!state || channel < 0 || channel >= VITA_AUDIO_BGM_CHANNELS) {
+    if(!state || channel < 0 || channel >= state->bgm_count) {
         return;
     }
 
@@ -182,11 +195,25 @@ void vita_audio_set_bgm_paused(audio_t* state, bool paused, int channel)
 
 void vita_audio_set_bgm_volume(audio_t* state, float volume)
 {
+    vita_audio_set_master_volume(state, volume, true);
+}
+
+void vita_audio_set_master_volume(audio_t* state, float volume, bool apply)
+{
     if(!state) {
         return;
     }
 
     pthread_mutex_lock(&state->mutex);
+    for(int index = 0; index < state->bgm_count; ++index) {
+        audio_track_t* track = &state->bgm[index];
+        if(!track->keep_master) {
+            track->master = state->bgm_volume;
+        }
+
+        track->keep_master = !apply;
+    }
+
     state->bgm_volume = audio_gain(volume);
     pthread_mutex_unlock(&state->mutex);
 }

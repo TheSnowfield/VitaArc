@@ -48,7 +48,7 @@ static void mix_sfx(audio_t* state, int32_t* mix, uint32_t frames)
 
 static void mix_bgm(audio_t* state, int32_t* mix, uint32_t frames)
 {
-    for(uint32_t channel_index = 0; channel_index < VITA_AUDIO_BGM_CHANNELS; ++channel_index) {
+    for(int channel_index = 0; channel_index < state->bgm_count; ++channel_index) {
         audio_track_t* channel = &state->bgm[channel_index];
         if(!channel->feed || !channel->playing || channel->paused) {
             continue;
@@ -63,7 +63,8 @@ static void mix_bgm(audio_t* state, int32_t* mix, uint32_t frames)
         int16_t pcm[VITA_AUDIO_GRAIN * VITA_AUDIO_CHANNELS];
         bool ended = false;
         uint32_t count = audio_feed_read(channel->feed, pcm, frames - delay, &ended);
-        int32_t gain = (int32_t)(audio_gain(state->bgm_volume * channel->volume) * 32768.0f);
+        float master = channel->keep_master ? channel->master : state->bgm_volume;
+        int32_t gain = (int32_t)(audio_gain(master * channel->volume) * 32768.0f);
 
         for(uint32_t frame = 0; frame < count; ++frame) {
             uint32_t source = frame * VITA_AUDIO_CHANNELS;

@@ -22,6 +22,28 @@
 #include <config.h>
 #include "posix.h"
 
+unsigned bridge_if_nametoindex(const char* name)
+{
+    (void)name;
+    errno = ENODEV;
+    return 0;
+}
+
+int bridge_getpwuid_r(uid_t uid, void* entry, char* buffer, size_t size, void** result)
+{
+    (void)uid;
+    (void)entry;
+    (void)buffer;
+    (void)size;
+    if(!result) {
+        return EINVAL;
+    }
+
+    /* The Vita has no POSIX account database. A missing entry is not an error. */
+    *result = NULL;
+    return 0;
+}
+
 #if defined(__vita__) && UINTPTR_MAX == UINT32_MAX
 _Static_assert(sizeof(struct timespec) == 8, "Android ARM timespec ABI");
 _Static_assert(sizeof(struct timeval) == 8, "Android ARM timeval ABI");

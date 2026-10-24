@@ -77,6 +77,9 @@ void VITAARC_SOFTFP bridge_softfp_sincosf(float value, float* sine, float* cosin
 double VITAARC_SOFTFP bridge_softfp_sqrt(double value);
 float VITAARC_SOFTFP bridge_softfp_sqrtf(float value);
 double VITAARC_SOFTFP bridge_softfp_strtod(const char* text, char** end);
+double VITAARC_SOFTFP bridge_softfp_atof(const char* text);
+double VITAARC_SOFTFP bridge_softfp_fmin(double left, double right);
+double VITAARC_SOFTFP bridge_softfp_fmax(double left, double right);
 double VITAARC_SOFTFP bridge_softfp_tan(double value);
 float VITAARC_SOFTFP bridge_softfp_tanf(float value);
 

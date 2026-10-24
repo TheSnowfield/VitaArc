@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <malloc.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -331,6 +332,76 @@ void* bridge_mmap(void* address, size_t length, int protection, int flags, int f
 {
     (void)address; /* Non-fixed addresses are hints. */
     return __map(length, protection, flags, fd, offset);
+}
+
+void* bridge_mmap64(void* address, size_t length, int protection, int flags, int fd, int64_t offset)
+{
+    (void)address;
+    return __map(length, protection, flags, fd, offset);
+}
+
+int bridge_posix_memalign(void** address, size_t alignment, size_t length)
+{
+    if(!address || alignment < sizeof(void*) || (alignment & (alignment - 1))) {
+        return EINVAL;
+    }
+
+    int error = errno;
+    void* allocation = memalign(alignment, length ? length : 1);
+    errno = error;
+    if(!allocation) {
+        return ENOMEM;
+    }
+
+    *address = allocation;
+    return 0;
+}
+
+int bridge_mprotect(void* address, size_t length, int protection)
+{
+    (void)address;
+    (void)length;
+    (void)protection;
+    errno = ENOTSUP;
+    return -1;
+}
+
+int bridge_madvise(void* address, size_t length, int advice)
+{
+    if(!address || ((uintptr_t)address & (PAGE_BYTES - 1)) || length > UINTPTR_MAX - (uintptr_t)address) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    /* Access-pattern and prefetch hints need no work in resident Vita memory.
+     * Discard/free advice changes contents and cannot be silently ignored. */
+    switch(advice) {
+        case 0:
+        case 1:
+        case 2:
+        case 3: return 0;
+    }
+
+    errno = ENOTSUP;
+    return -1;
+}
+
+int bridge_mlock(const void* address, size_t length)
+{
+#ifdef __vita__
+    if(!length) {
+        return 0;
+    }
+
+    if(sceKernelFindMemBlockByAddr(address, length) < 0) {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    return 0;
+#else
+    return mlock(address, length);
+#endif
 }
 
 void* bridge_mmap2(unsigned long address, unsigned long length, unsigned long protection, unsigned long flags,

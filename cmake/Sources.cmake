@@ -79,6 +79,7 @@ set(VITAARC_JNI_SOURCES
 )
 
 set(VITAARC_LIBC_SOURCES
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/auxv.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/bionic/__memcpy_chk.cpp"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/bionic/__memmove_chk.cpp"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/bionic/__memset_chk.cpp"
@@ -88,6 +89,7 @@ set(VITAARC_LIBC_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/libc/bionic/__vsprintf_chk.cpp"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/cxx.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/directory.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/libc/fortify.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/guest_errno.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/libc.c"
     "${VITAARC_SOURCE_ROOT}/bridges/libc/memory.c"

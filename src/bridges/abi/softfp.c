@@ -31,6 +31,21 @@ BRIDGE_MATH_UNARY(tgamma)
 BRIDGE_MATH_UNARY(exp2)
 #undef BRIDGE_MATH_UNARY
 
+double VITAARC_SOFTFP bridge_softfp_atof(const char* text)
+{
+    return atof(text);
+}
+
+double VITAARC_SOFTFP bridge_softfp_fmin(double left, double right)
+{
+    return fmin(left, right);
+}
+
+double VITAARC_SOFTFP bridge_softfp_fmax(double left, double right)
+{
+    return fmax(left, right);
+}
+
 float VITAARC_SOFTFP bridge_softfp_logf(float value)
 {
     return logf(value);

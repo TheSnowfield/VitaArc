@@ -30,5 +30,7 @@ int bridge_nanosleep(const struct timespec* request, struct timespec* remaining)
 int bridge_fchmod(int fd, mode_t mode);
 int bridge_fchown(int fd, uid_t owner, gid_t group);
 int bridge_clock_gettime(clockid_t clock_id, struct timespec* time);
+unsigned bridge_if_nametoindex(const char* name);
+int bridge_getpwuid_r(uid_t uid, void* entry, char* buffer, size_t size, void** result);
 
 #endif /* __BRIDGES_LIBC_IMPL_POSIX_H */

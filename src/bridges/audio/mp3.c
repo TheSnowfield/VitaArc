@@ -9,16 +9,11 @@
 #include "../../logcat/logcat.h"
 
 #include "mp3.h"
+#include "mp3_frame.h"
+#include "mp3_index.h"
 
 #define VITA_AUDIO_OUTPUT_RATE 48000
 #define MP3_READ_BUFFER (32 * 1024)
-
-typedef struct mp3_frame_t {
-    uint32_t frame_size;
-    uint32_t sample_rate;
-    uint32_t version;
-    uint32_t channels;
-} mp3_frame_t;
 
 struct mp3_stream_t {
     FILE* file;
@@ -31,6 +26,11 @@ struct mp3_stream_t {
     uint32_t resample_phase;
     uint32_t sample_rate;
     uint32_t channels;
+    mp3_frame_t format;
+    mp3_index_t index;
+    /* Indexed positions require one full PCM frame per encoded frame. */
+    bool fixed;
+    bool checked;
     SceAudiodecCtrl control;
     SceAudiodecInfo info;
     bool decoder_created;
@@ -48,6 +48,7 @@ static bool __module_owned;
 static void __release_library(void)
 {
     if(__library_initialized && !__library_references && !__stream_references) {
+        mp3_mark_clear();
         sceAudiodecTermLibrary(SCE_AUDIODEC_TYPE_MP3);
         __library_initialized = false;
         if(__module_owned) {
@@ -55,73 +56,6 @@ static void __release_library(void)
             __module_owned = false;
         }
     }
-}
-
-static uint32_t read_be32(const uint8_t* data)
-{
-    return ((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | (uint32_t)data[3];
-}
-
-static bool parse_mp3_header(const uint8_t data[4], mp3_frame_t* frame)
-{
-    static const uint16_t mpeg1_bitrates[16] = {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0};
-
-    static const uint16_t mpeg2_bitrates[16] = {0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0};
-
-    static const uint32_t sample_rates[3] = {44100, 48000, 32000};
-
-    uint32_t header = read_be32(data);
-    if((header & 0xFFE00000) != 0xFFE00000) {
-        return false;
-    }
-
-    uint32_t version = (header >> 19) & 3;
-    uint32_t layer = (header >> 17) & 3;
-    uint32_t bitrate_index = (header >> 12) & 15;
-    uint32_t sample_rate_index = (header >> 10) & 3;
-    uint32_t padding = (header >> 9) & 1;
-    if(version == SCE_AUDIODEC_MP3_MPEG_VERSION_RESERVED) {
-        return false;
-    }
-
-    if(layer != 1) {
-        return false;
-    }
-
-    if(bitrate_index == 0 || bitrate_index == 15) {
-        return false;
-    }
-
-    if(sample_rate_index == 3) {
-        return false;
-    }
-
-    uint32_t sample_rate = sample_rates[sample_rate_index];
-    const uint16_t* bitrate_table = mpeg1_bitrates;
-    switch(version) {
-        case SCE_AUDIODEC_MP3_MPEG_VERSION_2:
-            sample_rate /= 2;
-            bitrate_table = mpeg2_bitrates;
-            break;
-
-        case SCE_AUDIODEC_MP3_MPEG_VERSION_2_5:
-            sample_rate /= 4;
-            bitrate_table = mpeg2_bitrates;
-            break;
-    }
-
-    uint32_t bitrate = (uint32_t)bitrate_table[bitrate_index] * 1000;
-    uint32_t coefficient = version == SCE_AUDIODEC_MP3_MPEG_VERSION_1 ? 144 : 72;
-    uint32_t frame_size = coefficient * bitrate / sample_rate + padding;
-    if(frame_size < 4 || frame_size > SCE_AUDIODEC_MP3_MAX_ES_SIZE) {
-        return false;
-    }
-
-    frame->frame_size = frame_size;
-    frame->sample_rate = sample_rate;
-    frame->version = version;
-    frame->channels = ((header >> 6) & 3) == 3 ? 1 : 2;
-    return true;
 }
 
 static long skip_id3(FILE* file)
@@ -145,27 +79,6 @@ static long skip_id3(FILE* file)
 
     fseek(file, offset, SEEK_SET);
     return offset;
-}
-
-static bool read_mp3_header(FILE* file, uint8_t header[4], mp3_frame_t* frame)
-{
-    if(fread(header, 1, 4, file) != 4) {
-        return false;
-    }
-
-    for(;;) {
-        if(parse_mp3_header(header, frame)) {
-            return true;
-        }
-
-        int byte = fgetc(file);
-        if(byte == EOF) {
-            return false;
-        }
-
-        memmove(header, header + 1, 3);
-        header[3] = (uint8_t)byte;
-    }
 }
 
 bool vita_mp3_library_init(uint32_t stream_count)
@@ -269,7 +182,7 @@ mp3_stream_t* vita_mp3_open(const char* path)
     skip_id3(stream->file);
     mp3_frame_t first_frame;
     uint8_t header[4];
-    if(!read_mp3_header(stream->file, header, &first_frame)) {
+    if(!mp3_frame_read(stream->file, header, &first_frame)) {
         vita_mp3_close(stream);
         return NULL;
     }
@@ -299,8 +212,11 @@ mp3_stream_t* vita_mp3_open(const char* path)
     stream->control.maxPcmSize = SCE_AUDIODEC_MP3_MAX_SAMPLES * 2 * sizeof(int16_t);
     stream->control.wordLength = SCE_AUDIODEC_WORD_LENGTH_16BITS;
     stream->control.pInfo = &stream->info;
-    stream->sample_rate = first_frame.sample_rate;
+    stream->sample_rate = first_frame.rate;
     stream->channels = first_frame.channels;
+    stream->format = first_frame;
+    stream->fixed = true;
+    mp3_index_init(&stream->index, stream->first_frame_offset, path);
 
     int result = sceAudiodecCreateDecoder(&stream->control, SCE_AUDIODEC_TYPE_MP3);
     if(result < 0) {
@@ -329,6 +245,7 @@ void vita_mp3_close(mp3_stream_t* stream)
 
     free(stream->encoded);
     free(stream->decoded);
+    mp3_index_free(&stream->index);
     if(stream->library_reference) {
         pthread_mutex_lock(&__library_mutex);
         --__stream_references;
@@ -358,39 +275,65 @@ bool vita_mp3_reset(mp3_stream_t* stream)
     return true;
 }
 
+static bool __read_frame(mp3_stream_t* stream, mp3_frame_t* frame)
+{
+    uint8_t header[4];
+    if(!mp3_frame_read(stream->file, header, frame)) {
+        stream->failed = ferror(stream->file) != 0;
+        return false;
+    }
+
+    memcpy(stream->encoded, header, sizeof(header));
+    uint32_t remaining = frame->size - sizeof(header);
+    if(fread(stream->encoded + sizeof(header), 1, remaining, stream->file) != remaining) {
+        stream->failed = true;
+        return false;
+    }
+
+    return true;
+}
+
+static bool __decode_frame(mp3_stream_t* stream, const mp3_frame_t* frame)
+{
+    stream->control.pEs = stream->encoded;
+    stream->control.inputEsSize = frame->size;
+    stream->control.pPcm = stream->decoded;
+    stream->control.outputPcmSize = 0;
+    if(sceAudiodecDecode(&stream->control) < 0) {
+        return false;
+    }
+
+    if(stream->control.outputPcmSize > stream->control.maxPcmSize ||
+        stream->control.outputPcmSize % (frame->channels * sizeof(int16_t))) {
+        return false;
+    }
+
+    stream->sample_rate = frame->rate;
+    stream->channels = frame->channels;
+    stream->decoded_frames = stream->control.outputPcmSize / (frame->channels * sizeof(int16_t));
+    stream->decoded_position = 0;
+    return true;
+}
+
 static bool decode_next_frame(mp3_stream_t* stream)
 {
     for(uint32_t attempt = 0; attempt < 16; ++attempt) {
         mp3_frame_t frame;
-        uint8_t header[4];
-        if(!read_mp3_header(stream->file, header, &frame)) {
-            stream->failed = ferror(stream->file) != 0;
+        if(!__read_frame(stream, &frame)) {
             return false;
         }
 
-        memcpy(stream->encoded, header, sizeof(header));
-        uint32_t remaining = frame.frame_size - sizeof(header);
-        if(fread(stream->encoded + sizeof(header), 1, remaining, stream->file) != remaining) {
+        if(!__decode_frame(stream, &frame)) {
             stream->failed = true;
             return false;
         }
 
-        stream->control.pEs = stream->encoded;
-        stream->control.inputEsSize = frame.frame_size;
-        stream->control.pPcm = stream->decoded;
-        stream->control.outputPcmSize = 0;
-        int result = sceAudiodecDecode(&stream->control);
-        if(result < 0 || stream->control.outputPcmSize > stream->control.maxPcmSize ||
-            stream->control.outputPcmSize % (frame.channels * sizeof(int16_t))) {
-            stream->failed = true;
-            return false;
+        if(stream->decoded_frames != frame.samples || !mp3_frame_matches(&frame, &stream->format)) {
+            stream->fixed = false;
         }
 
-        if(result >= 0 && stream->control.outputPcmSize >= frame.channels * sizeof(int16_t)) {
-            stream->sample_rate = frame.sample_rate;
-            stream->channels = frame.channels;
-            stream->decoded_frames = stream->control.outputPcmSize / (frame.channels * sizeof(int16_t));
-            stream->decoded_position = 0;
+        stream->checked = true;
+        if(stream->decoded_frames) {
             return true;
         }
 
@@ -467,6 +410,72 @@ static bool __skip_to(mp3_stream_t* stream, uint64_t position)
     return true;
 }
 
+static bool __preroll(mp3_stream_t* stream, uint32_t first, uint32_t target)
+{
+    uint32_t ready = 0;
+    uint32_t payload = 0;
+    for(uint32_t frame = first; frame < target; ++frame) {
+        mp3_frame_t format;
+        if(!__read_frame(stream, &format) || !mp3_frame_matches(&format, &stream->format)) {
+            return false;
+        }
+
+        if(frame + 2 < target) {
+            payload += format.payload;
+        }
+
+        if(!__decode_frame(stream, &format) || stream->decoded_frames != format.samples) {
+            ready = 0;
+            continue;
+        }
+
+        ++ready;
+    }
+
+    /* Reservoir and synthesis history must both be ready before audible PCM. */
+    uint32_t reservoir = stream->format.version == SCE_AUDIODEC_MP3_MPEG_VERSION_1 ? 511 : 255;
+    return ready >= 2 && payload >= reservoir;
+}
+
+static bool __seek_index(mp3_stream_t* stream, uint64_t position)
+{
+    if(!stream->checked || !stream->fixed || stream->failed) {
+        return false;
+    }
+
+    uint32_t rate = stream->format.rate;
+    uint64_t source = position / VITA_AUDIO_OUTPUT_RATE * rate;
+    source += position % VITA_AUDIO_OUTPUT_RATE * rate / VITA_AUDIO_OUTPUT_RATE;
+    uint64_t target = source / stream->format.samples;
+    if(target >= UINT32_MAX) {
+        return false;
+    }
+
+    long offset;
+    uint32_t first;
+    if(!mp3_index_find(&stream->index, stream->file, &stream->format, (uint32_t)target, &offset, &first)) {
+        return false;
+    }
+
+    if(sceAudiodecClearContext(&stream->control) < 0 || fseek(stream->file, offset, SEEK_SET) != 0) {
+        return false;
+    }
+
+    if(!__preroll(stream, first, (uint32_t)target)) {
+        stream->index.blocked = true;
+        return false;
+    }
+
+    uint64_t base = target * stream->format.samples;
+    /* Restore the first output sample in this source frame and its phase. */
+    stream->output_position = (base * VITA_AUDIO_OUTPUT_RATE + rate - 1) / rate;
+    stream->resample_phase = (uint32_t)(stream->output_position * rate - base * VITA_AUDIO_OUTPUT_RATE);
+    stream->decoded_frames = 0;
+    stream->decoded_position = 0;
+    stream->failed = false;
+    return __skip_to(stream, position);
+}
+
 bool vita_mp3_seek_frames(mp3_stream_t* stream, uint64_t position)
 {
     if(!stream || !stream->decoder_created) {
@@ -474,7 +483,20 @@ bool vita_mp3_seek_frames(mp3_stream_t* stream, uint64_t position)
     }
 
     uint64_t previous = stream->output_position;
-    if(position < previous || stream->failed) {
+    uint64_t distance = position > previous ? position - previous : previous - position;
+    bool distant = distance > VITA_AUDIO_OUTPUT_RATE;
+    bool backward = position < previous && position > VITA_AUDIO_OUTPUT_RATE;
+    bool rewind = position < previous || stream->failed;
+    if((distant || backward) && stream->fixed && !stream->failed) {
+        if(__seek_index(stream, position)) {
+            return true;
+        }
+
+        /* A failed warm-up may have changed the decoder and file cursor. */
+        rewind = true;
+    }
+
+    if(rewind) {
         if(!vita_mp3_reset(stream)) {
             return false;
         }

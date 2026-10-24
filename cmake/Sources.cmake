@@ -49,6 +49,9 @@ set(VITAARC_ANDROID_SOURCES
 
 set(VITAARC_AUDIO_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/audio/mp3.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/audio/mp3_frame.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/audio/mp3_index.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/audio/mp3_marks.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/provider.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/stream.c"
     "${VITAARC_SOURCE_ROOT}/bridges/audio/wav.c"

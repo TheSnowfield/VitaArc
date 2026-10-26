@@ -10,6 +10,16 @@ Bitmap text rendering is based in part on the work of the FreeType Team
 (https://freetype.org). Its license is included in `licenses/freetype.txt` in
 the VPK. Text uses fonts from the selected APK.
 
+## Showcase
+
+![Arcaea running on a PlayStation Vita](resources/screenshots/vitaarc-on-ps-vita.png)
+
+VitaArc running on real PlayStation Vita hardware.
+
+![VitaArc startup screen with Arcaea version selection](resources/screenshots/2026-10-27-002627.png)
+
+VitaArc startup screen with Arcaea version selection.
+
 ## Hint
 This project now **under development**.  
 You may not get the game running correctly.

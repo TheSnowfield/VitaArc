@@ -2,6 +2,7 @@
 #include <psp2/audiodec.h>
 #include <stdlib.h>
 #include <string.h>
+#include <config.h>
 
 #include "mp3_index.h"
 
@@ -11,11 +12,12 @@
 void mp3_index_init(mp3_index_t* index, long first, const char* path)
 {
     *index = (mp3_index_t){.first = first, .next = first};
-    if(!path || strncmp(path, "app0:", 5) || strlen(path) >= sizeof(index->path)) {
+    if(!path || (strncmp(path, "app0:", 5) && strncmp(path, PATH_TO_PACKAGE, strlen(PATH_TO_PACKAGE))) ||
+        strlen(path) >= sizeof(index->path)) {
         return;
     }
 
-    /* Only application assets are immutable for the lifetime of this process. */
+    /* The selected version stays fixed while the game is running. */
     strcpy(index->path, path);
 }
 

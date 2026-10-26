@@ -67,7 +67,6 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
 option(VITAARC_VERBOSE_LOGS "Enable verbose trace logging" OFF)
 
-set(ARCAEA_VERSION "" CACHE STRING "Arcaea APK version to package without an interactive prompt")
 set(VITAARC_HEAP_MB 256 CACHE STRING "Native heap reservation in MiB")
 set(VITAARC_GPU_RAM_MB 32 CACHE STRING "Maximum graphics RAM pool in MiB")
 set(VITAARC_GPU_STREAM_MB 6 CACHE STRING "Graphics streaming pool in MiB")
@@ -114,17 +113,27 @@ set_source_files_properties(
 list(APPEND VITAARC_SOURCES "${BRIDGE_SYMBOL_HEADER}")
 
 set(BOOT_LOGO_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/boot_logo.h")
+set(BOOT_ICON_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/boot_icon.h")
+set(BOOT_ICON_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitaarc-icon-pixel-v7.png")
+  set(BOOT_ICON_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitaarc-icon-pixel-v7.png")
+endif()
 add_custom_command(
-  OUTPUT "${BOOT_LOGO_HEADER}"
+  OUTPUT "${BOOT_LOGO_HEADER}" "${BOOT_ICON_HEADER}"
   COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_binary.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitagl.png" "${BOOT_LOGO_HEADER}"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_binary.py"
+    "${BOOT_ICON_SOURCE}" "${BOOT_ICON_HEADER}"
+    --symbol __icon_png
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_binary.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/branding/vitagl.png"
-  COMMENT "Embedding boot logo"
+    "${BOOT_ICON_SOURCE}"
+  COMMENT "Embedding startup logos"
   VERBATIM
 )
-set_source_files_properties("${BOOT_LOGO_HEADER}" PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
-list(APPEND VITAARC_SOURCES "${BOOT_LOGO_HEADER}")
+set_source_files_properties("${BOOT_LOGO_HEADER}" "${BOOT_ICON_HEADER}"
+  PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
+list(APPEND VITAARC_SOURCES "${BOOT_LOGO_HEADER}" "${BOOT_ICON_HEADER}")
 
 ## Build and link
 add_executable(${PROJECT_NAME} ${VITAARC_SOURCES})
@@ -184,8 +193,6 @@ set(VITA_SELF "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.self")
 set(VITA_SFO "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk_param.sfo")
 set(VITA_VPK_OUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk.out")
 set(VITA_VPK "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk")
-set(APK_IMPORT_SCRIPT
-  "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_apk.py")
 
 file(GLOB SHADER_REPLACEMENTS
   CONFIGURE_DEPENDS
@@ -211,48 +218,7 @@ if(VITAARC_SHADER_BINARY_DIR)
   endforeach()
 endif()
 
-option(VITAARC_PACKAGE_APK
-  "Import an Arcaea APK from third-party/arcaea into the VPK" OFF)
-set(VITAARC_TEXTURE_PROFILE "vita" CACHE STRING
-  "APK texture profile: original or vita")
-set_property(CACHE VITAARC_TEXTURE_PROFILE PROPERTY STRINGS original vita)
-if(NOT VITAARC_TEXTURE_PROFILE MATCHES "^(original|vita)$")
-  message(FATAL_ERROR "VITAARC_TEXTURE_PROFILE must be original or vita")
-endif()
-
-set(ARCAEA_APK_FILES)
-set(APK_IMPORT_COMMAND)
-if(VITAARC_PACKAGE_APK)
-  file(GLOB ARCAEA_APK_FILES
-    CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea/*.apk"
-  )
-  list(LENGTH ARCAEA_APK_FILES ARCAEA_APK_COUNT)
-  if(ARCAEA_APK_COUNT EQUAL 0)
-    message(FATAL_ERROR
-      "No APK files found under third-party/arcaea. "
-      "Configure with -DVITAARC_PACKAGE_APK=OFF to build a base VPK.")
-  endif()
-
-  set(APK_IMPORT_ARGUMENTS
-    --vpk "${VITA_VPK_OUT}"
-    --apk-dir "${CMAKE_CURRENT_SOURCE_DIR}/third-party/arcaea"
-    --prefix package
-    --textures "${VITAARC_TEXTURE_PROFILE}"
-    --heap-mb "${VITAARC_HEAP_MB}"
-  )
-  if(ARCAEA_VERSION)
-    list(APPEND APK_IMPORT_ARGUMENTS --version "${ARCAEA_VERSION}")
-  endif()
-
-  set(APK_IMPORT_COMMAND
-    COMMAND "${Python3_EXECUTABLE}"
-      "${APK_IMPORT_SCRIPT}"
-      ${APK_IMPORT_ARGUMENTS}
-  )
-else()
-  message(STATUS "Building a base VPK without Arcaea APK resources")
-endif()
+message(STATUS "Building VitaArc VPK; game resources are installed separately")
 
 add_custom_command(
   OUTPUT "${VITA_SFO}"
@@ -285,14 +251,9 @@ add_custom_command(
     -s "${VITA_SFO}"
     -b "${VITA_SELF}"
     "${VITA_VPK_OUT}"
-  ${APK_IMPORT_COMMAND}
   DEPENDS
     "${VITA_SFO}"
     "${VITA_SELF}"
-    "${APK_IMPORT_SCRIPT}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tools/apk_manifest.py"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_textures.py"
-    ${ARCAEA_APK_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/icon0.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/background.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/livearea/startup.png"

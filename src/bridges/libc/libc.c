@@ -74,9 +74,9 @@ void* bridge_dlopen(const char* filename, int flags)
         return loader_clone_handle(loaded);
     }
 
-    char path[256];
-    snprintf(path, sizeof(path), "%s%s", PATH_TO_LIBRARY, name);
-    if(!util_file_exists(path)) {
+    char path[VITAARC_PATH_CAPACITY];
+    int written = snprintf(path, sizeof(path), "%s%s", PATH_TO_LIBRARY, name);
+    if(written < 0 || written >= (int)sizeof(path) || !util_file_exists(path)) {
         snprintf(__dl_error, sizeof(__dl_error), "library not found: %s", name);
         return NULL;
     }

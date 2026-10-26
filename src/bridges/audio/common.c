@@ -35,7 +35,7 @@ bool audio_path(const char* source, char* destination, size_t destination_size)
     } else if(strncmp(source, sdcard_prefix, sizeof(sdcard_prefix) - 1) == 0) {
         length = snprintf(destination, destination_size, "%s%s", PATH_TO_USER, source + sizeof(sdcard_prefix) - 1);
     } else if(strncmp(source, "assets/", 7) == 0) {
-        length = snprintf(destination, destination_size, "%s/%s", PATH_TO_PACKAGE, source);
+        length = snprintf(destination, destination_size, "%s%s", PATH_TO_PACKAGE, source);
     } else if(strncmp(source, "audio/", 6) == 0 || strncmp(source, "songs/", 6) == 0) {
         length = snprintf(destination, destination_size, "%s/%s", PATH_TO_ASSETS, source);
     } else {

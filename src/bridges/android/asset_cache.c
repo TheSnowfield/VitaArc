@@ -21,7 +21,7 @@ typedef struct asset_folder_t {
     uint64_t used;
 } asset_folder_t;
 
-/* app0 packaged assets are immutable. Keep only a bounded set of directory
+/* The selected version is fixed while running. Keep only a bounded set of directory
  * names; reading image/audio data continues through the regular file stream. */
 static asset_folder_t* __folders[CACHE_FOLDERS];
 static pthread_mutex_t __mutex = PTHREAD_MUTEX_INITIALIZER;

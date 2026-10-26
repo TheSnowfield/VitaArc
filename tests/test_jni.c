@@ -703,8 +703,14 @@ static void __test_corruption(void)
 int main(int argc, char** argv)
 {
     assert(argc == 3);
+    const char* selected = getenv("VITAARC_TEST_VERSION_DIR");
+    if(selected)
+        assert(vita_version_select(selected));
     __env = jni_runtime_get_env();
     __helper = (*__env)->FindClass(__env, HELPER);
+    jstring assets_path = (*__env)->CallStaticObjectMethod(__env, __helper, __method("getAssetsPath", "()" STRING));
+    __expect_string(assets_path, PATH_TO_PACKAGE);
+    (*__env)->DeleteLocalRef(__env, assets_path);
     if(strcmp(argv[1], "runtime") == 0) {
         __test_analytics();
         __test_animation_interval();

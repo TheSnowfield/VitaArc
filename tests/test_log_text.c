@@ -71,6 +71,11 @@ static void __pixels(unsigned width, unsigned height, unsigned pitch)
     unsigned scale = width >= 960 && height >= 544 ? 2 : 1;
     assert(storage[1 + 20 * scale * pitch + 7 * scale] == 0xff8080ffu);
     assert(storage[1 + 20 * scale * pitch + 6 * scale] == 0xff18120cu);
+
+    const char* names[] = {"1.0", "2.0"};
+    log_text_draw_menu(&text, names, 2, 1, storage + 1, width, height, pitch);
+    log_text_draw_menu(&text, NULL, 0, 0, storage + 1, width, height, pitch);
+    assert(storage[0] == guard && storage[count + 1] == guard);
     for(unsigned y = 0; y < height; ++y) {
         for(unsigned x = width; x < pitch; ++x) {
             assert(storage[1 + y * pitch + x] == guard);
@@ -78,6 +83,57 @@ static void __pixels(unsigned width, unsigned height, unsigned pitch)
     }
 
     free(storage);
+}
+
+static void __fixed_header_and_menu(void)
+{
+    const unsigned width = 480, height = 272, top = 32;
+    uint32_t logo_pixels[16];
+    for(unsigned index = 0; index < 16; ++index) {
+        logo_pixels[index] = 0xffabcdefu;
+    }
+
+    log_image_t image = {logo_pixels, 4, 4};
+    log_text_t text = {0};
+    log_text_image(&text, &image);
+    assert(text.count == 0 && text.image == &image);
+    log_text_write(&text, INFORMATION, "A\n", 2);
+
+    uint32_t* before = calloc((size_t)width * height, sizeof(*before));
+    uint32_t* after = calloc((size_t)width * height, sizeof(*after));
+    assert(before && after);
+    log_text_draw(&text, before, width, height, width);
+    assert(before[20 * width + 6] == logo_pixels[0]);
+    for(unsigned index = 0; index < LOG_ROWS + 10; ++index) {
+        log_text_write(&text, ERROR, "B\n", 2);
+    }
+
+    log_text_draw(&text, after, width, height, width);
+    assert(!memcmp(before, after, (size_t)top * width * sizeof(*before)));
+    assert(after[top * width + 6] == 0xff8080ffu);
+
+    const char* names[40];
+    for(unsigned index = 0; index < 40; ++index) {
+        names[index] = index == 39 ? "B" : "A";
+    }
+
+    log_text_t saved = text;
+    log_text_draw_menu(&text, names, 40, 0, after, width, height, width);
+    assert(!memcmp(before, after, (size_t)top * width * sizeof(*before)));
+    assert(after[(top + 16) * width + 7] == 0xffffd080u);
+    assert(after[(top + 16) * width + 18] == 0xff18120cu);
+    assert(after[(top + 16) * width + 19] == 0xffffd080u);
+
+    /* 25 entries fit with this header: item 39 is row 14 of page two. */
+    log_text_draw_menu(&text, names, 40, 39, after, width, height, width);
+    unsigned selected_y = top + (14 + 2) * 8;
+    assert(after[selected_y * width + 7] == 0xffffd080u);
+    assert(after[selected_y * width + 18] == 0xffffd080u);
+    assert(!memcmp(&saved, &text, sizeof(text)));
+    assert(!memcmp(before, after, (size_t)top * width * sizeof(*before)));
+
+    free(after);
+    free(before);
 }
 
 int main(void)
@@ -88,6 +144,8 @@ int main(void)
     __pixels(480, 272, 512);
     __pixels(960, 544, 960);
     __pixels(40, 40, 64);
-    puts("Log text: wrapping, scrolling, fragments, severity and framebuffer bounds passed.");
+    __pixels(32, 32, 64);
+    __fixed_header_and_menu();
+    puts("Log text: wrapping, scrolling, fixed header, paged selection and framebuffer bounds passed.");
     return 0;
 }

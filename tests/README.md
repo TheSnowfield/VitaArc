@@ -35,7 +35,7 @@ See [the version compatibility record](../.llm/apk-compatibility.md).
 
 Requirements: Linux or WSL, a C compiler, CMake 3.16+, Python 3, pthreads and
 libffi, Vorbis and FreeType development headers/libraries, plus a test font
-(`sudo apt-get install libffi-dev libvorbis-dev libfreetype-dev fonts-dejavu-core`
+(`sudo apt-get install libffi-dev libvorbis-dev libfreetype-dev libpng-dev fonts-dejavu-core`
 on Ubuntu). An alternate font can be selected with `-DVITAARC_TEST_FONT=<font.ttf>`.
 No game files or VitaSDK are needed.
 
@@ -49,6 +49,20 @@ From PowerShell, prefix each command with `wsl -d Ubuntu --`.
 Use `ctest --test-dir build/host-tests -V` to see the individual scenario output.
 AddressSanitizer and UndefinedBehaviorSanitizer are enabled by default; configure
 with `-DVITAARC_SANITIZERS=OFF` only on hosts without sanitizer support.
+
+CI host tests use Ubuntu 24.04. FreeType 2.14.2 leaks the temporary raster buffer
+inside `FT_Glyph_To_Bitmap`, causing both `jni_text_bitmap` and
+`jni_cocos_closed_loop` to fail LeakSanitizer checks. The same tests pass with
+Ubuntu 24.04's FreeType 2.13.2. For newer hosts, use FreeType 2.14.3 or later,
+which fixes the buffer ownership; keep leak detection enabled.
+
+Release tests exercise the GitHub publisher with stubbed `gh`/`git` commands and
+the GitLab publisher with a fake API. They cover version releases, commit
+nightlies, reruns, interrupted uploads and rejection of tags at another commit:
+
+```sh
+python3 -m unittest discover -s tests -p 'test_release_tools.py'
+```
 
 `run_tests.py` creates an isolated temporary directory containing Vita-style
 `app0:package/assets` and `ux0:vitaarc/persistent/data` paths. It runs nine fresh

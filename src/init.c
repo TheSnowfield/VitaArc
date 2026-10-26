@@ -218,6 +218,32 @@ static void __stop(vita_app_t* app)
     bridge_gl_shutdown_buffers();
 }
 
+static bool __select_version(void)
+{
+    vita_versions_t versions = {0};
+    if(!vita_versions_scan(&versions)) {
+        log_e(TAG, "Cannot scan game versions: %s", PATH_TO_VERSIONS);
+        log_screen_wait();
+        return false;
+    }
+
+    unsigned selected = 0;
+    bool result = log_screen_select((const char* const*)versions.names, versions.count, &selected);
+    if(result) {
+        result = selected < versions.count && vita_version_select(versions.names[selected]);
+        if(result) {
+            log_i(TAG, "Selected version: %s", versions.names[selected]);
+            log_i(TAG, "Game resources: %s", PATH_TO_PACKAGE);
+        } else {
+            log_e(TAG, "Selected game directory is unavailable");
+            log_screen_wait();
+        }
+    }
+
+    vita_versions_free(&versions);
+    return result;
+}
+
 int main(void)
 {
     vita_app_t app = {0};
@@ -233,11 +259,16 @@ int main(void)
     }
 
     bool ready = false;
-    if(video && __shaders()) {
+    bool selected = video && __select_version();
+    if(selected && __shaders()) {
         ready = __boot(&app);
     }
 
     log_flush();
+    if(selected && !ready) {
+        log_screen_wait();
+    }
+
     log_screen_end();
     if(ready) {
         __loop(&app);

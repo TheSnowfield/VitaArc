@@ -3,5 +3,9 @@ build/
 __pycache__/
 *.py[cod]
 
+# Local branding drafts and generated icon variants.
+/resources/branding/
+/livearea/icon0-*.png
+
 # ignore arcaea apk files
 third-party/arcaea

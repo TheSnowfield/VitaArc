@@ -10,6 +10,9 @@
 #include <logcat/logcat.h>
 #include "paths.h"
 
+/* This suite exercises the unchanged standalone-probe default. */
+#define ASSET_ROOT PATH_TO_APP "package/assets"
+
 static unsigned __dirs;
 static unsigned __opens;
 static unsigned __errors;
@@ -70,7 +73,7 @@ static void* __reader(void* unused)
 {
     (void)unused;
     for(unsigned index = 0; index < 1000; ++index) {
-        assert(!a_asset_cached(PATH_TO_ASSETS "/char/absent.png"));
+        assert(!a_asset_cached(ASSET_ROOT "/char/absent.png"));
     }
 
     return NULL;
@@ -85,8 +88,8 @@ static void __fixture(const char* path)
 
 int main(void)
 {
-    __fixture(PATH_TO_ASSETS "/char/0_icon.png");
-    __fixture(PATH_TO_ASSETS "/fault/ok.bin");
+    __fixture(ASSET_ROOT "/char/0_icon.png");
+    __fixture(ASSET_ROOT "/fault/ok.bin");
     a_asset_manager_t* manager = a_asset_manager_from_java(NULL, NULL);
     __opens = 0;
 
@@ -102,7 +105,7 @@ int main(void)
     assert(a_asset_read(asset, pixels, sizeof(pixels)) == 5 && !memcmp(pixels, "pixel", 5));
     a_asset_close(asset);
     assert(__dirs == 2 && __opens == 1);
-    assert(a_asset_cached(PATH_TO_ASSETS "/char/0_ICON.PNG"));
+    assert(a_asset_cached(ASSET_ROOT "/char/0_ICON.PNG"));
 
     pthread_t readers[4];
     for(unsigned index = 0; index < 4; ++index) {
@@ -139,13 +142,13 @@ int main(void)
     __dirs = 0;
     char path[128];
     for(unsigned index = 0; index < 17; ++index) {
-        snprintf(path, sizeof(path), PATH_TO_ASSETS "/cache%u/item", index);
+        snprintf(path, sizeof(path), ASSET_ROOT "/cache%u/item", index);
         __fixture(path);
         assert(a_asset_cached(path));
     }
 
     assert(__dirs == 17);
-    assert(a_asset_cached(PATH_TO_ASSETS "/cache0/item") && __dirs == 18);
+    assert(a_asset_cached(ASSET_ROOT "/cache0/item") && __dirs == 18);
     a_asset_cache_clear();
     return 0;
 }

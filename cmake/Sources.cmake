@@ -31,6 +31,7 @@ set(VITAARC_AUDIO_BACKEND_SOURCES
 )
 
 set(VITAARC_APPLICATION_SOURCES
+    "${VITAARC_SOURCE_ROOT}/config.c"
     "${VITAARC_SOURCE_ROOT}/bridge_symbols.c"
     "${VITAARC_SOURCE_ROOT}/init.c"
     "${VITAARC_SOURCE_ROOT}/kubridge.c"
@@ -63,6 +64,7 @@ set(VITAARC_AUDIO_SOURCES
 set(VITAARC_COCOS2DX_SOURCES
     "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/cocos2dx.c"
     "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/storage.c"
+    "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/texture_size.c"
     "${VITAARC_SOURCE_ROOT}/bridges/cocos2dx/textures.c"
 )
 

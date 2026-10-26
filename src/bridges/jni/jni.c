@@ -60,30 +60,9 @@ static bool __ready;
 
 static bool __app_version(char version[64])
 {
-    /* Older 1.6.1c VPKs predate this manifest-derived package metadata. */
-    strcpy(version, "1.6.1c");
-    FILE* file = fopen(PATH_TO_APP "vitaarc-apk-version.txt", "rb");
-    if(!file)
-        return true;
-
-    size_t length = fread(version, 1, 63, file);
-    int extra = fgetc(file);
-    bool valid = !ferror(file) && (extra == EOF || (extra == '\n' && fgetc(file) == EOF));
-    fclose(file);
-    while(length && (version[length - 1] == '\n' || version[length - 1] == '\r'))
-        --length;
-    version[length] = 0;
-    if(!length || version[0] < '0' || version[0] > '9')
-        valid = false;
-    for(size_t index = 0; index < length; ++index) {
-        char c = version[index];
-        if(!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '.' || c == '-' ||
-               c == '_'))
-            valid = false;
-    }
-
+    bool valid = vita_version_read_metadata(version, 64);
     if(!valid)
-        log_e(TAG, "Invalid packaged APK version metadata");
+        log_e(TAG, "Invalid APK version metadata in %s", PATH_TO_PACKAGE);
     return valid;
 }
 

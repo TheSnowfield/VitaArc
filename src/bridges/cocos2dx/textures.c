@@ -1,26 +1,14 @@
-#include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <kubridge.h>
 
 #include <config.h>
 #include <loader.h>
 #include <logcat/logcat.h>
-#include <patcher.h>
 #include "cocos2dx.h"
+#include "texture_size.h"
 
-#define TEXTURE_MAP PATH_TO_PACKAGE "vitaarc-textures.bin"
-#define TEXTURE_INIT "_ZN7cocos2d9Texture2D13initWithImageEPNS_5ImageE"
 #define TEXTURE_FORMAT "_ZN7cocos2d9Texture2D13initWithImageEPNS_5ImageENS0_11PixelFormatE"
-#define TEXTURE_ALPHA "_ZN7cocos2d9Texture2D26getDefaultAlphaPixelFormatEv"
-
-typedef struct {
-    char path[256];
-    uint16_t width;
-    uint16_t height;
-    uint16_t small_width;
-    uint16_t small_height;
-} texture_row_t;
 
 typedef struct {
     uint32_t size;
@@ -43,80 +31,21 @@ static const texture_abi_t __abis[] = {
         0xa38598, 0xf4bb04, 0x119f10c, 20, 40, 12}, /* 7.0.260c */
 };
 
-static texture_row_t* __rows;
-static uint32_t __count;
 static bool __cow;
 static bool (*__init)(void*, void*, int);
-static int (*__alpha)(void);
-static const int* __format;
 static uint8_t __pixels;
 static uint8_t __size;
 static uint8_t __logical;
 
-_Static_assert(sizeof(texture_row_t) == 264, "Texture manifest row layout");
-
-static bool __valid_row(const texture_row_t* row)
+/* The verified prologue runs here, then returns to the original body. Keep this
+ * in executable memory; kubridge writes it before Cocos starts any threads. */
+__attribute__((naked, aligned(4))) static void __texture_trampoline(void)
 {
-    if(!memchr(row->path, 0, sizeof(row->path)) || strncmp(row->path, "assets/", 7)) {
-        return false;
-    }
-
-    if(!row->width || !row->height || row->width > 16384 || row->height > 16384) {
-        return false;
-    }
-
-    if(!row->small_width || !row->small_height) {
-        return false;
-    }
-
-    return row->small_width <= row->width && row->small_height <= row->height;
-}
-
-static bool __read_map(FILE* file)
-{
-    struct {
-        char magic[8];
-        uint32_t count;
-        uint32_t stride;
-    } header;
-
-    if(fread(&header, sizeof(header), 1, file) != 1) {
-        return false;
-    }
-
-    if(memcmp(header.magic, "VARCTX1", 8) || header.count > 4096 || header.stride != sizeof(texture_row_t)) {
-        return false;
-    }
-
-    if(!header.count) {
-        return fgetc(file) == EOF && !ferror(file);
-    }
-
-    __rows = calloc(header.count, sizeof(*__rows));
-    if(!__rows) {
-        return false;
-    }
-
-    if(fread(__rows, sizeof(*__rows), header.count, file) != header.count) {
-        return false;
-    }
-
-    if(fgetc(file) != EOF || ferror(file)) {
-        return false;
-    }
-
-    for(uint32_t index = 0; index < header.count; ++index) {
-        if(!__valid_row(&__rows[index])) {
-            return false;
-        }
-
-        if(index && strcmp(__rows[index - 1].path, __rows[index].path) >= 0) {
-            return false;
-        }
-    }
-
-    __count = header.count;
-    return true;
+    __asm__ volatile(
+        "nop\n nop\n nop\n nop\n"
+        "ldr.w pc, [pc, #0]\n"
+        ".word 0\n"
+        ".word 0\n");
 }
 
 static Elf32_Sym* __symbol(dynalib_t* library, const char* name)
@@ -237,65 +166,69 @@ static const char* __image_path(const void* image)
     return (const char*)text + 1;
 }
 
-static const texture_row_t* __find(const char* path)
+static bool __source_size(const char* name, unsigned packed_width, unsigned packed_height,
+    unsigned* width, unsigned* height)
 {
-    if(!path) {
-        return NULL;
-    }
-
-    const char* prefixes[] = {PATH_TO_PACKAGE, "app0:/package/", "file:///android_asset/"};
-    for(unsigned index = 0; index < sizeof(prefixes) / sizeof(prefixes[0]); ++index) {
-        size_t length = strlen(prefixes[index]);
-        if(!strncmp(path, prefixes[index], length)) {
-            path += length;
-            break;
-        }
-    }
-
-    char name[256];
-    if(strncmp(path, "assets/", 7)) {
-        if(snprintf(name, sizeof(name), "assets/%s", path) >= (int)sizeof(name)) {
-            return NULL;
-        }
-
-        path = name;
-    }
-
-    uint32_t low = 0;
-    uint32_t high = __count;
-    while(low < high) {
-        uint32_t middle = low + (high - low) / 2;
-        int order = strcmp(path, __rows[middle].path);
-        if(!order) {
-            return &__rows[middle];
-        }
-
-        if(order < 0) {
-            high = middle;
-            continue;
-        }
-
-        low = middle + 1;
-    }
-
-    return NULL;
-}
-
-static bool __from_image(void* texture, void* image)
-{
-    if(!__init(texture, image, __format ? *__format : __alpha())) {
+    if(!name || !*name) {
         return false;
     }
 
-    const texture_row_t* row = __find(__image_path(image));
-    if(!row) {
-        return true;
+    size_t prefix = strlen(PATH_TO_PACKAGE);
+    if(!strncmp(name, PATH_TO_PACKAGE, prefix)) {
+        name += prefix;
+    } else if(!strncmp(name, "file:///android_asset/", 22)) {
+        name += 22;
+    }
+
+    /* Only inspect immutable selected assets, never a generated text bitmap
+     * or an unrelated path supplied by the game. */
+    if(*name == '/' || strchr(name, ':') || strchr(name, '\\')) {
+        return false;
+    }
+
+    for(const char* part = name; *part;) {
+        const char* slash = strchr(part, '/');
+        size_t size = slash ? (size_t)(slash - part) : strlen(part);
+        if(!size || (size == 1 && *part == '.') || (size == 2 && !strncmp(part, "..", 2))) {
+            return false;
+        }
+
+        if(!slash) {
+            break;
+        }
+
+        part = slash + 1;
+    }
+
+    char path[VITAARC_PATH_CAPACITY];
+    int size = !strncmp(name, "assets/", 7)
+        ? snprintf(path, sizeof(path), "%s%s", PATH_TO_PACKAGE, name)
+        : snprintf(path, sizeof(path), "%s/%s", PATH_TO_ASSETS, name);
+    if(size < 0 || (size_t)size >= sizeof(path)) {
+        return false;
+    }
+
+    FILE* file = fopen(path, "rb");
+    if(!file) {
+        return false;
+    }
+
+    unsigned char header[57];
+    size_t count = fread(header, 1, sizeof(header), file);
+    fclose(file);
+    return vita_texture_source_size(header, count, packed_width, packed_height, width, height);
+}
+
+static bool __from_image_with_format(void* texture, void* image, int format)
+{
+    if(!__init(texture, image, format)) {
+        return false;
     }
 
     uint32_t* pixels = (void*)((unsigned char*)texture + __pixels);
-    if(pixels[0] != row->small_width || pixels[1] != row->small_height) {
-        log_e(TAG, "Texture profile mismatch: %s (%ux%u)", row->path, pixels[0], pixels[1]);
-        return false;
+    unsigned width, height;
+    if(!__source_size(__image_path(image), pixels[0], pixels[1], &width, &height)) {
+        return true;
     }
 
     /* GPU storage and normalized UV limits retain the smaller image size.
@@ -303,47 +236,26 @@ static bool __from_image(void* texture, void* image)
     float* size = (void*)((unsigned char*)texture + __size);
     if(__logical) {
         /* Preserve Cocos's /1080/ layout scale while restoring source dimensions. */
-        float x = (float)row->width / pixels[0];
-        float y = (float)row->height / pixels[1];
+        float x = (float)width / pixels[0];
+        float y = (float)height / pixels[1];
         float* logical = (void*)((unsigned char*)texture + __logical);
         logical[0] *= x;
         logical[1] *= y;
         size[0] *= x;
         size[1] *= y;
     } else {
-        size[0] = row->width;
-        size[1] = row->height;
+        size[0] = width;
+        size[1] = height;
     }
 
-    pixels[0] = row->width;
-    pixels[1] = row->height;
+    pixels[0] = width;
+    pixels[1] = height;
     return true;
 }
 
 bool bridge_cocos_configure_textures(dynalib_t* library)
 {
-    FILE* file = fopen(TEXTURE_MAP, "rb");
-    if(!file) {
-        if(errno == ENOENT) {
-            return true;
-        }
-
-        log_e(TAG, "Cannot open texture profile: %s", strerror(errno));
-        return false;
-    }
-
-    bool valid = __read_map(file);
-    fclose(file);
-    if(!valid) {
-        log_e(TAG, "Invalid texture profile: %s", TEXTURE_MAP);
-        bridge_cocos_release_textures();
-        return false;
-    }
-
-    if(!__count) {
-        return true;
-    }
-
+    bridge_cocos_release_textures();
     const texture_abi_t* abi = __layout(library);
     if(!abi) {
         log_e(TAG, "Texture profile requires a supported Cocos image ABI");
@@ -356,40 +268,57 @@ bool bridge_cocos_configure_textures(dynalib_t* library)
     __size = abi->size_offset ? abi->size_offset : 32;
     __logical = abi->logical;
 
-    uintptr_t entry = (uintptr_t)loader_get_proc_address(library, TEXTURE_INIT);
-    __init = loader_get_proc_address(library, TEXTURE_FORMAT);
-    __alpha = loader_get_proc_address(library, TEXTURE_ALPHA);
+    uintptr_t entry = (uintptr_t)loader_get_proc_address(library, TEXTURE_FORMAT);
     if(abi->entry) {
-        if(abi->alpha > library->span || sizeof(int) > library->span - abi->alpha) {
-            bridge_cocos_release_textures();
-            return false;
-        }
-
-        entry = (library->base + abi->entry) | 1;
-        __init = (void*)((library->base + abi->init) | 1);
-        __format = (const void*)(library->base + abi->alpha);
+        entry = (library->base + abi->init) | 1;
     }
 
-    if(!__init || (!__alpha && !__format) || !(entry & 1) || (entry & 2) ||
-        (!abi->entry && !__code(library, TEXTURE_INIT, 16))) {
+    if(!(entry & 1) || (entry & 2)) {
         log_e(TAG, "Texture profile requires a supported Cocos image ABI");
         bridge_cocos_release_textures();
         return false;
     }
 
-    uint32_t offset = (entry & ~(uintptr_t)1) - library->base;
-    patch_uint32(library, offset, 0xf000f8df); /* Thumb LDR.W PC, [PC, #0]. */
-    patch_uint32(library, offset + 4, (uintptr_t)__from_image);
-    log_i(TAG, "Vita texture profile: %u smaller images, original layout dimensions", __count);
+    const unsigned char* original = (const void*)(entry & ~(uintptr_t)1);
+    uint32_t trampoline[5] = {0, 0, 0xf000f8df, entry + 8, 0};
+    memcpy(trampoline, original, 8);
+    if(abi->cow) {
+        /* 1.6.1c loads a PC-relative GOT displacement in its first 8 bytes.
+         * Relocate that LDR literal; all other fingerprinted prologues are
+         * complete push/add/sub instructions that can be copied unchanged. */
+        uint16_t load;
+        memcpy(&load, (unsigned char*)trampoline + 6, sizeof(load));
+        if(load != 0x4f4b) {
+            bridge_cocos_release_textures();
+            return false;
+        }
+
+        load = 0x4f02; /* LDR r7, [PC, #8] => trampoline+16. */
+        memcpy((unsigned char*)trampoline + 6, &load, sizeof(load));
+        memcpy(&trampoline[4], original + 0x134, 4);
+    }
+
+    void* target = (void*)((uintptr_t)__texture_trampoline & ~(uintptr_t)1);
+    if(kuKernelCpuUnrestrictedMemcpy(target, trampoline, sizeof(trampoline)) < 0) {
+        bridge_cocos_release_textures();
+        return false;
+    }
+
+    kuKernelFlushCaches(target, sizeof(trampoline));
+    __init = (void*)((uintptr_t)target | 1);
+    /* Hook the explicit-format overload too: asynchronous TextureCache loads
+     * call it directly. The default overload continues to supply its format. */
+    uint32_t hook[2] = {0xf000f8df, (uintptr_t)__from_image_with_format};
+    if(kuKernelCpuUnrestrictedMemcpy((void*)original, hook, sizeof(hook)) < 0) {
+        bridge_cocos_release_textures();
+        return false;
+    }
+
+    log_i(TAG, "Vita textures: embedded source sizes; min edge 64, long edge 256, half size up to 960");
     return true;
 }
 
 void bridge_cocos_release_textures(void)
 {
-    free(__rows);
-    __rows = NULL;
-    __count = 0;
     __init = NULL;
-    __alpha = NULL;
-    __format = NULL;
 }

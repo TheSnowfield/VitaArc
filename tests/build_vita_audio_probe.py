@@ -21,6 +21,7 @@ def main():
     subprocess.run([
         compiler, "-O2", "-Wall", "-Wextra", "-Werror", "-Wno-unused-parameter", "-mthumb",
         "-I", str(root / "src"),
+        str(root / "src/config.c"),
         *(["-DVITAARC_VORBIS_PROBE"] if args.vorbis else []),
         str(root / "tests/vita_audio_probe.c"), str(root / "src/bridges/audio/mp3.c"),
         str(root / "src/bridges/audio/mp3_frame.c"), str(root / "src/bridges/audio/mp3_index.c"),

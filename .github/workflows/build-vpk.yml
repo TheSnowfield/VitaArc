@@ -2,6 +2,8 @@ name: Build VPK
 
 on:
   push:
+    branches: ["**"]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -9,20 +11,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-vpk-${{ github.ref }}
-  cancel-in-progress: true
+  group: build-vpk-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   test-jni:
-    runs-on: ubuntu-latest
+    # Ubuntu 26.04 ships FreeType 2.14.2, whose FT_Glyph_To_Bitmap leaks.
+    # Keep leak detection enabled on the same LTS used by GitLab host tests.
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out sources
         uses: actions/checkout@v4
       - name: Install host test dependencies
         # libffi is used only by host native dispatch; Vita uses AAPCS32 packing.
-        run: sudo apt-get update && sudo apt-get install -y libffi-dev libvorbis-dev libfreetype-dev fonts-dejavu-core
+        run: sudo apt-get update && sudo apt-get install -y libffi-dev libvorbis-dev libfreetype-dev libpng-dev fonts-dejavu-core python3-pil
+      - name: Test resource packaging and release tools
+        run: |
+          /usr/bin/python3 -m unittest discover -s tests -p 'test_package*.py'
+          /usr/bin/python3 -m unittest discover -s tests -p 'test_release_tools.py'
       - name: Configure host tests
-        run: cmake -S tests -B build/host-tests -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S tests -B build/host-tests -DCMAKE_BUILD_TYPE=Debug -DPython3_EXECUTABLE=/usr/bin/python3
       - name: Build JNI mock tests
         run: cmake --build build/host-tests --parallel 2
       - name: Run JNI mock closed loop with sanitizers
@@ -41,12 +49,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build base VPK with VitaSDK
-        env:
-          VITAARC_PACKAGE_APK: "OFF"
         run: bash build.sh
 
       - name: Verify VPK
-        run: test -s build/VitaArc.vpk
+        run: python3 tools/check_vpk.py build/VitaArc.vpk
 
       - name: Upload VPK
         uses: actions/upload-artifact@v4
@@ -55,3 +61,36 @@ jobs:
           path: build/VitaArc.vpk
           if-no-files-found: error
           retention-days: 14
+
+  release:
+    needs: [test-jni, build]
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.sha }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: Check out complete commit history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download verified VPK
+        uses: actions/download-artifact@v4
+        with:
+          name: VitaArc-${{ github.sha }}
+          path: build
+      - name: Verify application-only VPK
+        run: python3 tools/check_vpk.py build/VitaArc.vpk
+      - name: Generate commit history
+        if: github.ref_type == 'branch'
+        env:
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: python3 tools/nightly_notes.py --commit "$GITHUB_SHA" --repository-url "$REPOSITORY_URL" --output build/nightly-notes.md
+      - name: Publish VPK release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: bash tools/publish_github_release.sh

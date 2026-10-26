@@ -300,10 +300,11 @@ bool jni_bitmap_create(JNIEnv* env, const jvalue* arguments)
     const char* font = (*env)->GetStringUTFChars(env, arguments[1].l, NULL);
     bool result = false;
     if(font && !(*env)->ExceptionCheck(env)) {
-        char path[512];
+        char path[VITAARC_PATH_CAPACITY];
         const char* relative = font;
-        if(!strncmp(relative, PATH_TO_ASSETS "/", sizeof(PATH_TO_ASSETS)))
-            relative += sizeof(PATH_TO_ASSETS);
+        size_t assets_length = strlen(PATH_TO_ASSETS);
+        if(!strncmp(relative, PATH_TO_ASSETS, assets_length) && relative[assets_length] == '/')
+            relative += assets_length + 1;
         if(!strncmp(relative, "assets/", 7))
             relative += 7;
         bool asset_font = (strstr(relative, ".ttf") || strstr(relative, ".otf")) && relative[0] != '/' &&
@@ -330,8 +331,8 @@ bool jni_bitmap_create(JNIEnv* env, const jvalue* arguments)
         bridge_bitmap_t bitmap;
         bool rendered = written > 0 && written < (int)sizeof(path) && bridge_bitmap_render(&request, &bitmap);
         if(!rendered && asset_font) {
-            request.font_path = PATH_TO_ASSETS "/Fonts/Kazesawa-Regular.ttf";
-            rendered = bridge_bitmap_render(&request, &bitmap);
+            written = snprintf(path, sizeof(path), "%s/Fonts/Kazesawa-Regular.ttf", PATH_TO_ASSETS);
+            rendered = written > 0 && written < (int)sizeof(path) && bridge_bitmap_render(&request, &bitmap);
         }
 
         if(rendered) {

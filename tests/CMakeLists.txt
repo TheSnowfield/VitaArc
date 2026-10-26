@@ -5,6 +5,7 @@ enable_testing()
 find_package(Threads REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(Freetype REQUIRED)
+find_package(PNG REQUIRED)
 find_path(FFI_INCLUDE_DIR ffi.h PATH_SUFFIXES x86_64-linux-gnu aarch64-linux-gnu)
 find_library(FFI_LIBRARY ffi)
 find_path(VORBIS_INCLUDE_DIR vorbis/vorbisfile.h)
@@ -32,7 +33,51 @@ target_include_directories(test_log_text PRIVATE "${VITAARC_ROOT}/src")
 target_compile_options(test_log_text PRIVATE -Wall -Wextra -Werror -UNDEBUG)
 add_test(NAME startup_log_text COMMAND test_log_text)
 
+set(LOG_LOGO_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/log-logo-fixture")
+set(BOOT_ICON_SOURCE "${VITAARC_ROOT}/livearea/icon0.png")
+if(EXISTS "${VITAARC_ROOT}/resources/branding/vitaarc-icon-pixel-v7.png")
+  set(BOOT_ICON_SOURCE "${VITAARC_ROOT}/resources/branding/vitaarc-icon-pixel-v7.png")
+endif()
+add_custom_command(
+  OUTPUT "${LOG_LOGO_FIXTURE}/generated/boot_logo.h" "${LOG_LOGO_FIXTURE}/generated/boot_icon.h"
+  COMMAND "${Python3_EXECUTABLE}" "${VITAARC_ROOT}/tools/embed_binary.py"
+    "${VITAARC_ROOT}/resources/branding/vitagl.png" "${LOG_LOGO_FIXTURE}/generated/boot_logo.h"
+  COMMAND "${Python3_EXECUTABLE}" "${VITAARC_ROOT}/tools/embed_binary.py"
+    "${BOOT_ICON_SOURCE}"
+    "${LOG_LOGO_FIXTURE}/generated/boot_icon.h" --symbol __icon_png
+  DEPENDS "${VITAARC_ROOT}/tools/embed_binary.py" "${VITAARC_ROOT}/resources/branding/vitagl.png"
+    "${BOOT_ICON_SOURCE}"
+  VERBATIM)
+add_executable(test_log_logo test_log_logo.c "${VITAARC_ROOT}/src/logcat/logo.c"
+  "${VITAARC_ROOT}/src/logcat/text.c"
+  "${LOG_LOGO_FIXTURE}/generated/boot_logo.h" "${LOG_LOGO_FIXTURE}/generated/boot_icon.h")
+target_include_directories(test_log_logo PRIVATE "${VITAARC_ROOT}/src" "${LOG_LOGO_FIXTURE}")
+target_link_libraries(test_log_logo PRIVATE PNG::PNG)
+target_compile_options(test_log_logo PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+add_test(NAME startup_log_logos COMMAND test_log_logo)
+
+add_executable(test_texture_size test_texture_size.c "${VITAARC_ROOT}/src/bridges/cocos2dx/texture_size.c")
+target_include_directories(test_texture_size PRIVATE "${VITAARC_ROOT}/src/bridges/cocos2dx")
+target_compile_options(test_texture_size PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+add_test(NAME cocos_texture_size COMMAND test_texture_size)
+add_test(NAME cocos_texture_python_roundtrip COMMAND "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_LIST_DIR}/run_texture_roundtrip.py" "$<TARGET_FILE:test_texture_size>")
+
+add_executable(test_versions test_versions.c "${VITAARC_ROOT}/src/config.c"
+  "${VITAARC_ROOT}/src/bridges/android/asset_cache.c"
+  "${VITAARC_ROOT}/src/bridges/android/assetmgr.c"
+  "${VITAARC_ROOT}/src/bridges/audio/common.c")
+target_include_directories(test_versions PRIVATE
+  "${CMAKE_CURRENT_LIST_DIR}/mocks/include" "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
+target_compile_options(test_versions PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+target_link_libraries(test_versions PRIVATE Threads::Threads)
+target_link_options(test_versions PRIVATE
+  -Wl,--wrap=opendir,--wrap=readdir,--wrap=closedir,--wrap=lstat,--wrap=malloc,--wrap=realloc)
+add_test(NAME runtime_version_paths COMMAND "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_LIST_DIR}/run_isolated.py" "$<TARGET_FILE:test_versions>")
+
 add_library(jni_bridge STATIC
+  "${VITAARC_ROOT}/src/config.c"
   ${VITAARC_JNI_RUNTIME_SOURCES}
   "${VITAARC_ROOT}/src/bridges/jni/thread.c"
   "${VITAARC_ROOT}/src/bridges/jni/references.c"
@@ -88,6 +133,7 @@ target_link_libraries(test_threads PRIVATE jni_bridge)
 target_compile_options(test_threads PRIVATE -Wall -Wextra -Werror -UNDEBUG)
 
 add_executable(test_audio test_audio.c vorbis_fixture.c mocks/audio.c mocks/platform.c
+  "${VITAARC_ROOT}/src/config.c"
   ${VITAARC_AUDIO_BACKEND_SOURCES} "${VITAARC_ROOT}/src/bridges/audio/mp3.c"
   "${VITAARC_ROOT}/src/bridges/audio/mp3_frame.c" "${VITAARC_ROOT}/src/bridges/audio/mp3_index.c"
   "${VITAARC_ROOT}/src/bridges/audio/mp3_marks.c"
@@ -196,6 +242,7 @@ target_link_options(test_storage_paths PRIVATE -Wl,--wrap=stat)
 add_test(NAME storage_directory_preparation COMMAND test_storage_paths)
 
 add_executable(test_asset_cache test_asset_cache.c
+  "${VITAARC_ROOT}/src/config.c"
   "${VITAARC_ROOT}/src/bridges/android/asset_cache.c"
   "${VITAARC_ROOT}/src/bridges/android/assetmgr.c")
 target_include_directories(test_asset_cache PRIVATE "${VITAARC_ROOT}/src" "${VITAARC_ROOT}/src/bridges")
@@ -245,7 +292,7 @@ if(VITAARC_SANITIZERS AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
   target_link_options(test_storage_paths PRIVATE -fsanitize=address,undefined)
   target_compile_options(test_walk PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
   target_link_options(test_walk PRIVATE -fsanitize=address,undefined)
-  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
+  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text test_log_logo test_versions test_texture_size)
     target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=address,undefined)
   endforeach()
@@ -258,7 +305,7 @@ if(VITAARC_THREAD_SANITIZER AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
   target_link_options(test_storage_paths PRIVATE -fsanitize=thread -no-pie)
   target_compile_options(test_walk PRIVATE -fsanitize=thread -fno-omit-frame-pointer -fno-pie)
   target_link_options(test_walk PRIVATE -fsanitize=thread -no-pie)
-  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text)
+  foreach(target jni_bridge mock_game test_jni test_bitmap test_posix test_vita_posix test_threads test_audio test_gl test_shader_binary test_native test_file test_vita_file test_cxx test_memory test_directory test_guest_errno test_poll test_once test_sync test_thread_attributes test_log_text test_log_logo test_versions test_texture_size)
     target_compile_options(${target} PRIVATE -fsanitize=thread -fno-omit-frame-pointer)
     target_link_options(${target} PRIVATE -fsanitize=thread)
     get_target_property(target_type ${target} TYPE)

@@ -17,7 +17,6 @@ typedef struct {
 typedef struct {
     char text[LOG_COLS + 1];
     log_level_t level;
-    unsigned image;
 } log_line_t;
 
 typedef struct {
@@ -34,5 +33,9 @@ void log_text_image(log_text_t* text, const log_image_t* image);
 void log_text_write(log_text_t* text, log_level_t level, const char* data, size_t size);
 
 void log_text_draw(const log_text_t* text, uint32_t* pixels, unsigned width, unsigned height, unsigned pitch);
+
+/* Draw an interactive selection over the log body, preserving the fixed header. */
+void log_text_draw_menu(const log_text_t* text, const char* const* names, unsigned count, unsigned selected,
+    uint32_t* pixels, unsigned width, unsigned height, unsigned pitch);
 
 #endif

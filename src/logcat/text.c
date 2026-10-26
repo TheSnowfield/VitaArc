@@ -1,6 +1,10 @@
+#include <stdio.h>
 #include <string.h>
+#include <config.h>
 #include "text.h"
 #include "font.h"
+
+#define LOG_BACKGROUND 0xff18120cu
 
 static void __next(log_text_t* text)
 {
@@ -35,23 +39,6 @@ void log_text_image(log_text_t* text, const log_image_t* image)
     }
 
     text->image = image;
-    unsigned rows = (image->height + 7) / 8;
-    if(rows > LOG_ROWS) {
-        rows = LOG_ROWS;
-    }
-
-    for(unsigned row = 0; row < rows; ++row) {
-        if(text->count) {
-            __next(text);
-        } else {
-            text->count = 1;
-        }
-
-        text->lines[text->row].image = row + 1;
-    }
-
-    __next(text);
-    text->newline = true;
 }
 
 void log_text_write(log_text_t* text, log_level_t level, const char* data, size_t size)
@@ -162,23 +149,28 @@ static void __block(uint32_t* pixels, unsigned pitch, unsigned x, unsigned y, un
     }
 }
 
-static void __image(const log_image_t* image, unsigned slice, uint32_t* pixels,
+static void __image(const log_image_t* image, uint32_t* pixels,
     unsigned width, unsigned height, unsigned pitch, unsigned y, unsigned scale)
 {
     if(!image || !image->pixels) {
         return;
     }
 
-    unsigned first = (slice - 1) * 8;
-    for(unsigned row = 0; row < 8 && first + row < image->height; ++row) {
-        for(unsigned col = 0; col < image->width; ++col) {
+    unsigned rows = y < height ? (height - y) / scale : 0;
+    if(rows > image->height) {
+        rows = image->height;
+    }
+
+    unsigned cols = width / scale > 6 ? width / scale - 6 : 0;
+    if(cols > image->width) {
+        cols = image->width;
+    }
+
+    for(unsigned row = 0; row < rows; ++row) {
+        for(unsigned col = 0; col < cols; ++col) {
             unsigned x = (6 + col) * scale;
             unsigned top = y + row * scale;
-            if(x + scale > width || top + scale > height) {
-                continue;
-            }
-
-            uint32_t source = image->pixels[(first + row) * image->width + col];
+            uint32_t source = image->pixels[row * image->width + col];
             if(!(source >> 24)) {
                 continue;
             }
@@ -186,6 +178,31 @@ static void __image(const log_image_t* image, unsigned slice, uint32_t* pixels,
             uint32_t color = __blend(pixels[top * pitch + x], source);
             __block(pixels, pitch, x, top, scale, color);
         }
+    }
+}
+
+static unsigned __content_top(const log_text_t* text, unsigned height, unsigned scale)
+{
+    unsigned top = 20 * scale;
+    if(text->image) {
+        unsigned available = height > top ? (height - top) / scale : 0;
+        unsigned rows = text->image->height < available ? text->image->height : available;
+        top += (rows + 8) * scale;
+    }
+
+    return top < height ? top : height;
+}
+
+static void __line(uint32_t* pixels, unsigned width, unsigned height, unsigned pitch,
+    unsigned x, unsigned y, unsigned scale, const char* line, uint32_t color)
+{
+    if(y + 7 * scale > height) {
+        return;
+    }
+
+    for(unsigned col = 0; line[col] && x + 5 * scale <= width; ++col, x += 6 * scale) {
+        unsigned char value = (unsigned char)line[col];
+        __glyph(pixels, pitch, x, y, scale, value >= ' ' && value <= '~' ? (char)value : '?', color);
     }
 }
 
@@ -198,41 +215,81 @@ void log_text_draw(const log_text_t* text, uint32_t* pixels, unsigned width, uns
     unsigned scale = width >= 960 && height >= 544 ? 2 : 1;
     for(unsigned y = 0; y < height; ++y) {
         for(unsigned x = 0; x < width; ++x) {
-            pixels[y * pitch + x] = 0xff18120cu;
+            pixels[y * pitch + x] = LOG_BACKGROUND;
         }
     }
 
-    const char title[] = "VitaArc - startup";
-    for(unsigned col = 0; title[col] && (col * 6 + 11) * scale <= width; ++col) {
-        __glyph(pixels, pitch, (col * 6 + 6) * scale, 6 * scale, scale, title[col], 0xffffd080u);
+    __line(pixels, width, height, pitch, 6 * scale, 6 * scale, scale, "VitaArc - startup", 0xffffd080u);
+    if(text->image) {
+        __image(text->image, pixels, width, height, pitch, 20 * scale, scale);
     }
 
-    unsigned count = (height - 19 * scale) / (8 * scale);
+    unsigned top = __content_top(text, height, scale);
+    unsigned count = (height - top) / (8 * scale);
     if(count > text->count) {
         count = text->count;
     }
 
     unsigned first = (text->row + LOG_ROWS + 1 - count) % LOG_ROWS;
     for(unsigned row = 0; row < count; ++row) {
-        unsigned y = (20 + row * 8) * scale;
+        unsigned y = top + row * 8 * scale;
         if(y + 7 * scale > height) {
             break;
         }
 
         const log_line_t* line = &text->lines[(first + row) % LOG_ROWS];
-        if(line->image) {
-            __image(text->image, line->image, pixels, width, height, pitch, y, scale);
-            continue;
-        }
+        __line(pixels, width, height, pitch, 6 * scale, y, scale, line->text, __color(line->level));
+    }
+}
 
-        uint32_t color = __color(line->level);
-        for(unsigned col = 0; col < LOG_COLS && line->text[col]; ++col) {
-            unsigned x = (6 + col * 6) * scale;
-            if(x + 5 * scale > width) {
-                break;
-            }
+void log_text_draw_menu(const log_text_t* text, const char* const* names, unsigned count, unsigned selected,
+    uint32_t* pixels, unsigned width, unsigned height, unsigned pitch)
+{
+    if(!text || !pixels || width < 32 || height < 32 || pitch < width) {
+        return;
+    }
 
-            __glyph(pixels, pitch, x, y, scale, line->text[col], color);
+    unsigned scale = width >= 960 && height >= 544 ? 2 : 1;
+    unsigned top = __content_top(text, height, scale);
+    for(unsigned y = top; y < height; ++y) {
+        for(unsigned x = 0; x < width; ++x) {
+            pixels[y * pitch + x] = LOG_BACKGROUND;
         }
     }
+
+    unsigned x = 6 * scale;
+    unsigned row_height = 8 * scale;
+    if(!names || !count) {
+        __line(pixels, width, height, pitch, x, top, scale, "No Arcaea versions installed.", 0xff70d8ffu);
+        __line(pixels, width, height, pitch, x, top + 2 * row_height, scale,
+            "Copy the prepared version directory to:", 0xffe8e8e8u);
+        __line(pixels, width, height, pitch, x, top + 3 * row_height, scale,
+            PATH_TO_VERSIONS "<version>/", 0xffe8e8e8u);
+        __line(pixels, width, height, pitch, x, top + 5 * row_height, scale, "Circle: exit", 0xffffd080u);
+        return;
+    }
+
+    if(selected >= count) {
+        selected = 0;
+    }
+
+    char title[64];
+    snprintf(title, sizeof(title), "Select Arcaea version (%u/%u)", selected + 1, count);
+    __line(pixels, width, height, pitch, x, top, scale, title, 0xffffd080u);
+    unsigned rows = (height - top) / row_height;
+    unsigned visible = rows > 5 ? rows - 5 : 1;
+    unsigned first = selected / visible * visible;
+    for(unsigned row = 0; row < visible && first + row < count; ++row) {
+        unsigned index = first + row;
+        unsigned y = top + (row + 2) * row_height;
+        if(index == selected) {
+            __line(pixels, width, height, pitch, x, y, scale, ">", 0xffffd080u);
+        }
+
+        __line(pixels, width, height, pitch, x + 2 * 6 * scale, y, scale,
+            names[index] ? names[index] : "?", index == selected ? 0xffffd080u : 0xffe8e8e8u);
+    }
+
+    __line(pixels, width, height, pitch, x, top + (visible + 3) * row_height, scale,
+        "Up/Down: select   Cross: boot   Circle: exit", 0xffa0a0a0u);
 }
